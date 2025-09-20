@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rook's Leprosy Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    "q": "Who discovered the causative agent of leprosy, Mycobacterium leprae?",
+    "options": ["Robert Koch", "Louis Pasteur", "Armauer Hansen", "Albert Calmette"],
+    "answer": 2,
+    "explanation": "Mycobacterium leprae was discovered by Armauer Hansen in Norway in 1873 and was the first bacillus found to be associated with a human disease."
+  },
+  {
+    "q": "Which of the following is NOT a major region for leprosy incidence?",
+    "options": ["South and South-East Asia", "South America", "Scandinavia", "Africa"],
+    "answer": 2,
+    "explanation": "The vast majority of new leprosy cases occur in South and South-East Asia, South America, and Africa. Leprosy was endemic in Norway until the early 20th century but is no longer a significant region for new cases."
+  },
+  {
+    "q": "What is the primary source of infection for leprosy in a community?",
+    "options": ["Skin lesions", "Biting arthropods", "Nasal discharges from untreated lepromatous patients", "Contaminated water"],
+    "answer": 2,
+    "explanation": "Nasal discharges from untreated lepromatous leprosy (LL) patients, who are often undiagnosed for several years, are the main source of infection. M. leprae DNA has been detected in nasal swabs of a significant portion of the population in endemic areas."
+  },
+  {
+    "q": "Which cell is the primary target for Mycobacterium leprae?",
+    "options": ["Keratinocyte", "Langerhans cell", "Schwann cell", "Melanocyte"],
+    "answer": 2,
+    "explanation": "M. leprae has a predilection for neural tissue. Bacilli enter the nerves, and the target cell is the Schwann cell, leading to nerve damage and dysfunction."
+  },
+  {
+    "q": "According to the Ridley-Jopling classification, which type of leprosy is characterized by a strong cell-mediated immune response and few, if any, detectable bacilli?",
+    "options": ["Lepromatous Leprosy (LL)", "Borderline Lepromatous (BL)", "Borderline Tuberculoid (BT)", "Tuberculoid Tuberculoid (TT)"],
+    "answer": 3,
+    "explanation": "Tuberculoid Tuberculoid (TT) leprosy represents the end of the spectrum with a strong cell-mediated immune (CMI) response. This restricts the infection, making bacilli very difficult to find, but the intense lymphocytic infiltration causes significant nerve damage."
+  },
+  {
+    "q": "What is the hallmark histological finding in a skin biopsy from a patient with polar lepromatous leprosy?",
+    "options": ["Tuberculoid granulomas with caseation", "A clear subepidermal zone with foamy macrophages full of acid-fast bacilli", "Non-specific periadnexal lymphocytic infiltrate", "Neutrophilic infiltrate with vasculitis"],
+    "answer": 1,
+    "explanation": "Lepromatous leprosy histology shows a thin epidermis, a clear subepidermal (Grenz) zone, and a dense infiltrate in the dermis consisting of foamy macrophages packed with acid-fast bacilli (AFB), often in clumps called globi."
+  },
+  {
+    "q": "Which type of leprosy is considered immunologically unstable and most at risk for type 1 (reversal) reactions?",
+    "options": ["Polar Tuberculoid (TT)", "Polar Lepromatous (LL)", "Indeterminate Leprosy", "Borderline Leprosy (BT, BB, BL)"],
+    "answer": 3,
+    "explanation": "Borderline patients (BT, BB, BL) are immunologically unstable. They are at high risk of developing type 1 (reversal) reactions, which are delayed hypersensitivity reactions caused by a shift in immune recognition."
+  },
+  {
+    "q": "A type 2 reaction, Erythema Nodosum Leprosum (ENL), is primarily associated with which form(s) of leprosy?",
+    "options": ["Tuberculoid and Borderline Tuberculoid", "Borderline Lepromatous and Lepromatous", "Indeterminate Leprosy", "Pure Neural Leprosy"],
+    "answer": 1,
+    "explanation": "ENL reactions occur in multibacillary patients who have a large antigen load, specifically those with Borderline Lepromatous (BL) and Lepromatous (LL) leprosy."
+  },
+  {
+    "q": "What is the proposed mechanism for tissue damage in Type 2 (ENL) reactions?",
+    "options": ["Purely T-cell mediated cytotoxicity", "Immune complex deposition", "Direct bacterial invasion and toxicity", "Antibody-mediated demyelination"],
+    "answer": 1,
+    "explanation": "ENL has classically been regarded as an immune complex disorder, supported by the presence of immunoglobulin and complement in the lesions. However, there is also evidence of enhanced T-cell activity during episodes."
+  },
+  {
+    "q": "Which cytokine profile (Th1/Th2) is dominant in the skin lesions of a patient with tuberculoid leprosy?",
+    "options": ["Th1 (e.g., IFN-γ, IL-2)", "Th2 (e.g., IL-4, IL-10)", "A mix of Th1 and Th2", "Neither; it is neutrophilic"],
+    "answer": 0,
+    "explanation": "Tuberculoid patients have a Th1-type response to M. leprae, with predominant production of cytokines like IL-2 and IFN-γ, which activate macrophage bactericidal functions."
+  },
+  {
+    "q": "Why has Mycobacterium leprae never been grown in standard in vitro culture media?",
+    "options": ["It is a virus, not a bacterium", "It requires living host cells to replicate and has lost many metabolic genes", "It is an obligate anaerobe and dies in room air", "It can only grow at very high temperatures (>50°C)"],
+    "answer": 1,
+    "explanation": "M. leprae has undergone reductive evolution, losing many functional genes for carbon catabolism and energy production. Its growth is restricted to a few carbon sources, and it remains viable only in living host cells like Schwann cells or in animal models (e.g., mouse footpad, armadillo)."
+  },
+  {
+    "q": "What is the most common early symptom of leprosy that patients may notice?",
+    "options": ["Fever and chills", "An area of numbness on the skin", "Severe joint pain", "A persistent cough"],
+    "answer": 1,
+    "explanation": "Patients frequently present with signs of nerve damage. The commonest early lesion is an area of numbness on the skin, or a blister, burn, or ulcer in an anaesthetic hand or foot."
+  },
+  {
+    "q": "A patient presents with a solitary, well-defined, hypopigmented, hairless, and anaesthetic macule. This description is most characteristic of which type of leprosy?",
+    "options": ["Lepromatous Leprosy", "Borderline Lepromatous Leprosy", "Tuberculoid Leprosy", "Indeterminate Leprosy"],
+    "answer": 2,
+    "explanation": "A solitary, well-defined, hypopigmented (never depigmented), dry, hairless, and insensitive macule or plaque is the classic presentation of tuberculoid leprosy, reflecting a strong localized immune response."
+  },
+  {
+    "q": "Leonine facies, madarosis (loss of eyebrows/eyelashes), and testicular atrophy are late complications of which form of leprosy?",
+    "options": ["Tuberculoid Leprosy", "Borderline Leprosy", "Lepromatous Leprosy", "Pure Neural Leprosy"],
+    "answer": 2,
+    "explanation": "These are consequences of widespread bacillary invasion and infiltration in untreated Lepromatous Leprosy (LL). The bacteria spread hematogenously to cool, superficial sites like the skin of the face, eyes, and testes."
+  },
+  {
+    "q": "What percentage of leprosy patients may present with pure neural leprosy, showing asymmetrical peripheral nerve trunk involvement without visible skin lesions?",
+    "options": ["<1%", "5-10%", "25-30%", ">50%"],
+    "answer": 1,
+    "explanation": "Pure neural leprosy occurs in 5–10% of patients. They present with asymmetrical involvement of peripheral nerve trunks (e.g., ulnar, peroneal) leading to sensory or motor deficits, but no visible skin lesions."
+  },
+  {
+    "q": "How does HIV infection typically affect the clinical presentation of leprosy?",
+    "options": ["It causes rapid progression to pure lepromatous disease", "It is associated with the full spectrum of leprosy; borderline types and reactions may dominate", "It completely protects against developing leprosy", "It causes leprosy to present only as a severe ENL reaction"],
+    "answer": 1,
+    "explanation": "Contrary to initial predictions, HIV infection is associated with the full spectrum of clinical and histopathological features of leprosy. Coinfected patients appear to be at increased risk of reactions, and borderline types often dominate the clinical picture. Leprosy can also present as an Immune Reconstitution Inflammatory Syndrome (IRIS) after starting antiretroviral therapy."
+  },
+  {
+    "q": "The 'cardinal signs' of leprosy used for clinical diagnosis include all of the following EXCEPT:",
+    "options": ["Hypopigmented or reddish skin lesions with definite loss of sensation", "Thickened peripheral nerves", "Acid-fast bacilli in skin smears or biopsies", "Positive serological test for anti-PGL-1 antibodies"],
+    "answer": 3,
+    "explanation": "The three cardinal signs are: 1) Hypopigmented or reddish skin lesions with definite loss of sensation, 2) Thickened peripheral nerves, and 3) Acid-fast bacilli in skin smears or biopsies. Serology (anti-PGL-1) is a useful investigative tool but is not a cardinal sign for diagnosis, as it can be negative in paucibacillary disease and positive in some healthy contacts."
+  },
+  {
+    "q": "What is the purpose of performing a slit-skin smear in leprosy?",
+    "options": ["To test for cure after treatment", "To determine the bacterial index (BI) and classify the patient as PB or MB", "To diagnose pure neural leprosy", "To identify the specific strain of M. leprae"],
+    "answer": 1,
+    "explanation": "The slit-skin smear is used to detect acid-fast bacilli (AFB) and determine the Bacterial Index (BI), a logarithmic scale of bacillary load. This is critical for classifying the patient as Paucibacillary (PB) or Multibacillary (MB), which dictates the duration of multidrug therapy (MDT). It is not a test of cure, as it cannot detect very low levels of bacteria."
+  },
+  {
+    "q": "For a nerve biopsy to diagnose pure neural leprosy, which type of nerve is ideally sampled?",
+    "options": ["A motor nerve", "A purely sensory, thickened peripheral nerve", "A cranial nerve", "A nerve within a skin lesion"],
+    "answer": 1,
+    "explanation": "In pure neural leprosy, a biopsy of a purely sensory thickened peripheral nerve should be sampled to establish the diagnosis, for example the radial cutaneous nerve at the wrist or the superficial peroneal or sural nerve at the ankle."
+  },
+  {
+    "q": "According to the WHO multidrug therapy (MDT) regimen, what is the duration of treatment for an adult patient classified as multibacillary (MB)?",
+    "options": ["6 months", "12 months", "24 months", "Lifelong"],
+    "answer": 1,
+    "explanation": "The WHO MDT regimen specifies a 12-month course of rifampicin, clofazimine, and dapsone for multibacillary (MB) leprosy. Paucibacillary (PB) leprosy is treated for 6 months (rifampicin and dapsone, though the current standard includes clofazimine for all)."
+  },
+  {
+    "q": "Which drug in the MDT regimen is a potent bactericidal agent, rendering bacilli non-viable within days of a single dose?",
+    "options": ["Dapsone", "Clofazimine", "Rifampicin", "Ofloxacin"],
+    "answer": 2,
+    "explanation": "Rifampicin is highly bactericidal. Four days after a single 600 mg dose, M. leprae bacilli are no longer viable. Because resistance can develop easily, it must always be given in combination with other drugs."
+  },
+  {
+    "q": "A serious adverse effect of dapsone, occurring around 6 weeks after initiation and manifesting with exfoliative dermatitis, fever, and hepatitis, is known as:",
+    "options": ["The Lucio phenomenon", "Erythema Nodosum Leprosum (ENL)", "Dapsone Hypersensitivity Syndrome (a form of DRESS)", "Clofazimine-induced crystal deposition"],
+    "answer": 2,
+    "explanation": "The 'dapsone hypersensitivity syndrome' is a severe, potentially fatal drug reaction (a form of DRESS) that occurs approximately 6 weeks after starting dapsone. It is associated with HLA-B*13:01."
+  },
+  {
+    "q": "The most noticeable side effect of clofazimine is:",
+    "options": ["Hepatotoxicity", "Skin discoloration ranging from red to purple-black", "Peripheral neuropathy", "Renal failure"],
+    "answer": 1,
+    "explanation": "Clofazimine is a brick-red dye that deposits in the skin, causing a noticeable red to purple-black discoloration. This usually fades within a year of stopping the drug but can persist for longer."
+  },
+  {
+    "q": "What is the first-line treatment for managing neuritis or acute inflammation in a type 1 (reversal) reaction?",
+    "options": ["High-dose NSAIDs", "Corticosteroids (e.g., prednisolone)", "Thalidomide", "Immediate surgical decompression"],
+    "answer": 1,
+    "explanation": "The aim is to control inflammation and prevent permanent nerve damage. Neuritis or inflamed skin lesions in a type 1 reaction should be treated with corticosteroids (e.g., prednisolone starting at 40-60 mg daily), while MDT is continued."
+  },
+  {
+    "q": "Which drug is superior to steroids for controlling severe and recurrent Erythema Nodosum Leprosum (ENL) but has severe teratogenic effects?",
+    "options": ["Azathioprine", "Minocycline", "Thalidomide", "Clarithromycin"],
+    "answer": 2,
+    "explanation": "Thalidomide (400 mg daily) is highly effective and superior to steroids in controlling ENL. However, its use is strictly limited due to its potent teratogenicity (causing phocomelia), requiring robust pregnancy prevention programmes in women of childbearing age."
+  },
+  {
+    "q": "The major cause of disability and deformity in leprosy is:",
+    "options": ["The direct destruction of skin by bacteria", "The complications of nerve damage", "The systemic effects of chronic infection", "Side effects from multidrug therapy"],
+    "answer": 1,
+    "explanation": "Nerve damage leads to anaesthesia, muscle weakness, contractures, and autonomic dysfunction. These permit trauma, burns, and tissue necrosis, which in turn lead to ulceration, secondary infection, and loss of tissue. Thus, complications of nerve damage are the major causes of disability."
+  },
+  {
+    "q": "The key to managing an anaesthetic foot and preventing plantar ulcers is:",
+    "options": ["Daily antibiotic prophylaxis", "Regular soaking and moisturizing, and protection with appropriate footwear", "Weekly steroid injections", "Complete bed rest"],
+    "answer": 1,
+    "explanation": "Daily self-care is crucial. Soaking dry feet followed by rubbing with oil keeps the skin supple. Anaesthetic feet need protection with well-fitting, shock-absorbing footwear to distribute pressure evenly and prevent trauma that the patient cannot feel."
+  },
+  {
+    "q": "How is a single new plantar ulcer in an anaesthetic foot best treated?",
+    "options": ["With intravenous antibiotics", "With weight-bearing exercises to promote circulation", "By complete rest and off-loading all pressure until healed", "With topical corticosteroids"],
+    "answer": 2,
+    "explanation": "Unlike some other ulcers, plantar ulcers in leprosy heal ONLY if they are protected from weight-bearing. No weight-bearing is permitted until the ulcer has healed completely. Rest is the primary treatment."
+  },
+  {
+    "q": "What is the recommended chemoprophylaxis for contacts of leprosy patients, according to the WHO, despite its limited and short-lived efficacy?",
+    "options": ["One year of daily dapsone", "Single-dose rifampicin", "BCG vaccination", "Two weeks of ofloxacin and minocycline"],
+    "answer": 1,
+    "explanation": "The WHO recommends single-dose rifampicin (600 mg for adults) for contacts of leprosy patients. Evidence from trials like COLEP shows its protection is weak, short-lived (2 years), and only significant against paucibacillary disease in social (not household) contacts. There are concerns about potential rifampicin resistance."
+  },
+  {
+    "q": "Which widely used vaccine has been shown to provide some variable protection against leprosy?",
+    "options": ["Measles vaccine (MMR)", "Bacille Calmette-Guérin (BCG) vaccine", "Tetanus vaccine", "Hepatitis B vaccine"],
+    "answer": 1,
+    "explanation": "BCG vaccine, primarily used against tuberculosis, provides variable protection against leprosy because the antigens of M. tuberculosis and M. leprae are closely related. The protective effect is thought to be greatest for close contacts."
+  },
+  {
+    "q": "What is the proposed mechanism of nerve damage in borderline leprosy?",
+    "options": ["Purely from direct bacillary invasion", "Purely from an inflammatory response", "From a combination of bacillary invasion and inflammation", "From vitamin deficiencies"],
+    "answer": 2,
+    "explanation": "Nerve damage in borderline leprosy results from a combination of bacillary invasion and the host's inflammatory response. Acute neuritis during reversal reactions is particularly damaging, as oedema compresses the nerve, causing rapid functional loss."
+  },
+  {
+    "q": "The Lucio phenomenon, characterized by irregular red patches that necrose into painful ulcers, is associated with which form of leprosy?",
+    "options": ["Tuberculoid Leprosy", "Lucio Leprosy (Pure Diffuse Lepromatous Leprosy)", "Borderline Tuberculoid Leprosy", "Type 1 Reactions"],
+    "answer": 1,
+    "explanation": "The Lucio phenomenon is a severe, potentially fatal reaction that only occurs in patients with the pure diffuse form of lepromatous leprosy, first described in Mexico (Lucio and Alvarado, 1852). It is due to obstructive vasculopathy leading to infarction and necrosis."
+  },
+  {
+    "q": "Which nerve is most frequently affected in leprosy, according to large cohort studies?",
+    "options": ["Ulnar nerve", "Facial nerve", "Posterior tibial nerve", "Median nerve"],
+    "answer": 2,
+    "explanation": "Two large cohort studies with systematic nerve examination showed that the posterior tibial nerve is the most frequently affected nerve in leprosy, followed by the ulnar, median, lateral popliteal, and facial nerves."
+  },
+  {
+    "q": "Blindness in leprosy can result from a combination of factors. Which pair is MOST commonly responsible?",
+    "options": ["Direct bacillary invasion of the retina and vitamin A deficiency", "Lagophthalmos and corneal anaesthesia", "Optic neuritis and glaucoma", "Cataracts caused by dapsone"],
+    "answer": 1,
+    "explanation": "Lagophthalmos (inability to close the eye due to facial nerve paralysis) prevents blinking and lubrication. Combined with corneal anaesthesia (due to trigeminal nerve damage), the cornea is exposed to trauma and drying, leading to ulceration, infection, and ultimately blindness. Bacillary invasion can also cause iridocyclitis."
+  },
+  {
+    "q": "A patient on multidrug therapy develops tender, enlarged nerves and existing skin lesions become red and oedematous. This describes which event?",
+    "options": ["Relapse of disease", "Adverse drug reaction to dapsone", "A type 1 (reversal) reaction", "A type 2 (ENL) reaction"],
+    "answer": 2,
+    "explanation": "This classic presentation describes a type 1 (reversal) reaction, which occurs in borderline patients. It is characterized by acute neuritis (tender nerves, new loss of function) and acutely inflamed skin lesions. MDT must be continued, and corticosteroids started to control inflammation."
+  },
+  {
+    "q": "What is a major obstacle to leprosy control that persists even with effective antibiotic treatment?",
+    "options": ["The high cost of medications", "The stigma associated with the disease", "The need for intravenous therapy", "Rapid development of drug resistance"],
+    "answer": 1,
+    "explanation": "The historical belief that leprosy was inherited and the fear of the deformities it causes have contributed to profound stigma. This stigma remains a major obstacle to control, as it can delay presentation for diagnosis and create social isolation for patients."
+  },
+  {
+    "q": "In the context of leprosy, what does 'downgrading' refer to?",
+    "options": ["A reduction in the Bacterial Index during treatment", "A shift in the immune spectrum from borderline towards the lepromatous pole", "A decrease in the severity of a reaction", "The surgical lowering of a raised skin lesion"],
+    "answer": 1,
+    "explanation": "Downgrading' describes the immunological shift where a patient's disease moves across the spectrum towards the lepromatous pole (e.g., from BT to BL or LL), typically associated with a weakening cell-mediated immune response. This can happen if the disease is untreated."
+  },
+  {
+    "q": "Which second-line drug for leprosy is a fluoroquinolone with high bactericidal activity?",
+    "options": ["Clarithromycin", "Minocycline", "Ofloxacin", "Azithromycin"],
+    "answer": 2,
+    "explanation": "Ofloxacin is a fluoroquinolone antibiotic that is highly bactericidal against M. leprae. It is considered a second-line drug and can be part of alternative regimens for patients who cannot tolerate standard MDT components."
+  },
+  {
+    "q": "The 'bacterial index' (BI) from slit-skin smears is measured on a scale from 0 to 6. What does a BI of 0 indicate?",
+    "options": ["No bacteria seen in any field", "1-10 bacilli per 100 high-power fields", "1-10 bacilli per 10 high-power fields", ">1000 bacilli per single high-power field"],
+    "answer": 0,
+    "explanation": "The Bacterial Index (BI) is a logarithmic scale. A BI of 0 means no acid-fast bacilli are found in any of the 100 oil-immersion fields examined. This is typical of tuberculoid leprosy."
+  },
+  {
+    "q": "What is the recommended management for a patient who has completed MDT but is diagnosed with a 'relapse' of multibacillary disease?",
+    "options": ["Start a different second-line regimen", "Retreat with the full WHO MDT regimen for multibacillary disease", "Give a single booster dose of rifampicin", "Treat with corticosteroids only"],
+    "answer": 1,
+    "explanation": "Relapsed multibacillary patients are retreated with the full standard WHO MDT regimen (rifampicin, clofazimine, dapsone for 12 months) regardless of any change in classification. Distinguishing relapse from a reaction can be difficult."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

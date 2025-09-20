@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bolognia Allergic Contact Dermatitis Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    q: "What percentage of all contact dermatitis cases does allergic contact dermatitis (ACD) account for?",
+    options: ["10%", "20%", "50%", "80%"],
+    answer: 1,
+    explanation: "ACD accounts for approximately 20% of all contact dermatitis cases, while irritant contact dermatitis accounts for ~80%."
+  },
+  {
+    q: "Which type of immune reaction is allergic contact dermatitis?",
+    options: ["Type I hypersensitivity", "Type II hypersensitivity", "Type III hypersensitivity", "Type IV hypersensitivity"],
+    answer: 3,
+    explanation: "ACD is a delayed-type (Type IV) hypersensitivity reaction that requires prior sensitization to the chemical allergen."
+  },
+  {
+    q: "What is the gold standard for diagnosing allergic contact dermatitis?",
+    options: ["Skin biopsy", "Patch testing", "Blood tests", "Clinical examination alone"],
+    answer: 1,
+    explanation: "Patch testing remains the gold standard for accurate and consistent diagnosis of ACD unless the exposure is quite obvious."
+  },
+  {
+    q: "How many allergens are included in the current T.R.U.E. TEST®?",
+    options: ["28", "35", "45", "60"],
+    answer: 1,
+    explanation: "The T.R.U.E. TEST® currently consists of 35 allergens plus a negative control, though extended testing beyond these allergens improves diagnostic accuracy."
+  },
+  {
+    q: "According to the North American Contact Dermatitis Group (2017-2018), which is the most common allergen?",
+    options: ["Fragrance mix I", "Methylisothiazolinone", "Nickel sulfate", "Formaldehyde"],
+    answer: 2,
+    explanation: "Nickel sulfate ranks as the most common allergen tested by the NACDG, with up to 16% of patch test clinic patients reacting to it."
+  },
+  {
+    q: "What is the typical duration for patch test application before first reading?",
+    options: ["24 hours", "48 hours", "72 hours", "1 week"],
+    answer: 1,
+    explanation: "Patches are typically applied for 48 hours before the first reading, with a second reading performed between 72 hours to 1 week after initial application."
+  },
+  {
+    q: "Which histologic pattern is considered the prototype of allergic contact dermatitis?",
+    options: ["Lichenoid dermatitis", "Spongiotic dermatitis", "Granulomatous dermatitis", "Interface dermatitis"],
+    answer: 1,
+    explanation: "Histologically, ACD is the prototype of spongiotic dermatitis, characterized by variable spongiosis with a mixed dermal inflammatory infiltrate."
+  },
+  {
+    q: "What is the recommended timeframe to avoid topical corticosteroids at patch test sites before testing?",
+    options: ["3 days", "1 week", "2 weeks", "1 month"],
+    answer: 1,
+    explanation: "Patients should not have applied topical corticosteroids to patch test sites for 1 week prior to testing to avoid false-negative results."
+  },
+  {
+    q: "Which preservative has emerged as a major cause of ACD in recent years, particularly from wet wipes?",
+    options: ["Quaternium-15", "Formaldehyde", "Methylisothiazolinone", "Parabens"],
+    answer: 2,
+    explanation: "Methylisothiazolinone (MI) became a major allergen after 2014 when regulatory changes allowed increased concentrations, leading to widespread reactions from wet wipes and personal care products."
+  },
+  {
+    q: "What is the characteristic reaction pattern described for cobalt patch testing?",
+    options: ["Edge effect", "Poral reaction", "Delayed reaction", "Crescendo reaction"],
+    answer: 1,
+    explanation: "Cobalt patch testing may show a 'poral' reaction appearing as erythematous to violaceous dots, believed to result from allergen residing within acrosyringia."
+  },
+  {
+    q: "Which test can be used to identify nickel-releasing objects?",
+    options: ["Cobalt spot test", "Dimethylglyoxime test", "Patch test", "Potassium hydroxide test"],
+    answer: 1,
+    explanation: "The dimethylglyoxime test identifies objects that release nickel using a pink color indicator, useful for testing jewelry and metal objects."
+  },
+  {
+    q: "What percentage of patients with quaternium-15 allergy are also formaldehyde-sensitive?",
+    options: ["25%", "50%", "65%", "80%"],
+    answer: 3,
+    explanation: "Studies show that up to 80% of those reacting to quaternium-15 are also formaldehyde-sensitive due to formaldehyde release by quaternium-15."
+  },
+  {
+    q: "Which fragrance mix was introduced to improve detection of fragrance allergies beyond fragrance mix I?",
+    options: ["Balsam of Peru", "Fragrance mix II", "Essential oil mix", "Perfume mix"],
+    answer: 1,
+    explanation: "Fragrance mix II was introduced to detect additional fragrance allergies, with approximately 25% of fragrance-allergic patients missed if fragrance mix II were not used."
+  },
+  {
+    q: "What is the most common clinical presentation of ACD to p-phenylenediamine in hair colorants?",
+    options: ["Hand dermatitis", "Scalp and forehead dermatitis", "Neck dermatitis only", "Generalized dermatitis"],
+    answer: 1,
+    explanation: "ACD to PPD in permanent hair colorants primarily involves the forehead, neck, and scalp areas."
+  },
+  {
+    q: "Which corticosteroid group produces the most allergic reactions according to the reclassification system?",
+    options: ["Group 1", "Group 2", "Group 3", "All groups equally"],
+    answer: 0,
+    explanation: "Group 1 corticosteroids (non-methylated, most often non-halogenated molecules) produce the most allergic reactions."
+  },
+  {
+    q: "What is the recommended screening combination for detecting corticosteroid allergy?",
+    options: ["Hydrocortisone and betamethasone", "Tixocortol-21-pivalate and budesonide", "Triamcinolone and clobetasol", "Prednisolone and dexamethasone"],
+    answer: 1,
+    explanation: "The combination of tixocortol-21-pivalate and budesonide provides reasonable screening for corticosteroid allergy, detecting ~75% of reactions."
+  },
+  {
+    q: "Which textile allergens are most commonly responsible for textile dermatitis?",
+    options: ["Natural fibers", "Synthetic fibers", "Dyes and resins", "Fabric softeners"],
+    answer: 2,
+    explanation: "The allergens most likely to cause textile dermatitis are dyes (particularly disperse blue dyes 106 and 124) and resins used to make clothes wrinkle-resistant."
+  },
+  {
+    q: "What characterizes systemic contact dermatitis?",
+    options: ["Local reaction to high concentrations", "Widespread dermatitis from systemic exposure to known contact allergen", "Reaction to new allergens", "Airborne exposure only"],
+    answer: 1,
+    explanation: "Systemic contact dermatitis involves widespread dermatitis from systemic exposure (oral, IV, etc.) to a chemical that previously caused contact allergy."
+  },
+  {
+    q: "Which sites are most characteristically affected in airborne contact dermatitis?",
+    options: ["Hands and feet", "Trunk", "Eyelids and exposed areas", "Flexural areas"],
+    answer: 2,
+    explanation: "Airborne contact dermatitis predominantly affects exposed skin areas, especially the eyelids, face, V of the neck, arms, and legs."
+  },
+  {
+    q: "What is the 'baboon syndrome' in the context of systemic contact dermatitis?",
+    options: ["Facial swelling", "Symmetric gluteal and inguinal erythema", "Hand dermatitis", "Scalp involvement"],
+    answer: 1,
+    explanation: "Baboon syndrome refers to symmetric, sharply demarcated erythema of the gluteal or inguinal area plus other intertriginous or flexural sites."
+  },
+  {
+    q: "Which rubber accelerators are most important causes of hand dermatitis in healthcare workers?",
+    options: ["Latex proteins only", "Thiurams, carbamates, mercaptobenzothiazole", "Natural rubber only", "Synthetic polymers"],
+    answer: 1,
+    explanation: "Rubber accelerators including thiurams, carbamates, mercaptobenzothiazole and its derivatives, and thioureas are important causes of glove-related hand dermatitis."
+  },
+  {
+    q: "What is the clinical relevance rate for methylisothiazolinone according to NACDG data?",
+    options: ["45%", "65%", "78%", "88%"],
+    answer: 3,
+    explanation: "Methylisothiazolinone shows an 88% relevant reaction rate according to NACDG data, indicating high clinical significance."
+  },
+  {
+    q: "Which metals commonly show co-sensitivity with nickel?",
+    options: ["Gold and silver", "Cobalt and chromium", "Copper and zinc", "Aluminum and titanium"],
+    answer: 1,
+    explanation: "Concomitant reactions to nickel and cobalt are common, and ~80% of individuals with cobalt sensitivity have co-sensitivity to nickel or chromate."
+  },
+  {
+    q: "What is the characteristic 'edge effect' seen with corticosteroid patch testing?",
+    options: ["Reaction only at patch edges", "Central clearing with rim erythema", "Delayed central reaction", "Enhanced peripheral reaction"],
+    answer: 1,
+    explanation: "The edge effect shows erythema only at the rim of the test chamber with a clear center that may later become involved, due to anti-inflammatory effects."
+  },
+  {
+    q: "Which topical antibiotic is the most common sensitizer among topical antibiotics?",
+    options: ["Bacitracin", "Neomycin", "Polymyxin B", "Mupirocin"],
+    answer: 1,
+    explanation: "Neomycin is the most commonly used topical antibiotic and is the most common sensitizer among the topical antibiotics."
+  },
+  {
+    q: "What is the recommended approach for testing unknown products brought by patients?",
+    options: ["Test as is", "Dilute to 1%", "Never test unknown products", "Test after chemical analysis"],
+    answer: 2,
+    explanation: "Unknown products or chemicals should never be applied as patch tests due to risk of severe irritation, burns, or ulceration."
+  },
+  {
+    q: "Which concentration of methylchloroisothiazolinone/methylisothiazolinone is used in patch testing?",
+    options: ["50 ppm", "100 ppm", "200 ppm", "500 ppm"],
+    answer: 2,
+    explanation: "The standard patch test concentration for MCI/MI is 200 ppm in aqueous solution in most screening series."
+  },
+  {
+    q: "What characterizes the International Grading System '+' reaction?",
+    options: ["Doubtful reaction", "Weak, non-vesicular reaction with erythema", "Strong vesicular reaction", "Spreading bullous reaction"],
+    answer: 1,
+    explanation: "A '+' reaction is defined as a weak, non-vesicular reaction with erythema, infiltration, and papules."
+  },
+  {
+    q: "Which allergen requires delayed readings beyond the standard 72-hour timeframe?",
+    options: ["Nickel", "Gold", "Fragrance mix", "Rubber accelerators"],
+    answer: 1,
+    explanation: "Gold, neomycin, and corticosteroids may show delayed patch test responses, making later readings (up to 1 week) necessary."
+  },
+  {
+    q: "What is the main reason for the high rate of nickel sensitivity?",
+    options: ["Environmental pollution", "Ear piercing", "Occupational exposure", "Dietary sources"],
+    answer: 1,
+    explanation: "The high rate of nickel sensitivity is attributed largely to ear piercing, which allows direct exposure to an injured cutaneous surface."
+  },
+  {
+    q: "Which formaldehyde-releasing preservatives should be avoided by formaldehyde-sensitive individuals?",
+    options: ["Only quaternium-15", "Only DMDM hydantoin", "All formaldehyde releasers", "None specifically"],
+    answer: 2,
+    explanation: "Formaldehyde-sensitive individuals should generally avoid all formaldehyde-releasing preservatives including quaternium-15, imidazolidinyl urea, diazolidinyl urea, and DMDM hydantoin."
+  },
+  {
+    q: "What is the significance of a positive balsam of Peru reaction?",
+    options: ["Direct relevance to balsam exposure", "Marker for fragrance allergy", "Indicates food allergies", "Shows plant sensitization"],
+    answer: 1,
+    explanation: "Positive reactions to balsam of Peru most commonly relate to previous fragrance exposure, as it's rarely found in current topical pharmaceuticals or fragrances."
+  },
+  {
+    q: "Which sites should be examined to assess for endogenous dermatoses in hand dermatitis patients?",
+    options: ["Scalp", "Feet", "Trunk", "Face"],
+    answer: 1,
+    explanation: "When evaluating hand dermatitis, examination of the feet is important to assess for endogenous dermatoses like psoriasis or fungal infections."
+  },
+  {
+    q: "What is the recommended oral prednisone dose limit during patch testing?",
+    options: ["10 mg daily", "20 mg daily", "30 mg daily", "No limit"],
+    answer: 1,
+    explanation: "If corticosteroids are necessary for disease control during patch testing, the daily oral AM dose should not exceed 20 mg prednisone equivalent."
+  },
+  {
+    q: "Which disperse dyes are commonly used as screening agents for textile dermatitis?",
+    options: ["Disperse blue 1 and 3", "Disperse blue 106 and 124", "Disperse red 1 and 17", "Disperse yellow 3 and 9"],
+    answer: 1,
+    explanation: "Disperse blue dyes 106 and 124 are common causes of textile dermatitis and serve as effective screening agents for this condition."
+  },
+  {
+    q: "What is the typical timeline for complete clearing of ACD after allergen avoidance?",
+    options: ["1-2 weeks", "3-4 weeks", "6 weeks or more", "Several months"],
+    answer: 2,
+    explanation: "It may take 6 weeks or more to see complete and prolonged clearing of ACD, even when allergens are being avoided."
+  },
+  {
+    q: "Which metal allergy shows the poorest prognosis?",
+    options: ["Nickel", "Cobalt", "Chromium from cement", "Gold"],
+    answer: 2,
+    explanation: "Allergic contact dermatitis to chromium in cement has a notoriously bad prognosis and poor response to treatment."
+  },
+  {
+    q: "What characterizes 'leave-on' versus 'rinse-off' products for patch testing?",
+    options: ["Leave-on products need dilution", "Rinse-off products can be tested as is", "Leave-on products can be tested as is", "Both require dilution"],
+    answer: 2,
+    explanation: "'Leave-on' products (moisturizers, makeup) may be tested 'as is', while 'rinse-off' products (soaps, shampoos) need dilution to 1-10% in water."
+  },
+  {
+    q: "Which allergen is associated with the modern era of glucose sensors and insulin pumps?",
+    options: ["Nickel", "Isobornyl acrylate", "Colophony", "Rubber accelerators"],
+    answer: 1,
+    explanation: "Isobornyl acrylate, along with other acrylates and colophony, has emerged as a cause of ACD at glucose sensor and insulin pump sites."
+  },
+  {
+    q: "What is the recommended approach for suspected ACD to orthopedic implants?",
+    options: ["Remove implant immediately", "Patch test with extended metals series", "Clinical observation only", "Blood tests only"],
+    answer: 1,
+    explanation: "For suspected implant-related ACD, patch testing with an extended metals series including implant-specific metals is recommended, though clinical relevance remains debated."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

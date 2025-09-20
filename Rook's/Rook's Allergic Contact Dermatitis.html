@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rook's Allergic Contact Dermatitis Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    q: "Allergic contact dermatitis (ACD) is defined as what type of immunological reaction?",
+    options: ["Immediate IgE-mediated response [1]", "Eczematous reaction following prior sensitisation [2]", "Non-immunological irritant reaction [3]", "Cytotoxic CD8+ T-cell mediated reaction only [4]"],
+    answer: 1,
+    explanation: "Allergic contact dermatitis is defined as an eczematous reaction that occurs as an immunological response following exposure to a substance to which the immune system has previously been sensitised [2]."
+  },
+  {
+    q: "The term ‘allergie’ was first coined by which scientist in 1906?",
+    options: ["Josef Jadassohn [5]", "Landsteiner and Chase [6]", "von Pirquet [7]", "Bruno Bloch [8]"],
+    answer: 2,
+    explanation: "The term ‘allergie’ was first coined by von Pirquet in 1906 [7]. The word was derived from the Greek allos and ergon, meaning other or different work [9]."
+  },
+  {
+    q: "Who is generally accepted as the founder of the patch testing technique in 1895?",
+    options: ["Marion Sulzberger [8]", "Paul Bonnevie [8]", "Josef Jadassohn [5]", "Bruno Bloch [8]"],
+    answer: 2,
+    explanation: "Josef Jadassohn is generally accepted as the founder of the patch testing technique in 1895, with publication taking place the following year [5]."
+  },
+  {
+    q: "The diagnosis of allergic contact dermatitis can only be confirmed by which of the following methods?",
+    options: ["Exclusion of irritant factors [10]", "Patch testing [10]", "Skin biopsy [11]", "Identifying the pattern or distribution of the eczema [10]"],
+    answer: 1,
+    explanation: "The diagnosis of allergic contact dermatitis can only be confirmed by patch testing [10]."
+  },
+  {
+    q: "Based on pooled epidemiological studies of the general European population, which is the most common contact allergen?",
+    options: ["Fragrance mix 1 (3.5%) [12]", "Cobalt (2.7%) [12]", "Nickel (11.4%) [12]", "p-Phenylenediamine (1.5%) [13]"],
+    answer: 2,
+    explanation: "The most common contact allergen in the general population is nickel (11.4%), followed by fragrance mix 1 (3.5%) [12]."
+  },
+  {
+    q: "In the general population, the prevalence of contact dermatitis is significantly higher in women than in men, primarily due to higher rates of allergy to which substance?",
+    options: ["Fragrance mix II [14]", "p-Phenylenediamine (PPD) [13]", "Methylisothiazolinone [15]", "Nickel [12]"],
+    answer: 3,
+    explanation: "Contact dermatitis prevalence was significantly higher in women (27.9%) than in men (13.2%) [12]. This female preponderance is largely explained by exposure, such as the large number of metal-sensitive women resulting from ear piercing [16, 17], leading to high rates of nickel allergy [12]."
+  },
+  {
+    q: "Which two chemicals caused epidemics of biocide contact dermatitis resulting in regulatory response and subsequent withdrawal or partial withdrawal from cosmetics?",
+    options: ["Quaternium-15 and Diazolidinyl urea [18]", "Neomycin and Benzocaine [19, 20]", "Methyl dibromoglutaronitrile and Methylisothiazolinone [21]", "Potassium dichromate and Cobalt [22]"],
+    answer: 2,
+    explanation: "The epidemics of biocide contact dermatitis caused by methyl dibromoglutaronitrile and methylisothiazolinone resulted in the withdrawal and partial withdrawal, respectively, of such chemicals from cosmetics [21]."
+  },
+  {
+    q: "In nickel-allergic subjects, the persistence of vesicular hand eczema has been related to what exposure pathway?",
+    options: ["Direct contact with nickel-plated handles [17]", "Inhalation of nickel dust [23]", "Dietary intake of nickel [24]", "Use of stainless steel surgical instruments [23]"],
+    answer: 2,
+    explanation: "A recurrent vesicular palmar (dyshidrotic) pattern of eczema has been related to dietary intake of nickel [24]."
+  },
+  {
+    q: "Following the implementation of the EU ‘Nickel directive’ (introduced 1994, fully enforced 2001), what outcome was observed regarding nickel allergy rates among young patients in several European countries?",
+    options: ["Nickel allergy rates remained constant [22]", "Nickel allergy rates showed a substantial decline [22]", "Nickel allergy rates increased due to alternative sources [25]", "Nickel allergy prevalence shifted to older age groups [26]"],
+    answer: 1,
+    explanation: "Following implementation of the ‘Nickel directive’, nickel allergy rates among young patients showed a substantial decline in several countries [22], dropping from 26.9% before the EU directive to 12.4% thereafter in Denmark [22, 27]."
+  },
+  {
+    q: "Why is identifying the site of origin of contact dermatitis an important clue to the cause?",
+    options: ["It predicts the patient's eventual prognosis [28]", "By definition, contact dermatitis must begin in the sites where contact took place [29]", "It helps distinguish allergic from irritant causes, as irritant contact dermatitis does not tend to spread [29]", "It determines the type of T-cell response generated (Th1 vs Th2) [30]"],
+    answer: 1,
+    explanation: "By definition, contact dermatitis must begin in sites where contact has taken place with the responsible agent(s), and the sites of origin are an important clue to the cause [29]."
+  },
+  {
+    q: "Nickel allergy shows which pattern of incidence across different age groups in patch-tested patients?",
+    options: ["A progressive increase over time [31]", "A progressive decline after age 70 [26]", "A peak incidence in the late fifties [31]", "A peak incidence in the early twenties [31]"],
+    answer: 3,
+    explanation: "Nickel and cobalt showed a peak incidence in the early twenties and then a subsequent decline [31]."
+  },
+  {
+    q: "Nickel's high prevalence as an allergen is partially explained by its ability to directly ligate and trigger which receptor on the surface of dermal dendritic cells?",
+    options: ["Intercellular adhesion molecule 1 (ICAM-1) [32]", "Toll-like receptor 4 (TLR-4) [33]", "Major histocompatibility complex (MHC) class II molecules [33]", "Leukocyte functional antigen 1 (LFA-1) [32]"],
+    answer: 1,
+    explanation: "The metal ions nickel, palladium and cobalt are able to directly ligate and trigger Toll-like receptor 4 (TLR-4) on the surface of dermal dendritic cells [33]."
+  },
+  {
+    q: "The cross-sensitisation pattern often observed among aromatic compounds with a ‘para’ group, such as p-Phenylenediamine (PPD), typically involves which other substances?",
+    options: ["Mercapto mix and Thiuram mix [34]", "Benzocaine and Sulfonamides [35]", "Formaldehyde and Quaternium-15 [18]", "Lanolin and Cetearyl alcohol [36, 37]"],
+    answer: 1,
+    explanation: "Aromatic compounds with a ‘para’ group, for example PPD, benzocaine, procaine, sulphonamides, mesalazine, diaminodiphenylmethane and PABA UV filters, may all cross-sensitise [35]."
+  },
+  {
+    q: "What is the only sure way to distinguish irritant from allergic contact dermatitis pathologically?",
+    options: ["Biopsy of chronic eczematous lesions [11]", "Comparison of T-cell infiltrate density [38]", "Study of the very early events of the inflammatory process [11]", "Using high-frequency ultrasound [39]"],
+    answer: 2,
+    explanation: "The only sure way to distinguish irritant from allergic contact dermatitis is by study of the very early events of the inflammatory process, because the remainder of the inflammatory cascade is similar in the two processes [11]."
+  },
+  {
+    q: "Due to the nature of gold allergy reactions, what specific instruction is advised regarding patch test reading times for gold sodium thiosulphate 0.5% in petrolatum?",
+    options: ["Only a Day 2 reading is required [40]", "Readings must occur only immediately after patch removal [41]", "An additional 7-day or even 2- or 3-week reading has been advised [42]", "Gold is not recommended for standard series testing [42]"],
+    answer: 2,
+    explanation: "Late reactions are common and an additional 7-day or even 2- or 3-week reading has been advised for gold sodium thiosulphate due to persistent positive patch tests [42]."
+  },
+  {
+    q: "Which vehicle is generally considered most reliable for patch testing and has the added advantage of being occlusive and prolonging shelf-life?",
+    options: ["Water [43]", "Alcohol [43]", "Acetone [43]", "Petrolatum [43]"],
+    answer: 3,
+    explanation: "Petrolatum is generally more reliable, and has the added advantage of being occlusive, which helps to prevent oxidation and prolongs shelf-life [43]."
+  },
+  {
+    q: "Pre-existing or concomitant dermatitis predisposes to allergic contact dermatitis. Which specific location of eczema is known to predispose to nickel sensitivity?",
+    options: ["Facial eczema [44]", "Perianal dermatitis [45]", "Hand eczema [46]", "Stasis eczema [45]"],
+    answer: 2,
+    explanation: "It is known that hand eczema predisposes to nickel sensitivity and vice versa [46]."
+  },
+  {
+    q: "A delayed reaction time (longer than the usual 4 days) in patch testing can be found in situations of delayed penetration of allergens, such as which common topical antibiotic?",
+    options: ["Fluocinolone acetonide [47]", "Bacitracin [48]", "Neomycin [49]", "Chlorhexidine [50]"],
+    answer: 2,
+    explanation: "A delayed reaction time is found in situations of delayed penetration of allergens (e.g. neomycin in petrolatum) [49]. Neomycin classically produces late reactions (beyond 96 h readings) [19]."
+  },
+  {
+    q: "Cross-sensitisation is defined as the phenomenon where sensitization engendered by a primary allergen extends to secondary allergens due to what factor?",
+    options: ["Simultaneous exposure to multiple unrelated compounds [51]", "The presence of impurities in the test substance [52]", "Structural similarity [35]", "Non-specific hyperreactivity [53]"],
+    answer: 2,
+    explanation: "Cross-sensitisation is defined as the phenomenon where sensitisation engendered by one compound, the primary allergen, extends to one or more other compounds, the secondary allergens, as a result of structural similarity [35]."
+  },
+  {
+    q: "Allergic contact dermatitis caused by nail varnish allergens often presents in which well-localised ectopic pattern?",
+    options: ["Fingertips and palms [54]", "Eyelid dermatitis and face/neck patches [55]", "Axillary vaults and gluteal folds [56, 57]", "Lower legs with varicose eczema [57]"],
+    answer: 1,
+    explanation: "Nail varnish allergy often affects the face in well-localised patches, and may be associated with eyelid dermatitis and more extensive involvement of the neck, chest and even further afield [55]."
+  },
+  {
+    q: "Which experiment, performed in 1942, succeeded in proving that allergy was due to a factor supplied to the skin from within, by transmitting sensitivity between guinea pigs using a mononuclear peritoneal exudate?",
+    options: ["Bloch and Steiner-Woerlich's *Primula* extract test [6]", "Haxthausen’s transplantation experiments [6]", "Landsteiner and Chase's transmission experiment [6]", "Landsteiner and Jacobs' hapten-protein combination test [6]"],
+    answer: 2,
+    explanation: "In 1942, Landsteiner and Chase succeeded in transmitting sensitivity from one guinea pig to another [6]. In the same year, Haxthausen’s transplantation experiments finally proved that allergy was due to a factor supplied to the skin from within [6]."
+  },
+  {
+    q: "A positive patch test to tixocortol pivalate almost invariably means that the patient is allergic to which specific substance?",
+    options: ["Budesonide [58]", "Fluocinolone acetonide [47]", "Dexamethasone [47]", "Hydrocortisone [59]"],
+    answer: 3,
+    explanation: "A reaction to tixocortol pivalate almost invariably means that the patient is allergic to hydrocortisone [59]. Tixocortol pivalate is tested as a marker for hydrocortisone allergy [59]."
+  },
+  {
+    q: "Skin disease accounts for 13–34% of all occupational diseases. What percentage of occupational skin disease may be attributable to atopy?",
+    options: ["Less than 5% [60]", "10–12% [60]", "22% [60]", "Over 50% [61]"],
+    answer: 2,
+    explanation: "Twenty-two per cent of occupational skin disease may be attributable to atopy [60]."
+  },
+  {
+    q: "Which common preservative is known for the 'paraben paradox,' where relevant allergies are mainly from medicaments used on compromised skin (e.g., venous ulcers), while cosmetic usage on normal skin rarely causes problems?",
+    options: ["Methylisothiazolinone (MI) [15]", "Formaldehyde [62]", "Parabens [63]", "Quaternium-15 [64]"],
+    answer: 2,
+    explanation: "Relevant allergies to Parabens are mainly from sensitisation to medicaments (including paste bandages) used on compromised skin such as venous ulcers and eczema, but relevant problems from parabens in cosmetics are rare, illustrating the 'paraben paradox' [63]."
+  },
+  {
+    q: "The universally used system for scoring patch test reactions, devised in 1970, is associated with which group?",
+    options: ["British Society of Cutaneous Allergy (BSCA) [48]", "North American Contact Dermatitis Group (NACDG) [48]", "European Environmental and Contact Dermatitis Research Group (EECDRG) [65]", "International Contact Dermatitis Research Group (ICDRG) [66]"],
+    answer: 3,
+    explanation: "The scoring system devised by the ICDRG in 1970 is shown in Table 127.4 [66]."
+  },
+  {
+    q: "Involvement of the eyelids, body folds, and buttocks induced by oral challenge with nickel in allergic subjects led to this systemic reaction being labeled as what syndrome?",
+    options: ["Persistent Light Reaction [67]", "Eczematid-like Purpura [68]", "Baboon syndrome (or SDRIFE) [69]", "Oral Allergy Syndrome [70]"],
+    answer: 2,
+    explanation: "Involvement of the eyelids, body folds and buttocks induced by oral challenge with nickel in allergic subjects led to this reaction being labeled the ‘baboon syndrome’ [6]. This pattern is now referred to as SDRIFE (systemic drug-related intertriginous and flexural exanthema) [69]."
+  },
+  {
+    q: "Which characteristic typically points toward a false positive irritant reaction rather than a true allergic reaction in a patch test?",
+    options: ["Presence of minute papules or vesicles [38]", "Thickening in the dermis that is palpable [38]", "Lack of infiltration or itching [71]", "Extension beyond the margins of the patch [38]"],
+    answer: 2,
+    explanation: "Clues pointing to an irritant reaction include no infiltration, lack of itching, deep redness or a brown hue, and sharp delineation corresponding to the margins of the patch test [71]. Allergic reactions are typically erythematous and infiltrated, commonly with papules or vesicles, and cause palpable thickening [38]."
+  },
+  {
+    q: "Sensitisation to medicaments is particularly common in patients with pre-existing skin conditions. Which condition is associated with medicament sensitivity in about half of cases?",
+    options: ["Chronic otitis externa [72]", "Perianal inflammatory disorders [72]", "Leg ulcers or eczema of the lower legs [73]", "Facial acne/rosacea [74]"],
+    answer: 2,
+    explanation: "Sensitisation to medicaments is particularly common in patients with leg ulcers or eczema of the lower legs [73], and is found in about half of those with chronic stasis eczema [73]."
+  },
+  {
+    q: "Within the last decade, the main occupation in which workers suffer from acrylate allergy, often presenting at near epidemic proportions in consumers as well, is related to which industry?",
+    options: ["Construction (epoxy resins) [75]", "Printing (PPD derivatives) [76]", "Nail aesthetics/beauticians [77]", "Metalworking (nickel, cobalt) [78]"],
+    answer: 2,
+    explanation: "Within the last decade, nail aesthetics has become the main occupation in which workers suffer from acrylate allergy [2–4] but now allergic contact dermatitis caused by nail acrylates are also frequently affecting consumers at near epidemic proportions [77]."
+  },
+  {
+    q: "What was the highly effective regulatory intervention implemented in the EU in 2005 that significantly reduced occupational chromate allergy in construction workers?",
+    options: ["Limiting Cr(VI) in leather articles [79]", "Banning Cr(VI) in antirust paints [80]", "Adding ferrous sulphate to cement [81]", "Removing chromate from household bleach [80]"],
+    answer: 2,
+    explanation: "The addition of ferrous sulphate to cement became compulsory to reduce the amount of water-soluble hexavalent chromium to no more than 2 ppm [81]. Sensitisation to chromate in construction workers has since declined [81]."
+  },
+  {
+    q: "What is cited as the most important factor for the induction and elicitation of cutaneous nickel allergy?",
+    options: ["Constitutional susceptibility (atopy) [60]", "The concentration of nickel sulphate (5%) in the patch test [82]", "The amount of nickel per unit area present in the epidermis over time (μg/cm²/time) [83]", "The presence of residual nickel oxides (Ni2O3) [84]"],
+    answer: 2,
+    explanation: "The most important factor for the induction and elicitation of cutaneous nickel allergy is the amount of nickel per unit area present in the epidermis over time (μg/cm² over time) [83]."
+  },
+  {
+    q: "p-Phenylenediamine (PPD) and related dyes are colourless until oxidised and polymerised by hydrogen peroxide. What is true regarding PPD after this oxidation/polymerisation process?",
+    options: ["It becomes more allergenic [76]", "It is used for semipermanent dyeing [76]", "It is no longer allergenic [76]", "It causes systemic allergic contact dermatitis [85]"],
+    answer: 2,
+    explanation: "PPD and related dyes are colourless until oxidised... Once oxidised and polymerised, PPD is no longer allergenic [76]."
+  },
+  {
+    q: "Ketoprofen, a topical NSAID and leading cause of Photoallergic Contact Dermatitis (PACD), may cross-sensitise with which common UV filter photoallergen?",
+    options: ["PABA [86]", "Octocrylene [87]", "Ethylhexyl methoxycinnamate [86]", "Terephthalylidene dicamphor sulfonic acid [88]"],
+    answer: 1,
+    explanation: "Ketoprofen is the most frequently reported topical NSAID cause of PACD. Ketoprofen may cross-sensitise with the UV filter benzophenone-3 and octocrylene [87]."
+  },
+  {
+    q: "Turpentine, historically a standard patch test allergen derived from spruce and pine trees, is categorized as what type of substance?",
+    options: ["A petroleum-based white spirit [89]", "A natural oil used as a solvent [89]", "The non-volatile part of balsam, known as gum rosin [90]", "A highly stable, non-sensitizing compound [89]"],
+    answer: 1,
+    explanation: "Turpentine is a natural oil derived from spruce and pine trees, often used as a solvent [89]."
+  },
+  {
+    q: "Non-immune contact urticaria (NICU) is thought to occur due to which mechanism?",
+    options: ["Specific IgE-mediated response [1]", "Release of vasogenic mediators without immunological processes [3]", "Delayed type IV hypersensitivity reaction [91]", "Formation of complete hapten-protein antigens [33]"],
+    answer: 1,
+    explanation: "Non-immune CU is thought to be secondary to the release of vasogenic mediators without the involvement of immunological processes [3]."
+  },
+  {
+    q: "What minimum standard is generally used for an allergen to be suggested for inclusion in the standard baseline patch test series?",
+    options: ["It must cause generalized erythroderma [92]", "It must be highly volatile or airborne [93]", "It must be relevant to occupational exposure (O) [44]", "It results in a proportion of contact allergy exceeding 0.5–1.0% in routine testing, or is ubiquitous/highly relevant [94]"],
+    answer: 3,
+    explanation: "An allergen is generally suggested for inclusion in the baseline series when routine (consecutive) patch testing of patients with suspected contact dermatitis results in a proportion of contact allergy to the substance exceeding 0.5–1.0% or when this allergen is ubiquitous and/or clinically highly relevant [94]."
+  },
+  {
+    q: "The EU mandate that 26 well-established fragrance allergens be individually named on ingredient labels (above certain thresholds) was primarily intended to achieve what outcome?",
+    options: ["To ban the use of all sensitizing fragrances [95]", "To eliminate irritant reactions in consumers [96]", "To aid in the evaluation and surveillance of fragrance allergy and benefit individuals living with fragrance allergy [96]", "To prevent auto-oxidation of terpenes [97]"],
+    answer: 2,
+    explanation: "This mandate has been a significant step forward in the evaluation and surveillance of fragrance allergy and is of great benefit to individuals living with fragrance allergy [96]."
+  },
+  {
+    q: "In the UK EPIDERM occupational dermatoses surveillance study, which reporting group (Dermatologists or Occupational Physicians) reported a significantly higher rate for Hairdressers and Barbers (116.3 per 100,000)?",
+    options: ["Occupational Physicians [98]", "General Practitioners [99]", "Dermatologists [100]", "Insurance Companies [60]"],
+    answer: 2,
+    explanation: "The highest rate (116.3 per 100,000) for Hairdressers and Barbers was reported by Dermatologists [100]. This difference reflects the different types of occupational populations accessed, as dermatologists mainly receive individual referrals [101]."
+  },
+  {
+    q: "Allergic contact dermatitis (ACD) involves two main immunologic processes. What are they?",
+    options: ["Th1-mediated and Th2-mediated reactions [4, 102]", "Haptenisation and proliferation of Tregs [30, 33, 103]", "Sensitisation (induction or afferent limb) and elicitation (or efferent limb) [102]", "Penetration through the stratum corneum and binding to TLR-4 [33, 104]"],
+    answer: 2,
+    explanation: "There are two main processes involved in allergic contact dermatitis: (i) sensitisation (induction or afferent limb of sensitivity); and (ii) elicitation (or efferent limb) of contact dermatitis [102]."
+  },
+  {
+    q: "Which topical non-steroidal anti-inflammatory drug (NSAID) is listed in the European photopatch test baseline series as responsible for photoallergic contact dermatitis (PACD) and systemic photosensitivity?",
+    options: ["Ketoprofen [88]", "Promethazine [105]", "Piroxicam [88]", "Benzophenone-3 [106]"],
+    answer: 2,
+    explanation: "Piroxicam is listed in the photopatch test baseline series as 'An NSAID class of its own responsible for PACD and systemic photosensitivity' [88]."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

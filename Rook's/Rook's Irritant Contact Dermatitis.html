@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rook's Irritant Contact Dermatitis Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+        [
+  {
+    q: "Which is the most common site of irritant contact dermatitis?",
+    options: ["Face", "Hands", "Feet", "Scalp"],
+    answer: 1,
+    explanation: "Hands are the most frequently affected site due to repeated exposure to soaps, detergents, and occupational irritants."
+  },
+  {
+    q: "Which of the following is NOT a synonym for irritant contact dermatitis?",
+    options: ["Wear-and-tear dermatitis", "Traumiterative dermatitis", "Contact dermatitis", "Atopic dermatitis"],
+    answer: 3,
+    explanation: "Atopic dermatitis is a separate eczematous disorder and not a synonym of irritant contact dermatitis."
+  },
+  {
+    q: "Which layer of the skin provides the principal barrier against irritants?",
+    options: ["Stratum basale", "Stratum corneum", "Dermis", "Subcutaneous fat"],
+    answer: 1,
+    explanation: "The stratum corneum is the main barrier preventing penetration of irritants and water loss."
+  },
+  {
+    q: "Which chemical characteristic most influences the irritancy potential of a substance?",
+    options: ["Molecular weight", "pKa and hydrophobicity (log P)", "Colour", "Odour"],
+    answer: 1,
+    explanation: "Hydrophobicity and dissociation constant (pKa) are major determinants of irritancy potential."
+  },
+  {
+    q: "Which common household substance is a frequent cause of irritant dermatitis?",
+    options: ["Shampoo", "Perfume", "Moisturiser", "Hair dye"],
+    answer: 0,
+    explanation: "Shampoos, detergents, and soaps are common everyday irritants."
+  },
+  {
+    q: "Which plant family contains species with irritant latex such as Euphorbia?",
+    options: ["Compositae", "Euphorbiaceae", "Cruciferae", "Araceae"],
+    answer: 1,
+    explanation: "Euphorbiaceae (spurge family) produce a milky latex that is strongly irritant to skin."
+  },
+  {
+    q: "Which occupational group has the highest frequency of irritant contact dermatitis?",
+    options: ["Bankers", "Hairdressers", "Teachers", "Drivers"],
+    answer: 1,
+    explanation: "Hairdressers have frequent exposure to wet work and chemicals, predisposing them to irritant dermatitis."
+  },
+  {
+    q: "Which endogenous factor increases risk of irritant contact dermatitis?",
+    options: ["Eczema elsewhere", "Dark skin phototype", "Excess melanin", "Obesity"],
+    answer: 0,
+    explanation: "Patients with eczema or impaired barrier function are more susceptible to irritant dermatitis."
+  },
+  {
+    q: "Which clinical feature is more common in allergic than irritant dermatitis?",
+    options: ["Vesicles", "Dryness", "Scaling", "Chapping"],
+    answer: 0,
+    explanation: "Vesicles are more typical of allergic contact dermatitis, while irritant dermatitis usually causes dryness and chapping."
+  },
+  {
+    q: "Which cytokine is rapidly released after barrier disruption by irritants?",
+    options: ["IL-1α", "IL-4", "IL-10", "IFN-γ"],
+    answer: 0,
+    explanation: "Irritant exposure triggers rapid release of preformed IL-1α from keratinocytes."
+  },
+  {
+    q: "Which lipid makes up nearly half of the stratum corneum barrier?",
+    options: ["Ceramides", "Cholesterol", "Free fatty acids", "Phospholipids"],
+    answer: 0,
+    explanation: "Ceramides account for about 45–50% of stratum corneum lipids and are crucial for barrier function."
+  },
+  {
+    q: "Which irritant is most commonly used in experimental irritant patch testing?",
+    options: ["Sodium hydroxide", "Phenol", "Sodium lauryl sulphate", "Croton oil"],
+    answer: 2,
+    explanation: "Sodium lauryl sulphate is a standard irritant used in patch testing to study irritant responses."
+  },
+  {
+    q: "Which irritant causes both dermatitis and immediate non-immunological contact urticaria?",
+    options: ["Dimethyl sulfoxide (DMSO)", "Acetone", "Phenol", "Hydrochloric acid"],
+    answer: 0,
+    explanation: "DMSO can induce both irritant dermatitis and transient urticarial reactions."
+  },
+  {
+    q: "Which condition is a common differential diagnosis of irritant hand dermatitis?",
+    options: ["Tinea manuum", "Vitiligo", "Lichen planus", "Pemphigus vulgaris"],
+    answer: 0,
+    explanation: "Unilateral hand dermatitis can mimic tinea manuum, so fungal scrapings are essential in diagnosis."
+  },
+  {
+    q: "Which irritant pattern is typical in housewives and cleaners?",
+    options: ["Patchy eczema on finger webs", "Discoid lesions on face", "Bullous eruption on trunk", "Linear vesicles on legs"],
+    answer: 0,
+    explanation: "Patchy 'housework-type' eczema with involvement of finger webs is common in wet work exposure."
+  },
+  {
+    q: "Which cytokine is upregulated by irritants alongside IL-1α?",
+    options: ["TNF-α", "IL-5", "IL-17", "IL-22"],
+    answer: 0,
+    explanation: "Irritants induce TNF-α and GM-CSF production in keratinocytes, amplifying inflammation."
+  },
+  {
+    q: "What is the typical histological pattern of irritant contact dermatitis?",
+    options: ["Eczematous but variable", "Spongiosis with eosinophils", "Granulomatous inflammation", "Basal vacuolar change"],
+    answer: 0,
+    explanation: "Irritant dermatitis shows variable histology, often eczematous but with no single pathognomonic pattern."
+  },
+  {
+    q: "Which gender is more commonly affected by irritant hand dermatitis?",
+    options: ["Men", "Women", "Equal", "Varies by region"],
+    answer: 1,
+    explanation: "Women are more often affected, largely due to increased exposure to household irritants."
+  },
+  {
+    q: "Which diagnostic test is essential to exclude allergic contact dermatitis?",
+    options: ["Patch testing", "Skin biopsy", "Prick test", "Wood’s lamp"],
+    answer: 0,
+    explanation: "Patch testing is required to differentiate allergic from irritant dermatitis."
+  },
+  {
+    q: "Which of the following is considered a weak irritant but may cause cumulative dermatitis?",
+    options: ["Cement", "Water", "Hydrochloric acid", "Phenol"],
+    answer: 1,
+    explanation: "Even water, through repeated wet work, can cause cumulative irritant dermatitis."
+  },
+  {
+    q: "Which is the first-line management of irritant contact dermatitis?",
+    options: ["Systemic steroids", "Irritant avoidance", "Phototherapy", "Ciclosporin"],
+    answer: 1,
+    explanation: "The cornerstone of management is avoidance of the causative irritant."
+  },
+  {
+    q: "Which type of glove provides protection against water-miscible irritants?",
+    options: ["Cotton", "Latex", "Vinyl", "Leather"],
+    answer: 1,
+    explanation: "Latex gloves protect against water-miscible substances but may not be appropriate for all irritants."
+  },
+  {
+    q: "Which topical treatment is routinely used in irritant dermatitis?",
+    options: ["Topical steroids", "Topical antifungals", "Topical antivirals", "Topical calcineurin inhibitors"],
+    answer: 0,
+    explanation: "Topical corticosteroids are used for symptomatic relief, though their benefit in ICD is debated."
+  },
+  {
+    q: "Which emollient formulation is most effective in barrier repair?",
+    options: ["Petrolatum", "Lipid-rich cream", "Aqueous gel", "Alcohol-based lotion"],
+    answer: 1,
+    explanation: "Lipid-rich preparations best support barrier repair compared to aqueous or alcohol-based products."
+  },
+  {
+    q: "Which irritant reaction is common on eyelids due to cosmetics?",
+    options: ["Cosmetic irritant dermatitis", "Seborrheic dermatitis", "Psoriasis", "Photoallergic dermatitis"],
+    answer: 0,
+    explanation: "Cosmetics often cause irritant dermatitis on sensitive eyelid skin."
+  },
+  {
+    q: "Which occupational precaution is MOST important for prevention of hand eczema?",
+    options: ["Use of moisturisers", "Protective gloves", "Avoiding sun exposure", "Daily patch testing"],
+    answer: 1,
+    explanation: "Glove use and protective equipment are key preventive measures in occupational settings."
+  },
+  {
+    q: "Which agent is known to cause pustular reactions at non-toxic concentrations?",
+    options: ["Detergents", "Organic solvents", "Croton oil", "Dimethyl sulfoxide"],
+    answer: 2,
+    explanation: "Croton oil and phenol esters can induce pustular reactions via leukocyte chemotaxis."
+  },
+  {
+    q: "Which irritant reaction resembles sunburn and occurs on light exposure?",
+    options: ["Phototoxic contact dermatitis", "Photoallergic dermatitis", "Irritant urticaria", "Subjective sensory irritation"],
+    answer: 0,
+    explanation: "Phototoxic contact dermatitis mimics sunburn and occurs in sun-exposed sites after chemical activation by light."
+  },
+  {
+    q: "Which antibiotic is classically associated with phototoxic contact dermatitis?",
+    options: ["Tetracyclines", "Penicillins", "Macrolides", "Cephalosporins"],
+    answer: 0,
+    explanation: "Tetracycline antibiotics are well-known causes of phototoxic reactions."
+  },
+  {
+    q: "Which term refers to subjective burning/stinging without visible skin change?",
+    options: ["Subjective sensory irritation", "Allergic contact dermatitis", "Phototoxic dermatitis", "Contact urticaria"],
+    answer: 0,
+    explanation: "Subjective sensory irritation describes burning or stinging in the absence of skin lesions."
+  },
+  {
+    q: "Which substance is classically used to test 'stinger' reactions in sensitive skin?",
+    options: ["Lactic acid 5%", "Hydrochloric acid", "Phenol", "Benzoyl peroxide"],
+    answer: 0,
+    explanation: "A 5% lactic acid solution applied to the nasolabial fold is used to identify 'stingers'."
+  },
+  {
+    q: "Which strong irritant causes liquefactive necrosis and delayed deep burns?",
+    options: ["Sulphuric acid", "Nitric acid", "Hydrofluoric acid", "Phenol"],
+    answer: 2,
+    explanation: "Hydrofluoric acid penetrates deeply, binds calcium, and causes liquefactive necrosis."
+  },
+  {
+    q: "Which alkali is a frequent cause of occupational chemical burns?",
+    options: ["Potassium hydroxide", "Hydrochloric acid", "Phenol", "Nitric acid"],
+    answer: 0,
+    explanation: "Alkalis such as sodium and potassium hydroxide cause deep, penetrating burns."
+  },
+  {
+    q: "Which depth of burn extends into dermis but spares appendages?",
+    options: ["Superficial partial-thickness", "Deep partial-thickness", "Full-thickness", "Fourth-degree"],
+    answer: 1,
+    explanation: "Deep partial-thickness burns extend into dermis but allow healing from residual adnexal structures."
+  },
+  {
+    q: "Which topical antidote is recommended for hydrofluoric acid burns?",
+    options: ["Zinc oxide paste", "Calcium gluconate gel", "Potassium permanganate", "Petrolatum"],
+    answer: 1,
+    explanation: "2.5% calcium gluconate gel binds fluoride ions and alleviates pain in HF burns."
+  },
+  {
+    q: "Which systemic complication may occur after extensive hydrofluoric acid burns?",
+    options: ["Hypocalcaemia and arrhythmia", "Hypertension", "Hyperthyroidism", "Hypoglycaemia"],
+    answer: 0,
+    explanation: "Systemic fluoride absorption leads to hypocalcaemia and potentially fatal arrhythmias."
+  },
+  {
+    q: "Which is the first-line emergency management of chemical burns?",
+    options: ["Neutralising solution", "Irrigation with copious water", "Systemic steroids", "Topical antibiotics"],
+    answer: 1,
+    explanation: "Immediate and prolonged irrigation with large volumes of water is the cornerstone of chemical burn management."
+  },
+  {
+    q: "Which dressing type is recommended to aid barrier repair in chemical burns?",
+    options: ["Dry gauze", "Vapour-permeable dressing", "Alcohol swabs", "Tight occlusive plastic"],
+    answer: 1,
+    explanation: "Vapour-permeable dressings allow moisture balance and stimulate barrier repair."
+  }
+];
+
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

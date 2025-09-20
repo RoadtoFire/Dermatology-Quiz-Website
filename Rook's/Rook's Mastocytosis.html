@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rook's Mastocytosis Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    "q": "What is the most common mutation found in adults with systemic mastocytosis?",
+    "options": ["D816V in the TK2 domain", "F522C in the transmembrane domain", "V559G in the juxtamembrane domain", "A533D in the extracellular domain"],
+    "answer": 0,
+    "explanation": "About 90% of adults with systemic mastocytosis have the D816V mutation in the intracellular TK2 domain of the KIT gene."
+  },
+  {
+    "q": "Which of the following is a major WHO criterion for diagnosing systemic mastocytosis?",
+    "options": ["Serum tryptase >20 μg/L", "Multifocal aggregates of at least 15 mast cells in bone marrow", "Coexpression of CD117 with CD2 and/or CD25", "Spindle-shaped mast cells in biopsy"],
+    "answer": 1,
+    "explanation": "A major criterion is multifocal aggregates of at least 15 mast cells in bone marrow or another extracutaneous organ."
+  },
+  {
+    "q": "What is the typical age of onset for adult-onset urticaria pigmentosa?",
+    "options": ["10-20 years", "20-40 years", "40-60 years", "60-80 years"],
+    "answer": 1,
+    "explanation": "The most common age of onset for adult disease is 20-40 years."
+  },
+  {
+    "q": "Which sign is characterized by urtication and wealing upon rubbing a mastocytosis lesion?",
+    "options": ["Nikolsky sign", "Darier sign", "Auspitz sign", "Gottron sign"],
+    "answer": 1,
+    "explanation": "The Darier sign is positive when gentle rubbing of a lesion causes localized pruritus, redness, and wealing."
+  },
+  {
+    "q": "Which form of cutaneous mastocytosis typically presents with solitary nodules or plaques in infancy?",
+    "options": ["Urticaria pigmentosa", "Telangiectasia macularis eruptiva perstans", "Mastocytoma", "Diffuse cutaneous mastocytosis"],
+    "answer": 2,
+    "explanation": "Mastocytomas usually present as solitary red, pink, or yellowish nodules or plaques in infancy or early childhood."
+  },
+  {
+    "q": "What percentage of children with urticaria pigmentosa clear by adolescence?",
+    "options": ["Over 50%", "About 10%", "Less than 5%", "Virtually none"],
+    "answer": 0,
+    "explanation": "Over 50% of children with urticaria pigmentosa clear by adolescence."
+  },
+  {
+    "q": "Which of the following is NOT a common symptom of systemic mastocytosis?",
+    "options": ["Flushing", "Pruritus", "Wheezing", "Bone pain"],
+    "answer": 2,
+    "explanation": "Wheezing is often quoted but is extremely rare as a presentation of mastocytosis."
+  },
+  {
+    "q": "What is the recommended first-line treatment for mast cell mediator symptoms?",
+    "options": ["Proton pump inhibitors", "Non-sedating H1 antihistamines", "Topical corticosteroids", "Interferon-α"],
+    "answer": 1,
+    "explanation": "Non-sedating H1 antihistamines are the mainstay of therapy for mast cell mediator symptoms."
+  },
+  {
+    "q": "Which investigation is recommended at baseline and every 3-5 years in adults with mastocytosis?",
+    "options": ["Bone marrow biopsy", "DEXA scan", "Abdominal ultrasound", "CT thorax"],
+    "answer": 1,
+    "explanation": "A dual-energy X-ray absorptiometry (DEXA) scan should be done at baseline and every 3-5 years in adults to monitor bone density."
+  },
+  {
+    "q": "What is the lifetime prevalence estimate of mastocytosis?",
+    "options": ["1 in 1,000", "1 in 10,000 to 1 in 30,000", "1 in 100,000", "1 in 1,000,000"],
+    "answer": 1,
+    "explanation": "Population estimates suggest a lifetime prevalence in the region of 1 in 10,000 to 1 in 30,000."
+  },
+  {
+    "q": "Which of the following is a potential trigger for mast cell degranulation?",
+    "options": ["Acetaminophen", "Iodinated contrast media", "Beta-blockers", "Penicillin"],
+    "answer": 1,
+    "explanation": "Iodinated contrast media (especially ionic) are known potential triggers of mast cell degranulation."
+  },
+  {
+    "q": "What percentage of adults with indolent systemic mastocytosis have osteoporosis?",
+    "options": ["About 5%", "About 20%", "About 50%", "Over 75%"],
+    "answer": 1,
+    "explanation": "About 20% of adults with indolent systemic mastocytosis (ISM) have osteoporosis."
+  },
+  {
+    "q": "Which staining method is NOT typically used to demonstrate mast cells in formalin-fixed biopsies?",
+    "options": ["Giemsa", "Tryptase", "CD117", "Periodic acid-Schiff (PAS)"],
+    "answer": 3,
+    "explanation": "Mast cells are well demonstrated by Giemsa, tryptase, CD117, or chloroacetate esterase stains. PAS is not specific for mast cells."
+  },
+  {
+    "q": "What is the recommended management for patients with Hymenoptera sting anaphylaxis?",
+    "options": ["Short-term venom immunotherapy", "Lifelong venom immunotherapy", "Avoidance only", "Epinephrine only"],
+    "answer": 1,
+    "explanation": "Venom immunotherapy for patients with Hymenoptera sting anaphylaxis should be for life."
+  },
+  {
+    "q": "Which variant of maculopapular cutaneous mastocytosis is typically seen in children and may resolve around puberty?",
+    "options": ["Monomorphic variant", "Polymorphic variant", "Telangiectatic variant", "Bullous variant"],
+    "answer": 1,
+    "explanation": "The polymorphic variant with larger lesions of variable size and shape is typically seen in paediatric patients and may resolve around puberty."
+  },
+  {
+    "q": "What is the risk of anaphylaxis in adults with mastocytosis?",
+    "options": ["Up to 5%", "Up to 50%", "Up to 75%", "Virtually 100%"],
+    "answer": 1,
+    "explanation": "Up to 50% of adults experience one or more episodes of anaphylaxis."
+  },
+  {
+    "q": "Which tyrosine kinase inhibitor is NOT effective for D816V-positive systemic mastocytosis?",
+    "options": ["Imatinib", "Midostaurin", "Avapritinib", "Mastlinib"],
+    "answer": 0,
+    "explanation": "Imatinib is not effective for D816V-positive systemic mastocytosis."
+  },
+  {
+    "q": "What is the term for patients with evidence of clonality who do not meet full criteria for systemic mastocytosis?",
+    "options": ["Mast cell activation syndrome", "Monoclonal mast cell activation syndrome", "Idiopathic anaphylaxis", "Smouldering systemic mastocytosis"],
+    "answer": 1,
+    "explanation": "Patients with evidence of clonality (CD25 expression and/or KIT D816V mutation) who do not meet the criteria for systemic mastocytosis are said to have monoclonal mast cell activation syndrome."
+  },
+  {
+    "q": "Which of the following is a minor WHO criterion for systemic mastocytosis?",
+    "options": ["Multifocal aggregates of mast cells", "Serum tryptase >20 μg/L", "Bone marrow infiltration", "Skin lesions"],
+    "answer": 1,
+    "explanation": "A serum tryptase persistently >20 μg/L is one of the minor WHO criteria."
+  },
+  {
+    "q": "In which part of the body are urticaria pigmentosa lesions most concentrated?",
+    "options": ["Face and scalp", "Upper trunk and arms", "Lower trunk and thighs", "Palms and soles"],
+    "answer": 2,
+    "explanation": "Lesions have the highest concentration usually on the lower trunk and thighs."
+  },
+  {
+    "q": "Which of the following is a feature of diffuse cutaneous mastocytosis?",
+    "options": ["Well-defined nodules", "Thickened, doughy skin", "Telangiectasias", "Monomorphic macules"],
+    "answer": 1,
+    "explanation": "Diffuse cutaneous mastocytosis presents with thickened and doughy skin consistency."
+  },
+  {
+    "q": "What is the most common associated haematological neoplasm in advanced systemic mastocytosis?",
+    "options": ["Lymphoid", "Myeloid", "Erythroid", "Megakaryocytic"],
+    "answer": 1,
+    "explanation": "Within the advanced systemic mastocytosis category, up to 70% of patients may have an associated haematological neoplasm (AHN), most commonly myeloid."
+  },
+  {
+    "q": "Which drug has theoretical mast cell stabilising properties but is often sedating?",
+    "options": ["Loratadine", "Cetirizine", "Ketotifen", "Fexofenadine"],
+    "answer": 2,
+    "explanation": "Ketotifen has theoretical mast cell stabilising properties but is often sedating."
+  },
+  {
+    "q": "What is the recommended initial work-up for an adult with suspected mastocytosis?",
+    "options": ["Bone marrow biopsy", "Skin biopsy", "Abdominal CT", "Genetic testing"],
+    "answer": 1,
+    "explanation": "A skin biopsy should be done to confirm a clinical diagnosis of mastocytosis in the skin in adults."
+  },
+  {
+    "q": "Which of the following is NOT a reason for a persistently raised blood tryptase?",
+    "options": ["Systemic mastocytosis", "Hereditary α-tryptasemia", "Chronic spontaneous urticaria", "Hypertension"],
+    "answer": 3,
+    "explanation": "Hypertension is not listed as a cause for persistently raised tryptase. Causes include SM, HAT, renal failure, and chronic spontaneous urticaria."
+  },
+  {
+    "q": "What is the prognosis for most children with mastocytomas?",
+    "options": ["Persist for life", "Involute in the first few years", "Progress to systemic disease", "Transform into melanoma"],
+    "answer": 1,
+    "explanation": "Nearly all mastocytomas involute over the first few years of childhood."
+  },
+  {
+    "q": "Which cytokine receptor is encoded by the KIT gene?",
+    "options": ["Interleukin-2 receptor", "Stem cell factor receptor", "Erythropoietin receptor", "Thrombopoietin receptor"],
+    "answer": 1,
+    "explanation": "KIT encodes the transmembrane receptor for stem cell factor."
+  },
+  {
+    "q": "Which of the following mutations is more common in childhood mastocytosis compared to adult disease?",
+    "options": ["D816V", "Mutations outside exon 17", "V559G", "F522C"],
+    "answer": 1,
+    "explanation": "In childhood mastocytosis, the common activating D816V mutation is less frequently present, and mutations outside exon 17 are more common."
+  },
+  {
+    "q": "What is the treatment of choice for gastrointestinal symptoms in mastocytosis?",
+    "options": ["H1 antihistamines", "Sodium cromoglycate", "H2 antihistamines and proton pump inhibitors", "Topical corticosteroids"],
+    "answer": 2,
+    "explanation": "H2 antihistamines and proton pump inhibitors are used for gastrointestinal symptoms, including indigestion."
+  },
+  {
+    "q": "Which phototherapy modality may be effective for pruritus when PUVA is not tolerated?",
+    "options": ["Broadband UVA", "Narrow-band UVB", "PUVA bath therapy", "Excimer laser"],
+    "answer": 1,
+    "explanation": "Narrow-band UVB therapy may be effective for pruritus when PUVA is not tolerated."
+  },
+  {
+    "q": "What is the estimated proportion of adults with skin lesions who have indolent systemic mastocytosis (ISM) on investigation?",
+    "options": ["20-30%", "50-60%", "70-80%", "90-95%"],
+    "answer": 3,
+    "explanation": "It is now thought that the proportion of adults with skin lesions who have ISM is as high as 90–95%."
+  },
+  {
+    "q": "Which of the following is a feature of telangiectasia macularis eruptiva perstans (TMEP)?",
+    "options": ["Blistering in infancy", "Fixed red patches that flush", "Solitary nodules", "Thickened skin"],
+    "answer": 1,
+    "explanation": "TMEP presents with persistent red patches that usually flush but do not urticate on rubbing."
+  },
+  {
+    "q": "Which additional mutation confers a poorer prognosis in systemic mastocytosis?",
+    "options": ["SRSF2", "JAK2", "CALR", "MPL"],
+    "answer": 0,
+    "explanation": "Additional mutations including the presence of SRSF2, ASXL1 and RUNX1 confer a poorer prognosis."
+  },
+  {
+    "q": "What is the primary risk of using potent topical corticosteroids for mastocytosis?",
+    "options": ["Hyperpigmentation", "Steroid atrophy", "Systemic mast cell activation", "Infection"],
+    "answer": 1,
+    "explanation": "Steroid atrophy is an important risk of continued treatment with potent topical corticosteroids."
+  },
+  {
+    "q": "Which drug was recently (2021) approved by the FDA for advanced systemic mastocytosis?",
+    "options": ["Imatinib", "Midostaurin", "Avapritinib", "Cladribine"],
+    "answer": 2,
+    "explanation": "The US Food and Drug Administration approved avapritinib in June 2021 for patients with advanced systemic mastocytosis."
+  },
+  {
+    "q": "In bone marrow involvement, mast cells typically co-express which aberrant markers?",
+    "options": ["CD20 and CD79a", "CD3 and CD5", "CD117 and CD34", "CD2 and/or CD25"],
+    "answer": 3,
+    "explanation": "Clonal mast cells typically co-express the aberrant markers CD25 and/or CD2 with tryptase or CD117."
+  },
+  {
+    "q": "What is the main indication for cytoreductive treatment in mastocytosis?",
+    "options": ["Mild pruritus", "Cosmetic improvement", "Organ dysfunction or failure", "Isolated skin lesions"],
+    "answer": 2,
+    "explanation": "Cytoreductive treatment is indicated for systemic mastocytosis with organ dysfunction (B findings) or damage/failure (C findings)."
+  },
+  {
+    "q": "Which of the following is a common comorbidity in systemic mastocytosis?",
+    "options": ["Venous thromboembolism", "Rheumatoid arthritis", "Psoriasis", "Type 1 diabetes"],
+    "answer": 0,
+    "explanation": "A population-controlled study showed an increased risk of venous thromboembolism in addition to anaphylaxis and osteoporosis."
+  },
+  {
+    "q": "What is the first step in assessing an adult with suspected mastocytosis without skin lesions?",
+    "options": ["Bone marrow biopsy", "Measure serum tryptase", "Genetic testing", "Abdominal ultrasound"],
+    "answer": 1,
+    "explanation": "The algorithm for assessment starts with measuring serum tryptase."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

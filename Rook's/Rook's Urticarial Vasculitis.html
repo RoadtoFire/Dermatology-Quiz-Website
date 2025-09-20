@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rook's Urticarial Vasculitis Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    "q": "What is the fundamental diagnostic requirement for urticarial vasculitis?",
+    "options": ["Low serum complement levels", "The presence of anti-C1q antibodies", "Clinicopathological correlation", "Systemic organ involvement"],
+    "answer": 2,
+    "explanation": "The text states that clinicopathological correlation is essential for diagnosis, meaning both the clinical presentation of urticarial lesions and histological evidence of leukocytoclastic vasculitis are required."
+  },
+  {
+    "q": "Which demographic group has the highest incidence of urticarial vasculitis?",
+    "options": ["Children", "Men in their 20s", "Women in their 40s", "The elderly over 70"],
+    "answer": 2,
+    "explanation": "The text states that urticarial vasculitis shows a peak incidence in the fourth decade of life and that women are more often affected than men."
+  },
+  {
+    "q": "What is the estimated incidence of urticarial vasculitis per 100,000 person-years, according to a US-based population study?",
+    "options": ["0.5", "5", "20", "50"],
+    "answer": 0,
+    "explanation": "The text cites a US-based population study that reported an incidence of 0.5 per 100,000 person-years."
+  },
+  {
+    "q": "Which of the following is a well-documented disease association with urticarial vasculitis?",
+    "options": ["Psoriasis", "Systemic Lupus Erythematosus", "Atopic Dermatitis", "Parkinson's Disease"],
+    "answer": 1,
+    "explanation": "Common associations with urticarial vasculitis are attributed to connective tissue diseases including systemic lupus erythematosus."
+  },
+  {
+    "q": "What type of hypersensitivity reaction is urticarial vasculitis classified as?",
+    "options": ["Type I", "Type II", "Type III", "Type IV"],
+    "answer": 2,
+    "explanation": "The text states that urticarial vasculitis is a type III hypersensitivity reaction, in which intravascular antigen–antibody complexes result in complement activation."
+  },
+  {
+    "q": "Which autoantibody is particularly associated with the hypocomplementaemic variant of urticarial vasculitis (HUVS)?",
+    "options": ["Anti-nuclear antibody (ANA)", "Anti-C1q antibody", "Rheumatoid factor", "Anti-dsDNA"],
+    "answer": 1,
+    "explanation": "The text states that patients with HUVS usually have IgG autoantibodies directed against the collagen-like region of C1q (anti-C1q)."
+  },
+  {
+    "q": "Which cell type is reported to be the first recruited in the inflammatory infiltrate in exercise-induced urticarial vasculitis?",
+    "options": ["Neutrophils", "Lymphocytes", "Eosinophils", "Mast cells"],
+    "answer": 2,
+    "explanation": "In serial biopsies from a patient with exercise-induced urticarial vasculitis, eosinophils were the first cells recruited at 3 h, followed by neutrophil predominance at 24 h."
+  },
+  {
+    "q": "Which of the following is NOT a classical histopathological feature of fully developed urticarial vasculitis?",
+    "options": ["Endothelial cell swelling", "Fibrin deposits in venules", "Perivascular lymphocytic infiltrate only", "Erythrocyte extravasation"],
+    "answer": 2,
+    "explanation": "The classical features include endothelial cell damage, fibrin deposits, a neutrophil- or lymphocyte-predominant infiltrate (not lymphocytic only), and erythrocyte extravasation."
+  },
+  {
+    "q": "A negative direct immunofluorescence (DIF) result on a skin biopsy:",
+    "options": ["Confirms a diagnosis of normocomplementaemic urticarial vasculitis (NUV)", "Rules out a diagnosis of urticarial vasculitis", "Is common and does not rule out the diagnosis", "Is only seen in Schnitzler syndrome"],
+    "answer": 2,
+    "explanation": "The text states that negative immunofluorescence does not rule out a diagnosis of urticarial vasculitis, as detection depends on the duration of the lesion and timing of the biopsy."
+  },
+  {
+    "q": "Which genetic mutation has been identified in families with autosomal recessive hypocomplementaemic urticarial vasculitis syndrome (HUVS)?",
+    "options": ["NLRP3", "MEFV", "DNASE1L3", "TREX1"],
+    "answer": 2,
+    "explanation": "Homozygous mutations in DNASE1L3 encoding an endonuclease have been identified in two families with autosomal recessive HUVS."
+  },
+  {
+    "q": "Which of the following is cited as a potential environmental trigger for urticarial vasculitis?",
+    "options": ["High pollen count", "COVID-19 infection", "High-fat diet", "Stress"],
+    "answer": 1,
+    "explanation": "The text lists infections, including lately COVID-19, as potential triggers for urticarial vasculitis."
+  },
+  {
+    "q": "How do the lesions of urticarial vasculitis typically differ from those of chronic spontaneous urticaria in terms of sensation?",
+    "options": ["They are more pruritic (itchy)", "They are painful rather than itchy", "They are completely asymptomatic", "They cause a burning sensation only at night"],
+    "answer": 1,
+    "explanation": "Patients complain of recurrent weals which are typically painful rather than itchy."
+  },
+  {
+    "q": "What is a common cutaneous finding that may remain after a urticarial vasculitis lesion resolves?",
+    "options": ["Scarring", "Residual hyperpigmentation", "Atrophy", "Telangiectasias"],
+    "answer": 1,
+    "explanation": "The text states the weals are lasting longer than 24 h and often leaving residual hyperpigmentation."
+  },
+  {
+    "q": "Which systemic symptom is commonly associated with flares of urticarial vasculitis?",
+    "options": ["Hair loss", "Weight gain", "Fatigue and malaise", "Photosensitivity"],
+    "answer": 2,
+    "explanation": "Patients often complain about fatigue, malaise, musculoskeletal symptoms or fever associated with weals."
+  },
+  {
+    "q": "Which variant of urticarial vasculitis is the most common and usually has the mildest course?",
+    "options": ["Hypocomplementaemic Urticarial Vasculitis (HUV)", "Normocomplementaemic Urticarial Vasculitis (NUV)", "Hypocomplementaemic Urticarial Vasculitis Syndrome (HUVS)", "Exercise-induced urticarial vasculitis"],
+    "answer": 1,
+    "explanation": "The normocomplementaemic variant (NUV) represents the most common and mildest form (about 80% of patients) and usually comes without organ involvement."
+  },
+  {
+    "q": "What is a key diagnostic criterion for Hypocomplementaemic Urticarial Vasculitis Syndrome (HUVS)?",
+    "options": ["Fever >38.5°C", "Monoclonal gammopathy", "Biopsy-proven vasculitis", "Positive ANA titer"],
+    "answer": 2,
+    "explanation": "The text lists biopsy-proven vasculitis as the first of several diagnostic criteria for HUVS."
+  },
+  {
+    "q": "What is the most important clinical differential diagnosis for urticarial vasculitis?",
+    "options": ["Cutaneous lupus", "Erythema multiforme", "Chronic spontaneous urticaria", "Bullous pemphigoid"],
+    "answer": 2,
+    "explanation": "In clinical practice, chronic spontaneous urticaria is the most important differential diagnosis of urticarial vasculitis."
+  },
+  {
+    "q": "How can dermoscopy help differentiate urticarial vasculitis from chronic spontaneous urticaria?",
+    "options": ["It shows vessel dilation in urticaria", "It shows purpuric patches in urticarial vasculitis", "It shows white streaks in urticarial vasculitis", "It is not useful for differentiation"],
+    "answer": 1,
+    "explanation": "Dermoscopy may discriminate urticarial lesions in urticarial vasculitis (showing purpuric patches) from those in chronic spontaneous urticaria (no purpuric patches)."
+  },
+  {
+    "q": "Which of the following conditions shows neutrophilic infiltrates on histology but NOT true leukocytoclastic vasculitis?",
+    "options": ["HUVS", "Polyarteritis Nodosa", "Schnitzler syndrome", "Cryoglobulinemic vasculitis"],
+    "answer": 2,
+    "explanation": "Schnitzler syndrome and other urticarial autoinflammatory syndromes should be regarded as a neutrophilic urticarial dermatosis (NUD) rather than vasculitis."
+  },
+  {
+    "q": "Which life-threatening late complication is associated with urticarial vasculitis?",
+    "options": ["Cardiomyopathy", "Chronic Obstructive Pulmonary Disease (COPD)", "Liver cirrhosis", "Pancreatitis"],
+    "answer": 1,
+    "explanation": "Chronic obstructive pulmonary disease is considered as a life-threatening late complication of urticarial vasculitis."
+  },
+  {
+    "q": "What percentage of patients with HUVS may develop systemic lupus erythematosus?",
+    "options": ["<5%", "10-20%", "About 50%", ">80%"],
+    "answer": 2,
+    "explanation": "The text states that more than 50% of patients with HUVS develop systemic lupus erythematosus."
+  },
+  {
+    "q": "What is the cornerstone of diagnosis for urticarial vasculitis?",
+    "options": ["Serum complement levels", "A positive autologous serum skin test", "Lesional skin biopsy", "The presence of angioedema"],
+    "answer": 2,
+    "explanation": "Lesional skin biopsy of lesions over 12 hours old is the cornerstone of the diagnosis."
+  },
+  {
+    "q": "For which variant is direct immunofluorescence (DIF) most strongly recommended on a skin biopsy?",
+    "options": ["All cases of urticarial vasculitis", "Only when NUV is suspected", "When HUV/HUVS is suspected", "It is never recommended"],
+    "answer": 2,
+    "explanation": "Routine use of DIF is not recommended unless HUV/HUVS is suspected."
+  },
+  {
+    "q": "Which component of the initial laboratory work-up is essential for differentiating between NUV and HUV?",
+    "options": ["Complete blood count", "Liver function tests", "Complement profile (C3, C4, C1q)", "Erythrocyte sedimentation rate"],
+    "answer": 2,
+    "explanation": "Complement profile is important for differentiating between normocomplementaemic and hypocomplementaemic disease."
+  },
+  {
+    "q": "Which test is crucial if urinalysis is abnormal in a patient with urticarial vasculitis?",
+    "options": ["Renal ultrasound", "24-h urine protein and creatinine clearance", "Kidney biopsy", "Serum creatinine only"],
+    "answer": 1,
+    "explanation": "In the case of abnormal urinalysis, 24-h urine protein and creatinine clearance should be checked."
+  },
+  {
+    "q": "What is the reported efficacy of standard-dosed H1 antihistamines in urticarial vasculitis, according to a recent meta-analysis?",
+    "options": ["Effective in >90% of cases", "Effective in about 50% of cases", "Effective in only 24% of cases", "Completely ineffective"],
+    "answer": 2,
+    "explanation": "A recent meta-analysis demonstrated efficacy of H1 antihistamines in only 24% of cases."
+  },
+  {
+    "q": "Which of the following is a common first-line systemic treatment for all subtypes of urticarial vasculitis?",
+    "options": ["Methotrexate", "Oral corticosteroids", "Cyclosporin", "Dapsone"],
+    "answer": 1,
+    "explanation": "High efficacy on cutaneous and extracutaneous symptoms was shown for oral corticosteroids (e.g., prednisolone) in all subtypes."
+  },
+  {
+    "q": "Which second-line immunomodulator is used at a dose of 75-100 mg/day for urticarial vasculitis?",
+    "options": ["Colchicine", "Hydroxychloroquine", "Dapsone", "Azathioprine"],
+    "answer": 2,
+    "explanation": "The text lists dapsone at 75–100 mg/day as a second-line treatment."
+  },
+  {
+    "q": "Which biological agent currently has the best evidence for use in normocomplementaemic urticarial vasculitis (NUV)?",
+    "options": ["Rituximab (anti-CD20)", "Omalizumab (anti-IgE)", "Anakinra (anti-IL-1)", "Tocilizumab (anti-IL-6)"],
+    "answer": 1,
+    "explanation": "The best evidence exists for anti-IgE (omalizumab) treatment, with favourable clinical responses reported in the majority of patients with NUV."
+  },
+  {
+    "q": "Anti-IL-1 therapy (e.g., Anakinra) has shown benefit in the treatment of urticarial vasculitis in:",
+    "options": ["Large randomized controlled trials", "Open-label studies and case reports", "Only HUVS patients with renal failure", "Patients who failed anti-IgE therapy only"],
+    "answer": 1,
+    "explanation": "Anti-IL-1 therapy was beneficial in several reported cases and an open-label study."
+  },
+  {
+    "q": "What is a major challenge in managing urticarial vasculitis with oral corticosteroids?",
+    "options": ["Lack of efficacy", "Their prolonged use should be avoided due to toxicity", "They only work for NUV", "They must be combined with antihistamines to work"],
+    "answer": 1,
+    "explanation": "While effective, the prolonged use of oral corticosteroids should be avoided in view of their toxicity."
+  },
+  {
+    "q": "The prognosis of urticarial vasculitis primarily depends on:",
+    "options": ["The patient's age", "The presence of systemic involvement", "The initial response to antihistamines", "The ethnic background of the patient"],
+    "answer": 1,
+    "explanation": "Prognosis in urticarial vasculitis depends on the presence of systemic involvement."
+  },
+  {
+    "q": "A 10-year survival rate of 83% was reported for which patient group?",
+    "options": ["All urticarial vasculitis patients", "Patients with NUV", "Patients with HUV", "Patients with HUVS"],
+    "answer": 2,
+    "explanation": "A recent study from Sweden reported a 10-year survival rate of 83% in patients with HUV."
+  },
+  {
+    "q": "What is the most severe subtype of urticarial vasculitis?",
+    "options": ["Normocomplementaemic Urticarial Vasculitis (NUV)", "Drug-induced urticarial vasculitis", "Hypocomplementaemic Urticarial Vasculitis (HUV)", "Hypocomplementaemic Urticarial Vasculitis Syndrome (HUVS)"],
+    "answer": 3,
+    "explanation": "HUVS is the most severe subtype identified in about 5% of patients with urticarial vasculitis."
+  },
+  {
+    "q": "Which organ involvement is part of the diagnostic criteria for HUVS?",
+    "options": ["Hepatitis", "Myocarditis", "Glomerulonephritis", "Pneumonitis"],
+    "answer": 2,
+    "explanation": "The diagnostic criteria for HUVS include glomerulonephritis, among other systemic features."
+  },
+  {
+    "q": "Which finding on direct immunofluorescence of a skin biopsy is associated with a higher risk of developing glomerulonephritis?",
+    "options": ["IgA deposits in vessels", "Deposits of immunoglobulins or complement at the dermal-epidermal junction", "Negative immunofluorescence", "Fibrin deposits only"],
+    "answer": 1,
+    "explanation": "Patients who have deposits of immunoglobulins or complement at the dermal-epidermal junction on DIF are more likely to develop glomerulonephritis."
+  },
+  {
+    "q": "Which of the following is a recommended part of the extended diagnostic work-up for urticarial vasculitis?",
+    "options": ["Patch testing", "HIV testing for all patients", "Cryoglobulins", "Stool culture"],
+    "answer": 2,
+    "explanation": "Cryoglobulins are listed in the table as part of the extended work-up, dependent on the clinical presentation."
+  },
+  {
+    "q": "What is the proposed benefit of integrating biological agents into the management of urticarial vasculitis?",
+    "options": ["They are cheaper than conventional therapy", "They can help overcome the toxicity of long-term corticosteroids", "They cure the disease", "They are effective in 100% of patients"],
+    "answer": 1,
+    "explanation": "The text states that biological agents may help overcome the issue of toxicity associated with the use of conventional treatments, especially long-term oral corticosteroids."
+  },
+  {
+    "q": "What is the most pressing need for advancing the management of urticarial vasculitis?",
+    "options": ["More case reports", "Double-blind placebo-controlled studies", "Development of new antihistamines", "Genetic sequencing of all patients"],
+    "answer": 1,
+    "explanation": "The text concludes that there is a strong need for double-blind placebo-controlled studies to evaluate the efficacy of treatments for this rare disease."
+  }
+];
+    
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

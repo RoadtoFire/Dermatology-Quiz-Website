@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rook's Occupational Dermatology Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    "q": "What is the most common form of occupational skin disease?",
+    "options": ["Occupational allergic contact dermatitis", "Occupational irritant contact dermatitis", "Occupational acne", "Vibration white finger"],
+    "answer": 1,
+    "explanation": "Occupational irritant contact dermatitis is the commonest form of occupational skin disease."
+  },
+  {
+    "q": "Which occupation has the highest risk of developing occupational irritant contact dermatitis according to UK EPIDERM survey data?",
+    "options": ["Hairdressers", "Printers", "Machine tool operators", "Chemical plant operatives"],
+    "answer": 0,
+    "explanation": "Hairdressers have the highest rate of occupational irritant contact dermatitis at 120 cases per 100,000 employed per year."
+  },
+  {
+    "q": "What percentage of occupational contact dermatitis cases affect the hands?",
+    "options": ["50-60%", "60-70%", "70-80%", "80-90%"],
+    "answer": 3,
+    "explanation": "The hands are affected, alone or together with other sites, in 80-90% of all cases of occupational contact dermatitis."
+  },
+  {
+    "q": "Which test is particularly useful for detecting nickel contamination in the workplace?",
+    "options": ["Diphenylcarbazide test", "Dimethylglyoxime test", "Lutidine test", "Filter-paper test"],
+    "answer": 1,
+    "explanation": "The dimethylglyoxime test is useful for detecting the presence of nickel contamination."
+  },
+  {
+    "q": "What is the primary benefit of factory visits for dermatologists investigating occupational dermatitis?",
+    "options": ["Financial compensation for the visit", "Detection of relevance of previously unexplained positive patch test reactions", "Opportunity to recruit new patients", "Chance to promote skincare products"],
+    "answer": 1,
+    "explanation": "Factory visits can help detect the relevance of previously unexplained positive standard patch test reactions."
+  },
+  {
+    "q": "Which of the following is NOT recommended as a basic workplace skincare principle?",
+    "options": ["Lukewarm water for washing", "Use of disinfectant hand cleansers", "Applying emollient hand creams", "Cotton liners underneath protective gloves"],
+    "answer": 1,
+    "explanation": "Basic workplace skincare principles recommend avoiding disinfectant hand cleansers."
+  },
+  {
+    "q": "What is the most common pattern of soluble oil dermatitis?",
+    "options": ["Palmar vesicular eruption", "Discoid pattern mimicking nummular eczema", "Generalized exfoliative dermatitis", "Photosensitive distribution"],
+    "answer": 1,
+    "explanation": "Soluble oil dermatitis typically has a patchy distribution that mimics nummular eczema."
+  },
+  {
+    "q": "Which factor has been shown to worsen the severity of occupational irritant dermatitis?",
+    "options": ["Vitamin D deficiency", "Filaggrin mutations", "HLA typing", "Blood group type"],
+    "answer": 1,
+    "explanation": "On the background of atopy, filaggrin mutations seem to worsen severity of occupational irritant dermatitis."
+  },
+  {
+    "q": "What was the main cause of increased occupational skin disease during the COVID-19 pandemic?",
+    "options": ["Increased use of personal protective equipment", "Reduced workplace hygiene", "Changes in industrial processes", "Increased hand washing and sanitizing gel use"],
+    "answer": 3,
+    "explanation": "The COVID-19 pandemic resulted in increased hand washing and sanitizing hand gel use with a corresponding increase in occupational skin disease, predominantly irritant contact dermatitis."
+  },
+  {
+    "q": "Which of the following is a characteristic feature of fibreglass dermatitis?",
+    "options": ["Granuloma formation", "Minimal clinical signs despite being symptomatic", "Hyperpigmentation", "Scarring alopecia"],
+    "answer": 1,
+    "explanation": "Fibreglass dermatitis may cause minimal clinical signs despite being very symptomatic, as clothing may trap the fibreglass particles."
+  },
+  {
+    "q": "What is the most important principle in preventing occupational contact dermatitis?",
+    "options": ["Use of barrier creams", "Regular medical check-ups", "Reduction or avoidance of contact", "Genetic screening of employees"],
+    "answer": 2,
+    "explanation": "The basic principle of prevention of occupational contact dermatitis continues to be reduction of contact, or preferably avoidance."
+  },
+  {
+    "q": "Which occupation is particularly associated with allergic contact dermatitis from Compositae plants?",
+    "options": ["Florists", "Hairdressers", "Construction workers", "Mechanics"],
+    "answer": 0,
+    "explanation": "Florists are at risk of allergic contact dermatitis from Compositae plants."
+  },
+  {
+    "q": "What is the most common cause of occupational skin cancers?",
+    "options": ["Polycyclic hydrocarbons", "Arsenic exposure", "Ionizing radiation", "Sun exposure from outdoor work"],
+    "answer": 3,
+    "explanation": "Sun exposure from outdoor work is the most common cause of occupational skin cancers."
+  },
+  {
+    "q": "Which chemical is most associated with occupational leukoderma?",
+    "options": ["Nickel", "Chromate", "Monobenzyl ether of hydroquinone", "Formaldehyde"],
+    "answer": 2,
+    "explanation": "Monobenzyl ether of hydroquinone is one of the most commonly implicated chemicals in occupational leukoderma."
+  },
+  {
+    "q": "What is the primary clinical feature that distinguishes chloracne from acne vulgaris?",
+    "options": ["Inflammatory papules", "Comedones", "Straw-colored cysts", "Facial distribution"],
+    "answer": 2,
+    "explanation": "Straw-colored cysts are pathognomonic for chloracne and help distinguish it from acne vulgaris."
+  },
+  {
+    "q": "Which vibration frequency range is most associated with vibration white finger?",
+    "options": ["5-15 Hz", "20-40 Hz", "50-150 Hz", "200-300 Hz"],
+    "answer": 2,
+    "explanation": "Vibration white finger occurs in response to vibrational tools especially at 50-150 Hz."
+  },
+  {
+    "q": "What was the first cancer type to be linked with occupational exposure?",
+    "options": ["Lung cancer in miners", "Bladder cancer in dye workers", "Scrotal squamous carcinoma in chimney sweeps", "Mesothelioma in asbestos workers"],
+    "answer": 2,
+    "explanation": "In 1775, the first cancer of any type to be linked with occupational exposure was scrotal squamous carcinoma in British chimney sweeps, reported by Sir Percival Pott."
+  },
+  {
+    "q": "Which test is most appropriate for investigating type I hypersensitivity to natural rubber latex?",
+    "options": ["Patch test", "Skin prick test", "Dimethylglyoxime test", "Transepidermal water loss measurement"],
+    "answer": 1,
+    "explanation": "Skin prick testing is used to investigate type I hypersensitivity to natural rubber latex."
+  },
+  {
+    "q": "What is the main pathological mechanism in fibreglass dermatitis?",
+    "options": ["Type IV hypersensitivity", "Physical penetration of glass spicules", "Chemical irritation", "Photoallergic reaction"],
+    "answer": 1,
+    "explanation": "Fibreglass consists of sharp glass spicules which are capable of penetrating the superficial part of the horny layer of the skin to cause immediate skin irritation."
+  },
+  {
+    "q": "Which occupation is associated with 'Dogger Bank itch'?",
+    "options": ["Fishermen", "Farmers", "Construction workers", "Hairdressers"],
+    "answer": 0,
+    "explanation": "Fishermen are at risk of 'Dogger Bank itch' from sensitization to marine organisms."
+  },
+  {
+    "q": "What is the primary treatment approach for occupational leukoderma?",
+    "options": ["Topical corticosteroids", "UV phototherapy", "Prevention of further exposure", "Oral immunosuppressants"],
+    "answer": 2,
+    "explanation": "Treatment should be aimed at preventing further exposure to the depigmenting chemical."
+  },
+  {
+    "q": "Which polycyclic hydrocarbon is particularly implicated in the etiology of occupational skin cancer?",
+    "options": ["Benzo(a)pyrene", "Benzene", "Toluene", "Xylene"],
+    "answer": 0,
+    "explanation": "Benzo(a)pyrene is implicated in the etiology of skin cancer from soot exposure."
+  },
+  {
+    "q": "What is the typical latency period for development of occupational skin cancers?",
+    "options": ["1-5 years", "5-10 years", "10-20 years", "Very long latency period"],
+    "answer": 3,
+    "explanation": "Occupational skin cancers are associated with a very long latency period between exposure and development."
+  },
+  {
+    "q": "Which measurement may be a useful indicator of reactivity to irritants?",
+    "options": ["Skin pH", "Baseline transepidermal water loss", "Sebum production rate", "Skin thickness"],
+    "answer": 1,
+    "explanation": "Measurement of the baseline transepidermal water loss (TEWL) may be a useful indicator of reactivity to irritants."
+  },
+  {
+    "q": "What is the most common allergic contact dermatitis in hairdressers?",
+    "options": ["To nickel", "To hair dyes", "To shampoos", "To permanent wave liquids"],
+    "answer": 1,
+    "explanation": "Hairdressers are commonly sensitized to hair dyes among other allergens."
+  },
+  {
+    "q": "Which part of the body was frequently involved in historical cases of occupational skin cancer?",
+    "options": ["Face", "Hands", "Scrotum", "Neck"],
+    "answer": 2,
+    "explanation": "Previously, the scrotum was involved frequently because of continuous exposure to carcinogens and increased likelihood of skin absorption in that site."
+  },
+  {
+    "q": "What is the primary clinical feature of vibration white finger?",
+    "options": ["Persistent erythema", "Episodic white finger patches", "Hyperpigmentation", "Ulceration"],
+    "answer": 1,
+    "explanation": "Vibration white finger presents with episodic appearance of white finger skin patches (Raynaud phenomenon) in response to vibrational tools or environmental cold."
+  },
+  {
+    "q": "Which occupation is particularly associated with chrome ulcers?",
+    "options": ["Cement workers", "Printers", "Electroplaters", "Healthcare workers"],
+    "answer": 2,
+    "explanation": "Electroplaters are particularly associated with chrome ulcers from chromate exposure."
+  },
+  {
+    "q": "What is the main approach to managing established cases of occupational dermatitis?",
+    "options": ["Immediate job change", "Detailed analysis of causative factors", "Systemic immunosuppression", "Permanent disability leave"],
+    "answer": 1,
+    "explanation": "For established cases, a detailed analysis of causative factors is required, as minor changes of procedure may be helpful."
+  },
+  {
+    "q": "Which chemical group is most potent in causing chloracne?",
+    "options": ["Halogenated aromatic hydrocarbons", "Petroleum derivatives", "Metal salts", "Organic solvents"],
+    "answer": 0,
+    "explanation": "Halogenated aromatic hydrocarbons are the most potent acnegenic agents, causing chloracne."
+  },
+  {
+    "q": "What is the most important prognostic factor in occupational contact dermatitis?",
+    "options": ["Age of onset", "Duration of employment", "Atopic status", "Response may not be beneficial despite change of work"],
+    "answer": 3,
+    "explanation": "Neither irritant nor allergic contact dermatitis may be as beneficially affected by change of work as some believe, which has profound implications for management."
+  },
+  {
+    "q": "Which occupation is associated with 'cement dermatitis'?",
+    "options": ["Construction workers", "Hairdressers", "Mechanics", "Office workers"],
+    "answer": 0,
+    "explanation": "Construction workers are associated with cement dermatitis, which can be both irritant and allergic (to chromate)."
+  },
+  {
+    "q": "What is the primary characteristic of oil folliculitis?",
+    "options": ["Comedones", "Straw-colored cysts", "Red papules and pustules", "Hyperpigmentation"],
+    "answer": 2,
+    "explanation": "Oil folliculitis typically presents with red papules and pustules on areas exposed to oils."
+  },
+  {
+    "q": "Which diagnostic approach is most valuable for unexplained positive patch test reactions in occupational cases?",
+    "options": ["Repeat patch testing", "Factory visit", "Genetic testing", "Blood tests for specific IgE"],
+    "answer": 1,
+    "explanation": "A factory visit can be invaluable in the detection of previously unsuspected sources of allergens for unexplained positive reactions."
+  },
+  {
+    "q": "What is the main risk factor for developing occupational allergic contact dermatitis?",
+    "options": ["Blood group", "Gender", "Atopy", "Age"],
+    "answer": 2,
+    "explanation": "Atopy appears to be an independent risk factor for the development of occupational allergic contact dermatitis."
+  },
+  {
+    "q": "Which occupation is particularly associated with protein contact dermatitis?",
+    "options": ["Chefs and veterinarians", "Office workers", "Construction workers", "Printers"],
+    "answer": 0,
+    "explanation": "Chefs and veterinarians are at risk for protein contact dermatitis from food proteins or animal proteins."
+  },
+  {
+    "q": "What is the primary clinical feature of occupational leukoderma?",
+    "options": ["Erythema", "Scaling", "Hypopigmented macules", "Vesiculation"],
+    "answer": 2,
+    "explanation": "Occupational leukoderma presents with asymptomatic hypopigmented macules in exposed areas."
+  },
+  {
+    "q": "Which preventive measure is most effective for occupational skin diseases?",
+    "options": ["Barrier creams", "Process changes", "Pre-employment screening", "Regular medical examinations"],
+    "answer": 1,
+    "explanation": "Changes in the process, when practicable, are always likely to be more successful than personal protection in preventing occupational dermatitis."
+  },
+  {
+    "q": "What is the most common pattern of hand involvement in irritant contact dermatitis?",
+    "options": ["Palmar involvement only", "Dorsal hands and finger webs", "Lateral fingers only", "Wrists only"],
+    "answer": 1,
+    "explanation": "There is a tendency for irritant contact dermatitis to affect the dorsa of the hands and fingers and the finger webs, rather than the palms."
+  },
+  {
+    "q": "Which occupation has the highest risk of developing allergic contact dermatitis from epoxy resins?",
+    "options": ["Electronics industry workers", "Healthcare workers", "Office workers", "Agricultural workers"],
+    "answer": 0,
+    "explanation": "Electronics industry workers are at high risk of allergic contact dermatitis from epoxy resins used in soldering and insulation."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

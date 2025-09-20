@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bolognia Other Viral Diseases Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    q: "Which is the most common etiologic agent of nonspecific viral exanthems in children during summer and fall?",
+    options: ["Adenovirus", "Parainfluenza virus", "Non-polio enteroviruses", "Respiratory syncytial virus"],
+    answer: 2,
+    explanation: "Non-polio enteroviruses are the most common etiologies in children during summer/fall, while respiratory viruses like adenovirus and parainfluenza are more common in winter."
+  },
+  {
+    q: "Which enterovirus serotype has emerged as a major cause of severe and atypical hand-foot-and-mouth disease (HFMD) since 2008?",
+    options: ["Coxsackievirus A16", "Enterovirus 71", "Coxsackievirus A6", "Coxsackievirus B5"],
+    answer: 2,
+    explanation: "Coxsackievirus A6 (CVA6) has emerged globally since 2008 as a major cause of both outbreaks and sporadic cases of severe and atypical HFMD with more widespread vesicular eruptions."
+  },
+  {
+    q: "What is the characteristic distribution pattern of the measles exanthem?",
+    options: ["Centripetal spread", "Random distribution", "Cephalocaudad spread", "Acral predominance"],
+    answer: 2,
+    explanation: "The measles exanthem characteristically begins on the forehead, hairline, and behind the ears and spreads in a cephalocaudad (head-to-toe) direction."
+  },
+  {
+    q: "Which pathognomonic finding is associated with measles?",
+    options: ["Forchheimer spots", "Koplik spots", "Nagayama spots", "Strawberry tongue"],
+    answer: 1,
+    explanation: "Koplik spots are pathognomonic for measles - gray-white papules on the buccal mucosa that appear during the prodrome."
+  },
+  {
+    q: "What is the typical age group most commonly affected by rubella?",
+    options: ["Infants under 1 year", "Children 2-5 years", "School-aged children", "Young adults"],
+    answer: 2,
+    explanation: "Rubella typically affects school-aged children, though the incidence has markedly declined since MMR vaccination was introduced."
+  },
+  {
+    q: "Which lymph nodes are characteristically enlarged in rubella?",
+    options: ["Cervical only", "Axillary and inguinal", "Occipital and posterior auricular", "Submandibular"],
+    answer: 2,
+    explanation: "Tender lymphadenopathy, especially of the occipital, posterior auricular, and cervical regions, is characteristic of rubella."
+  },
+  {
+    q: "What is the cellular receptor for parvovirus B19?",
+    options: ["CD4 receptor", "P antigen (globoside)", "ICAM-1", "Sialic acid residues"],
+    answer: 1,
+    explanation: "Parvovirus B19 binds to the erythrocyte 'P antigen' (globoside), which explains its strong tropism for erythroid progenitor cells."
+  },
+  {
+    q: "Which stage of parvovirus B19 infection is associated with the appearance of the characteristic rash?",
+    options: ["During viremia", "Before viremia", "After IgM appears", "After IgG appears"],
+    answer: 3,
+    explanation: "The characteristic rash and arthralgia appear after anti-B19 IgG appears, about one week after IgM, suggesting an immune-mediated process."
+  },
+  {
+    q: "What is the characteristic appearance of the first stage of erythema infectiosum?",
+    options: ["Lacy reticulated pattern on extremities", "Bright red macular erythema on cheeks", "Petechial eruption", "Vesicular lesions"],
+    answer: 1,
+    explanation: "The first stage consists of bright red macular erythema of the cheeks with sparing of the nasal bridge and circumoral regions, giving the 'slapped cheek' appearance."
+  },
+  {
+    q: "Which condition is characterized by edema and erythema of hands and feet with petechiae and purpura?",
+    options: ["Erythema infectiosum", "Papular-purpuric gloves and socks syndrome", "Gianotti-Crosti syndrome", "Unilateral laterothoracic exanthem"],
+    answer: 1,
+    explanation: "Papular-purpuric gloves and socks syndrome (PPGSS) is characterized by edema and erythema of hands and feet, especially palms and soles, with petechiae and purpura."
+  },
+  {
+    q: "Which virus is the primary cause of roseola infantum?",
+    options: ["HHV-7", "HHV-6", "Parvovirus B19", "Enterovirus"],
+    answer: 1,
+    explanation: "Human herpesvirus-6 (HHV-6) is the primary cause of roseola infantum, though HHV-7 can occasionally cause it as well."
+  },
+  {
+    q: "What is the characteristic clinical presentation of roseola infantum?",
+    options: ["High fever with concurrent rash", "Low-grade fever followed by rash", "High fever for 3-5 days followed by rash at defervescence", "Rash followed by fever"],
+    answer: 2,
+    explanation: "Roseola infantum characteristically presents with high fever (40-40.5°C) for 3-5 days followed by the appearance of rose-pink macules and papules when the fever breaks."
+  },
+  {
+    q: "What is the characteristic distribution of unilateral laterothoracic exanthem (ULTE)?",
+    options: ["Bilateral symmetric", "Initially unilateral, most often axillary", "Centripetal", "Acral predominant"],
+    answer: 1,
+    explanation: "ULTE characteristically begins with a unilateral distribution, most commonly in the axillary region, then spreads to contralateral areas while maintaining unilateral predominance."
+  },
+  {
+    q: "Which age group is most commonly affected by ULTE?",
+    options: ["Infants under 6 months", "Toddlers and preschool-aged children", "School-aged children", "Adolescents"],
+    answer: 1,
+    explanation: "ULTE occurs most commonly in toddlers and preschool-aged children, with an age range of 6 months to 10 years and a male:female ratio of 1:2."
+  },
+  {
+    q: "Which viruses are most commonly associated with Gianotti-Crosti syndrome in the US?",
+    options: ["Hepatitis B virus", "Epstein-Barr virus", "Coxsackievirus", "Adenovirus"],
+    answer: 1,
+    explanation: "While hepatitis B virus is most commonly reported in Europe, Epstein-Barr virus represents the most commonly documented cause of Gianotti-Crosti syndrome in the US."
+  },
+  {
+    q: "What is the characteristic distribution of Gianotti-Crosti syndrome?",
+    options: ["Trunk predominant", "Symmetric on face, extremities, and buttocks", "Flexural areas", "Palms and soles"],
+    answer: 1,
+    explanation: "Gianotti-Crosti syndrome is characterized by symmetric papular eruption on the face, buttocks, and extensor surfaces of the extremities, with the trunk usually spared."
+  },
+  {
+    q: "Which poxvirus infection is most common in humans today?",
+    options: ["Smallpox", "Vaccinia", "Molluscum contagiosum", "Orf"],
+    answer: 2,
+    explanation: "With the eradication of smallpox, molluscum contagiosum became the only remaining poxvirus infection to specifically afflict humans and is now the most common."
+  },
+  {
+    q: "What is the characteristic histologic finding in molluscum contagiosum?",
+    options: ["Multinucleated giant cells", "Molluscum bodies (Henderson-Patterson bodies)", "Cowdry bodies", "Negri bodies"],
+    answer: 1,
+    explanation: "Molluscum contagiosum shows large intracytoplasmic inclusion bodies called molluscum bodies or Henderson-Patterson bodies within epidermal keratinocytes."
+  },
+  {
+    q: "Which orthopoxvirus has been associated with the 2022 international outbreak?",
+    options: ["Variola virus", "Vaccinia virus", "Mpox virus", "Cowpox virus"],
+    answer: 2,
+    explanation: "The mpox virus (previously called monkeypox) caused a global outbreak in 2022, declared by WHO as a public health emergency of international concern."
+  },
+  {
+    q: "What is the first-line treatment for severe mpox infection?",
+    options: ["Brincidofovir", "Cidofovir", "Tecovirimat", "Acyclovir"],
+    answer: 2,
+    explanation: "Tecovirimat is the first-line treatment for severe mpox disease or risk of severe disease, available through expanded-access protocol."
+  },
+  {
+    q: "Which mosquito species primarily transmits dengue virus?",
+    options: ["Culex mosquitoes", "Anopheles mosquitoes", "Aedes aegypti and A. albopictus", "Mansonia mosquitoes"],
+    answer: 2,
+    explanation: "Dengue virus is transmitted to humans primarily by Aedes aegypti and A. albopictus mosquitoes."
+  },
+  {
+    q: "What is the characteristic skin finding described in dengue fever?",
+    options: ["Petechial rash only", "Vesicular eruption", "White islands in a sea of red", "Targetoid lesions"],
+    answer: 2,
+    explanation: "Dengue fever may present with a morbilliform or scarlatiniform eruption with areas of sparing referred to as 'white islands in a sea of red.'"
+  },
+  {
+    q: "Which virus causes trichodysplasia spinulosa?",
+    options: ["JC virus", "BK virus", "Merkel cell polyomavirus", "Trichodysplasia spinulosa-associated polyomavirus"],
+    answer: 3,
+    explanation: "Trichodysplasia spinulosa is caused by the trichodysplasia spinulosa-associated polyomavirus (TSPyV), identified in 2010."
+  },
+  {
+    q: "What is the characteristic clinical appearance of trichodysplasia spinulosa?",
+    options: ["Keratotic plaques", "Erythematous papules with central spiny projections", "Vesicular eruption", "Hyperpigmented patches"],
+    answer: 1,
+    explanation: "Trichodysplasia spinulosa presents with numerous erythematous to skin-colored papules with a central spiny projection, primarily on the face."
+  },
+  {
+    q: "Which SARS-CoV-2 associated condition in children mimics Kawasaki disease?",
+    options: ["Pediatric inflammatory syndrome", "Multisystem inflammatory syndrome in children (MIS-C)", "COVID-19 vasculitis", "Viral-induced Kawasaki syndrome"],
+    answer: 1,
+    explanation: "Multisystem inflammatory syndrome in children (MIS-C) presents with systemic and mucocutaneous manifestations similar to those of Kawasaki disease."
+  },
+  {
+    q: "What percentage of untreated Kawasaki disease patients develop coronary artery aneurysms?",
+    options: ["5-10%", "15-25%", "30-40%", "45-55%"],
+    answer: 1,
+    explanation: "Coronary artery aneurysms or ectasias develop in 15-25% of untreated Kawasaki disease patients, but this decreases to ≤5-10% with IVIg treatment."
+  },
+  {
+    q: "What is a characteristic early cutaneous finding in Kawasaki disease?",
+    options: ["Vesicular eruption on palms", "Erythema of the perineum", "Petechial rash", "Targetoid lesions"],
+    answer: 1,
+    explanation: "A characteristic early cutaneous finding in Kawasaki disease is erythema of the perineum, which often desquamates within 48 hours."
+  },
+  {
+    q: "Which of the following is NOT part of the diagnostic criteria for Kawasaki disease?",
+    options: ["Bilateral non-purulent conjunctival injection", "Strawberry tongue", "Vesiculobullous lesions", "Cervical lymphadenopathy"],
+    answer: 2,
+    explanation: "Vesiculobullous lesions are rarely if ever seen in Kawasaki disease. The rash may be morbilliform, erythema multiforme-like, urticarial, scarlatiniform, or pustular."
+  },
+  {
+    q: "What is the recommended first-line treatment for acute Kawasaki disease?",
+    options: ["High-dose aspirin alone", "IVIg 2 g/kg in single infusion plus aspirin", "Corticosteroids", "Infliximab"],
+    answer: 1,
+    explanation: "The current first-line therapy is IVIg 2 g/kg in a single infusion over 8-12 hours plus aspirin, which reduces coronary aneurysm incidence from 25% to ≤5-10%."
+  },
+  {
+    q: "Which enterovirus commonly causes conjunctival hyperemia in addition to herpangina?",
+    options: ["Coxsackievirus A16", "Coxsackievirus B5", "Echovirus 9", "Enterovirus 71"],
+    answer: 1,
+    explanation: "Coxsackievirus B5 infection has been associated with conjunctival hyperemia in addition to causing herpangina."
+  },
+  {
+    q: "What is 'eczema coxsackium'?",
+    options: ["Coxsackievirus infection causing eczema", "Eczema complicated by bacterial infection", "HFMD eruption accentuated in areas of pre-existing eczema", "Secondary eczematous reaction to viral infection"],
+    answer: 2,
+    explanation: "'Eczema coxsackium' refers to HFMD (particularly CVA6) eruption that is accentuated in areas of pre-existing eczematous dermatitis."
+  },
+  {
+    q: "Which complication may occur 1-2 months after HFMD?",
+    options: ["Nail pitting", "Onychomadesis", "Nail clubbing", "Koilonychia"],
+    answer: 1,
+    explanation: "Onychomadesis (nail shedding) occasionally occurs 1-2 months after HFMD as a consequence of temporary nail matrix arrest related to the viral infection."
+  },
+  {
+    q: "What is the incubation period for measles?",
+    options: ["3-6 days", "7-9 days", "10-14 days", "18-21 days"],
+    answer: 2,
+    explanation: "The incubation period of measles is 10-14 days before symptoms appear."
+  },
+  {
+    q: "Which vitamin supplementation is recommended for children with acute measles?",
+    options: ["Vitamin D", "Vitamin C", "Vitamin A", "Vitamin E"],
+    answer: 2,
+    explanation: "The WHO recommends vitamin A supplementation for all children with acute measles due to its association with decreased measles-related morbidity and mortality."
+  },
+  {
+    q: "What is the typical duration of the rubella exanthem?",
+    options: ["1 day", "2-3 days", "5-7 days", "10-14 days"],
+    answer: 1,
+    explanation: "The rubella cutaneous eruption tends to fade in 2-3 days in the same order as it appeared (cephalocaudad)."
+  },
+  {
+    q: "Which blood group phenotypes are naturally resistant to parvovirus B19 infection?",
+    options: ["Type A", "Type B", "Type AB", "P1k or p phenotypes"],
+    answer: 3,
+    explanation: "Individuals who lack the P antigen (blood group P1k or p phenotypes) seem to be naturally resistant to B19 infection since the P antigen is the cellular receptor."
+  },
+  {
+    q: "What is the characteristic histologic pattern seen in human polyomavirus 6 and 7 infections?",
+    options: ["Ballooning degeneration", "Peacock plumage pattern", "Basket-weave stratum corneum", "Suprabasilar acantholysis"],
+    answer: 1,
+    explanation: "Both HPyV6 and HPyV7-associated pruritic and dyskeratotic dermatoses show a characteristic 'peacock plumage' pattern of dyskeratotic cells and irregular columns of parakeratosis."
+  },
+  {
+    q: "Which season is most associated with enterovirus infections?",
+    options: ["Winter and spring", "Spring and summer", "Summer and fall", "Fall and winter"],
+    answer: 2,
+    explanation: "In temperate climates, enteroviral infections are most common in the summer and fall, though CVA6 outbreaks can occur in winter."
+  },
+  {
+    q: "What is the most serious complication of congenital rubella syndrome when infection occurs in the first 16 weeks of pregnancy?",
+    options: ["Growth retardation", "Congenital heart defects", "Cataracts and deafness", "All of the above"],
+    answer: 3,
+    explanation: "Congenital rubella syndrome is characterized by cataracts, deafness, congenital heart defects (patent ductus arteriosus, ventricular septal defects), and CNS abnormalities when infection occurs during the first 16 weeks of pregnancy."
+  },
+  {
+    q: "Which laboratory finding is most useful for diagnosing acute parvovirus B19 infection?",
+    options: ["Elevated white blood cell count", "Anti-B19 IgM antibody", "Decreased hemoglobin", "Thrombocytopenia"],
+    answer: 1,
+    explanation: "Detection of serum anti-B19 IgM antibody is the preferred method for diagnosing acute infection, indicating infection within the previous 2-4 months."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

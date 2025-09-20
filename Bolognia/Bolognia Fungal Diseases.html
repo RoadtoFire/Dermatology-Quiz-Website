@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bolognia Fungal Diseases Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+        [
+  {
+    q: "Superficial mycoses are due to fungi that only invade which type of tissue?",
+    options: ["Dermis and subcutaneous tissue", "Fully keratinized tissues (stratum corneum, hair, and nails)", "Stratum basale of the epidermis", "Vascular endothelium"],
+    answer: 1,
+    explanation: "Superficial mycoses are due to fungi that only invade fully keratinized tissues, specifically the stratum corneum, hair, and nails [1]."
+  },
+  {
+    q: "The classification of cutaneous fungal infections includes which three major groups?",
+    options: ["Dermatophytic, Yeast, and Mold infections", "Anthropophilic, Zoophilic, and Geophilic infections", "Superficial, Subcutaneous, and Deep (Systemic) mycoses", "Primary, Secondary, and Opportunistic infections"],
+    answer: 2,
+    explanation: "Cutaneous fungal infections are subdivided into three major groups: (1) “superficial”; (2) “subcutaneous”; and (3) “deep” or systemic [1]."
+  },
+  {
+    q: "Which Malassezia species is currently recognized as a major causative organism of tinea (pityriasis) versicolor?",
+    options: ["M. furfur", "M. sympodialis", "M. restricta", "M. globosa"],
+    answer: 3,
+    explanation: "Studies have pointed to *M. globosa* as a major causative organism of tinea (pityriasis) versicolor, although *M. furfur* and *M. sympodialis* are also implicated [2, 3]."
+  },
+  {
+    q: "What morphologic change in *Malassezia spp.* promotes the occurrence of tinea versicolor?",
+    options: ["Transformation from mycelial form to round yeast form", "Transformation from the round yeast form to the mycelial form", "Fusion of arthroconidia", "Formation of chlamydoconidia"],
+    answer: 1,
+    explanation: "Tinea versicolor occurs when the round yeast form transforms to the mycelial form [4]."
+  },
+  {
+    q: "Hypopigmentation in tinea versicolor may be caused by inhibition of melanin production due to which fungal metabolic product?",
+    options: ["Keratinases", "Dicarboxylic acids", "Free fatty acids", "Mannans"],
+    answer: 1,
+    explanation: "Hypopigmentation may be secondary to either reduced tanning or inhibition of melanin production by dicarboxylic acids that result from metabolism of skin surface lipids by the yeast [5]."
+  },
+  {
+    q: "In a KOH examination of superficial skin scrapings from tinea versicolor, the mixture of hyphal and yeast forms is best described as resembling which food item, according to the source?",
+    options: ["Spaghetti and meatballs", "Ziti and meatballs", "Tapioca pudding", "Fish roe"],
+    answer: 1,
+    explanation: "In tinea versicolor, both hyphal and yeast forms are seen; although likened to 'spaghetti and meatballs', the findings more closely resemble 'ziti and meatballs' [6]."
+  },
+  {
+    q: "Tinea nigra is caused by which environmental pathogen, often found in soil and sewage under humid conditions?",
+    options: ["Piedraia hortae", "Trichophyton rubrum", "Malassezia furfur", "Hortaea werneckii"],
+    answer: 3,
+    explanation: "Tinea nigra is caused by *Hortaea werneckii* (formerly *Exophiala werneckii*), an environmental pathogen [7, 8]."
+  },
+  {
+    q: "Tinea nigra most commonly presents as a single, sharply marginated brown to gray–green macule or patch on which anatomical location?",
+    options: ["Scalp", "Trunk, particularly presternal area", "Palms, but also soles, neck, and trunk", "Inguinal creases"],
+    answer: 2,
+    explanation: "Although most frequently seen on the palms, tinea nigra can also appear on the soles, neck, and trunk [9]."
+  },
+  {
+    q: "What characteristic finding is seen on KOH examination of tinea nigra that aids in diagnosis?",
+    options: ["Septate pigmented hyphae", "Non-pigmented hyphae with blastoconidia", "Arthroconidia alternating with vacant cells", "Small yeast forms within macrophages"],
+    answer: 0,
+    explanation: "In tinea nigra, KOH examination reveals septate pigmented hyphae [6]."
+  },
+  {
+    q: "Piedra is a superficial infection characterized by the adherence of fungal elements to one another to form nodules along which structure?",
+    options: ["The nail plate", "The hair shaft", "The stratum corneum", "The dermal papillae"],
+    answer: 1,
+    explanation: "Piedra is a superficial infection that begins under the cuticle of the hair and extends outward, forming nodules along the hair shaft [10]."
+  },
+  {
+    q: "Which organisms are the causative agents of white piedra, often acquired from the environment or as part of normal flora?",
+    options: ["Piedraia hortae", "Hortaea werneckii", "Trichophyton spp.", "Microsporum spp."],
+    answer: 2,
+    explanation: "*Trichosporon spp.* (white piedra) are also acquired from the environment; in addition, they are occasionally part of the normal flora [7, 8]."
+  },
+  {
+    q: "Systemic trichosporonosis, especially due to *T. asahii* in immunocompromised patients, presents with skin lesions that are typically what morphology?",
+    options: ["Annular plaques with central clearing", "Papulo-vesicular and purpuric, often with central necrosis", "Firm, keloid-like nodules", "White, adherent plaques on the mucosa"],
+    answer: 1,
+    explanation: "The skin lesions [of systemic trichosporonosis] are typically papulo-vesicular and purpuric, often with central necrosis [11]."
+  },
+  {
+    q: "Dermatophytes produce which specific class of enzymes that allows them to invade keratinized tissue?",
+    options: ["Elastases", "Keratinases", "Collagenases", "Lipases"],
+    answer: 1,
+    explanation: "Dermatophytes, unlike most other fungi, produce keratinases (enzymes that break down keratin), which allow invasion of the fungi into the stratum corneum [12]."
+  },
+  {
+    q: "Which dermatophyte is the most common cause of tinea corporis worldwide?",
+    options: ["Microsporum canis", "Trichophyton tonsurans", "Epidermophyton floccosum", "Trichophyton rubrum"],
+    answer: 3,
+    explanation: "*T. rubrum* is the most common pathogen worldwide, followed by *T. mentagrophytes* [13]."
+  },
+  {
+    q: "What clinical sign in an annular lesion is specifically suggestive of tinea?",
+    options: ["Central clearing of the fungus with centrifugal spread", "Absence of scale upon stretching", "Fixed, hyperpigmented border", "Lesions confined to intertriginous areas"],
+    answer: 0,
+    explanation: "Infection spreads centrifugally from the point of skin invasion with central clearing of the fungus, typically resulting in annular lesions [14]. Pustules within the active border are suggestive of tinea [15]."
+  },
+  {
+    q: "Tinea incognito is a modified presentation of dermatophytosis often caused by the misuse of which agent, leading to atypical clinical features?",
+    options: ["Systemic antibiotics", "Potent topical corticosteroids", "Immunosuppressants (e.g., cyclosporine)", "High-potency topical retinoids"],
+    answer: 1,
+    explanation: "Tinea incognito refers to the altered appearance of a dermatophytosis that occurs when a patient uses potent topical corticosteroids for the presumed diagnosis of dermatitis [16]."
+  },
+  {
+    q: "Nodular perifolliculitis (Majocchi granuloma) results from a deep dermatophyte folliculitis and is most commonly seen in which patient scenario?",
+    options: ["Immunocompetent men with severe tinea capitis", "Women who have tinea pedis or onychomycosis and shave their legs", "Infants with seborrheic dermatitis", "Individuals with widespread tinea corporis due to *M. canis*"],
+    answer: 1,
+    explanation: "Nodular perifolliculitis... is most commonly seen in women who have tinea pedis or onychomycosis and shave their legs [17]."
+  },
+  {
+    q: "The chronic infection Tinea imbricata, caused by *T. concentricum*, presents clinically with concentric annular rings resembling which other dermatosis?",
+    options: ["Annular psoriasis", "Erythema annulare centrifugum", "Erythema gyratum repens", "Pityriasis rosea"],
+    answer: 2,
+    explanation: "The clinical presentation [of Tinea imbricata] consists of concentric annular rings resembling erythema gyratum repens [18]."
+  },
+  {
+    q: "In tinea cruris, which anatomical site is generally spared, and if involved, suggests cutaneous candidiasis?",
+    options: ["Inner thighs", "Crural folds", "The scrotum", "The buttocks"],
+    answer: 2,
+    explanation: "The scrotum itself is generally spared in tinea cruris. If the scrotum is involved or there are erosions or satellite pustules, cutaneous candidiasis should be considered [19]."
+  },
+  {
+    q: "Tinea manuum often presents unilaterally with non-inflammatory hyperkeratosis of the palm, a pattern frequently referred to as what syndrome?",
+    options: ["One hand–two feet syndrome", "Two hands–one foot syndrome", "Glove and stocking distribution", "Moccasin-type distribution"],
+    answer: 0,
+    explanation: "Tinea manuum is usually non-inflammatory and often unilateral ('two feet and one hand syndrome') [20]."
+  },
+  {
+    q: "What is the characteristic clinical presentation of tinea barbae caused by zoophilic organisms (*T. mentagrophytes*, *T. verrucosum*)?",
+    options: ["Superficial, non-inflammatory scaling", "Intense inflammation, multiple follicular pustules, abscesses, and kerion-like plaques", "Annular, hyperpigmented lesions with minimal scale", "Subcutaneous nodules resembling sporotrichosis"],
+    answer: 1,
+    explanation: "Since zoophilic organisms are the most common culprit and affected areas often have a large number of terminal hair follicles, the clinical presentation tends to be severe, with intense inflammation and multiple follicular pustules [21]."
+  },
+  {
+    q: "Which anthropophilic dermatophyte is currently the most common cause of tinea capitis in the US, with a predilection for individuals with Afro-textured hair?",
+    options: ["Microsporum canis", "Trichophyton tonsurans", "Trichophyton violaceum", "Microsporum audouinii"],
+    answer: 1,
+    explanation: "*T. tonsurans* is currently the most common cause [of tinea capitis] in the US... with a particular predilection for individuals with Afro-textured hair [22, 23]."
+  },
+  {
+    q: "The endothrix pattern of hair invasion, caused by *T. tonsurans*, classically results in which clinical finding?",
+    options: ["Gray patch tinea capitis", "Black dot tinea capitis", "Scutula formation", "Blue-white fluorescence"],
+    answer: 1,
+    explanation: "*T. tonsurans* causes an endothrix infection... which classically results in 'black dot' tinea capitis due to hair breakage near the scalp [24, 25]."
+  },
+  {
+    q: "What is the required therapy for tinea capitis due to the need for the drug to penetrate the hair follicle?",
+    options: ["Oral antifungal therapy", "High-potency topical corticosteroids", "Twice-weekly antifungal shampoos only", "Topical azole creams"],
+    answer: 0,
+    explanation: "Oral therapy is required, as the drug must penetrate the hair follicle to be effective [26]."
+  },
+  {
+    q: "Which non-dermatophyte organism commonly produces clinical findings identical to tinea pedis, particularly the moccasin and interdigital types?",
+    options: ["Malassezia globosa", "Hortaea werneckii", "Neoscytalidium dimidiatum and N. hyalinum", "Cryptococcus neoformans"],
+    answer: 2,
+    explanation: "Non-dermatophyte pathogens that produce clinical findings identical with tinea pedis include *Neoscytalidium dimidiatum* and *N. hyalinum*... and, occasionally, *Candida spp.* (interdigital type) [27]."
+  },
+  {
+    q: "What is the most common pattern of onychomycosis, characterized by fungal invasion via the hyponychium?",
+    options: ["Proximal subungual", "Superficial white", "Distal/lateral subungual", "Total dystrophic"],
+    answer: 2,
+    explanation: "The distal/lateral subungual pattern, with invasion via the hyponychium, is the most common [28]."
+  },
+  {
+    q: "For diagnosing onychomycosis, which method is cited as a quick and reliable technique with a sensitivity of 80% to over 95%, compared with 35%–60% for culture alone?",
+    options: ["Direct scraping/KOH examination", "Histologic examination of formalin-fixed, PAS-stained nail plates", "PCR-based assays", "Wood’s lamp examination"],
+    answer: 1,
+    explanation: "Histologic examination of formalin-fixed, PAS-stained nail plates is a quick and reliable method for diagnosing onychomycosis [29]."
+  },
+  {
+    q: "What key characteristic feature distinguishes cutaneous *Candida* infections, often found in intertriginous zones, from other types of dermatitis?",
+    options: ["The presence of thick, silvery scale", "Sharply marginated, erythematous patches accompanied by satellite papules and pustules", "Target lesions resembling erythema multiforme", "Molluscum contagiosum-like papules"],
+    answer: 1,
+    explanation: "Cutaneous *Candida* infections present with markedly erythematous, sometimes erosive, patches that are often accompanied by satellite papules and pustules [30]."
+  },
+  {
+    q: "What microscopic finding on KOH examination confirms the diagnosis of mucocutaneous candidiasis?",
+    options: ["Septate pigmented hyphae", "Budding yeast and pseudohyphae", "Broad-based budding yeasts", "Small spherules containing endospores"],
+    answer: 1,
+    explanation: "The diagnosis is established by the presence of budding yeast and pseudohyphae on KOH examination [31]."
+  },
+  {
+    q: "Chronic, severe irritant contact dermatitis in the anogenital region can lead to which reactive condition in infants and adults, characterized by erythematous to violaceous nodules and plaques?",
+    options: ["Tinea cruris", "Granuloma gluteale infantum/adultorum (erosive papulonodular dermatosis)", "Candidal intertrigo", "Perianal secondary syphilis"],
+    answer: 1,
+    explanation: "Granuloma gluteale infantum/adultorum... are reactive conditions that occur in the setting of chronic, severe irritant contact dermatitis in the anogenital region [32]."
+  },
+  {
+    q: "Chromoblastomycosis is caused by dematiaceous fungi and classically presents as what appearance on the extremities?",
+    options: ["A solitary, painless indurated subcutaneous nodule", "An expanding verrucous or granulomatous plaque", "Multiple draining sinuses containing grains", "A diffuse, non-scaly hypopigmented macule"],
+    answer: 1,
+    explanation: "Typically chronic in nature, an expanding verrucous plaque on the lower, or occasionally upper, extremity is the classic presentation [33]."
+  },
+  {
+    q: "What pathognomonic finding, said to resemble 'copper pennies,' is characteristic of chromoblastomycosis histology?",
+    options: ["Arthroconidia within hair shafts", "Medlar bodies (sclerotic bodies)", "Asteroid bodies", "Large, thick-walled cells with multiple narrow-based buds ('mariner's wheel')"],
+    answer: 1,
+    explanation: "Pathognomonic round, pigmented 'Medlar bodies' or sclerotic bodies... are present in the dermis [34]."
+  },
+  {
+    q: "Mycetoma (Madura foot) is differentiated from other mycoses by the presence of what characteristic feature in the draining sinuses?",
+    options: ["Cigar-shaped yeast forms", "Hemosiderin deposits", "Grains (sclerotia, sulfur granules)", "Hyaline, septate hyphae"],
+    answer: 2,
+    explanation: "Mycetoma is differentiated from other mycoses by its characteristic draining sinuses containing grains (sclerotia, sulfur granules) and local edema [35]."
+  },
+  {
+    q: "Sporotrichosis (*Rose gardener’s disease*) is most commonly acquired through what mechanism?",
+    options: ["Inhalation of aerosolized conidia", "Animal-to-human transmission from cats (*S. brasiliensis*)", "Cutaneous inoculation, especially by vegetation such as thorns and wood", "Hematogenous spread from a primary pulmonary focus"],
+    answer: 2,
+    explanation: "Sporotrichosis is most commonly acquired from cutaneous inoculation, especially by vegetation such as thorns and wood [36]."
+  },
+  {
+    q: "The most common clinical presentation of sporotrichosis is the primary inoculation site plus subsequent nodules and ulcers along the path of lymphatic drainage, known as what pattern?",
+    options: ["Sporotrichoid or lymphocutaneous pattern", "Fixed cutaneous sporotrichosis", "Mycetoma pattern", "Acroangiodermatitis"],
+    answer: 0,
+    explanation: "The most common one is a lymphocutaneous or 'sporotrichoid' pattern, which refers to the primary inoculation site plus spread of the infection along the lymphatics in a nodular pattern [37, 38]."
+  },
+  {
+    q: "Which dimorphic fungal infection is characterized by thick-walled, yeast-like cells resembling 'brass knuckles' with intercellular bridges in tissue specimens?",
+    options: ["Chromoblastomycosis", "Lobomycosis", "Histoplasmosis", "Coccidioidomycosis"],
+    answer: 1,
+    explanation: "Lobomycosis presents as firm, keloid-like nodules... Histologic evaluation shows highly characteristic chains of thick-walled, yeast-like cells (known as 'brass knuckles') with intercellular bridges [39]."
+  },
+  {
+    q: "Histoplasmosis, blastomycosis, and coccidioidomycosis are classified as systemic mycoses caused by 'true pathogens,' meaning the causative fungi are typically what morphologic type?",
+    options: ["Dematiaceous", "Zygomycetes", "Dimorphic", "Achlorophyllic algae"],
+    answer: 2,
+    explanation: "The systemic mycoses due to true pathogens... are caused by dimorphic fungi, meaning the organisms can exist as molds in nature and as other forms (usually yeasts) in living tissue [40]."
+  },
+  {
+    q: "In blastomycosis, the yeast forms exhibit a characteristic budding pattern that aids in diagnosis. What is this pattern?",
+    options: ["Small, multiple narrow-based buds ('mariner’s wheel')", "Intracellular yeast forms with a clear halo", "Thick, double-contoured walls with broad-based budding", "Cigar-shaped yeasts"],
+    answer: 2,
+    explanation: "Histologic examination... demonstrates pseudoepitheliomatous hyperplasia, suppurative and granulomatous inflammation, and round yeast forms with characteristic broad-based budding and thick, double-contoured walls [41]."
+  },
+  {
+    q: "Coccidioidomycosis, caused by highly virulent pathogens, presents with specific cutaneous lesions that, when biopsied, reveal which pathognomonic structure?",
+    options: ["Asteroid bodies", "Sclerotic bodies (Medlar bodies)", "Endospore-containing spherules (30–60 microns)", "Chains of blastoconidia"],
+    answer: 2,
+    explanation: "Biopsy specimens of specific lesions... reveal characteristic endospore-containing spherules that measure 30–60 microns when mature [42]."
+  },
+  {
+    q: "What is the primary mechanism of action for oral voriconazole, posaconazole, and isavuconazole, which are used for prophylaxis against opportunistic fungi like Aspergillus and Mucormycetes in high-risk patients?",
+    options: ["Inhibition of T-cell mediated inflammation", "Inhibition of fungal cell wall synthesis", "Targeting the IL-17 pathway", "Systemic antifungal prophylaxis"],
+    answer: 3,
+    explanation: "Prophylaxis with systemic antifungals (e.g. fluconazole, posaconazole, voriconazole, isavuconazole) is commonly administered to patients receiving myelosuppressive chemotherapy and to hematopoietic stem cell transplant recipients [43]. Voriconazole is a triazole that has activity against Aspergillus and Fusarium... Posaconazole and isavuconazole... also cover Mucormycetes [43]."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

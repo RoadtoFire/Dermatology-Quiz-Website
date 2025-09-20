@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dermatology Quiz Library</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 20px;
+            background: linear-gradient(120deg, #2c3e50, #4a6b8a);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .books-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        
+        .book {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            width: 100%;
+            max-width: 550px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .book:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .book-header {
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(120deg, #3498db, #2c3e50);
+            color: white;
+        }
+        
+        .book-header h2 {
+            font-size: 1.8rem;
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .book-content {
+            padding: 25px;
+        }
+        
+        .book-image {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .book-image img {
+            max-width: 180px;
+            height: auto;
+            border-radius: 6px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .quiz-list {
+            list-style: none;
+        }
+        
+        .quiz-list li {
+            margin-bottom: 12px;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            border-left: 4px solid #3498db;
+        }
+        
+        .quiz-list li:hover {
+            background: #e9f7fe;
+            border-left-color: #2c3e50;
+            transform: translateX(5px);
+        }
+        
+        .quiz-list a {
+            text-decoration: none;
+            color: #2c3e50;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .quiz-list a:hover {
+            color: #3498db;
+        }
+        
+        .quiz-list i {
+            color: #3498db;
+            font-size: 0.9rem;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 20px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .books-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .book {
+                width: 95%;
+            }
+            
+            .header h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to the Dermatology Quiz Library</h1>
+            <p>Test your knowledge with our comprehensive collection of dermatology quizzes from renowned textbooks</p>
+        </div>
+        
+        <div class="books-container">
+            <div class="book">
+                <div class="book-header">
+                    <h2>Rook's Textbook of Dermatology</h2>
+                </div>
+                <div class="book-content">
+                    <div class="book-image">
+                        <img src="Rooks.png" alt="Rook's Textbook of Dermatology">
+                    </div>
+                    <ul class="quiz-list">
+                        <li><a href="./Rook's/Rook's Allergic Contact Dermatitis.html">Allergic Contact Dermatitis <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Atopic Eczema.html">Atopic Eczema <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Autoinflammatory Diseases Presenting in the Skin.html">Autoinflammatory Diseases Presenting in the Skin <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Bacterial Infections.html">Bacterial Infections <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Eczematous Disorders.html">Eczematous Disorders <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Irritant Contact Dermatitis.html">Irritant Contact Dermatitis <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Leprosy.html">Leprosy <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Mastocytosis.html">Mastocytosis <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Mycobacterial Infections.html">Mycobacterial Infections <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Occupational Dermatology.html">Occupational Dermatology <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Psoriasis and Related Disorders.html">Psoriasis and Related Disorders <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Recurrent Anglo-oeidema without Weals.html">Recurrent Anglo-oeidema without Weals <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Seborrhoeic Dermatitis.html">Seborrhoeic Dermatitis <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Urticarial Vasculitis.html">Urticarial Vasculitis <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Rook's/Rook's Viral Infections.html">Viral Infections <i class="fas fa-arrow-right"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="book">
+                <div class="book-header">
+                    <h2>Bolognia Dermatology</h2>
+                </div>
+                <div class="book-content">
+                    <div class="book-image">
+                        <img src="Bolognia.png" alt="Bolognia Dermatology">
+                    </div>
+                    <ul class="quiz-list">
+                        <li><a href="./Bolognia/Bolognia Allergic Contact Dermatitis.html">Allergic Contact Dermatitis <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Bolognia/Bolognia Atopic Dermatitis.html">Atopic Dermatitis <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Bolognia/Bolognia Bacterial Diseases.html">Bacterial Diseases <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Bolognia/Bolognia Fungal Diseases.html">Fungal Diseases <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Bolognia/Bolognia Human Herpesviruses.html">Human Herpesviruses <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Bolognia/Bolognia Human Papillomaviruses.html">Human Papillomaviruses <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Bolognia/Bolognia Irritant Contact Dermatitis.html">Irritant Contact Dermatitis <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Bolognia/Bolognia Mycobacterial Infections.html">Mycobacterial Infections <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Bolognia/Bolognia Occupational Dermatoses.html">Occupational Dermatoses <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Bolognia/Bolognia Other Eczematous Emptions.html">Other Eczematous Emptions <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Bolognia/Bolognia Other Viral Diseases.html">Other Viral Diseases <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Bolognia/Bolognia Psoriasis.html">Psoriasis <i class="fas fa-arrow-right"></i></a></li>
+                        <li><a href="./Bolognia/Bolognia Rickettsial Diseases.html">Rickettsial Diseases <i class="fas fa-arrow-right"></i></a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Dermatology Quiz Library &copy; 2023 | Test your knowledge, enhance your learning</p>
+        </div>
+    </div>
+</body>
+</html>

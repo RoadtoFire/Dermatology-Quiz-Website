@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bolognia Atopic Dermatitis Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    q: "According to the World Allergy Organization (WAO) consensus, what defines the term 'atopy'?",
+    options: ["Increased transepidermal water loss (TEWL)", "Presence of allergen-specific IgE antibodies in the serum", "Filaggrin loss-of-function variants", "Predominance of Th1 cytokine profile"],
+    answer: 1,
+    explanation: "According to the consensus nomenclature by the World Allergy Organization (WAO), the term 'atopy' is tightly linked to the presence of allergen-specific IgE antibodies in the serum, as documented by positive fluorescence enzyme immunoassays or skin prick tests [1]."
+  },
+  {
+    q: "The current prevalence of Atopic Dermatitis (AD) in children in most high-income countries is estimated to be within which range?",
+    options: ["1%–2%", "5%–8%", "10%–30%", "40%–50%"],
+    answer: 2,
+    explanation: "The current prevalence of AD in most high-income and some low-income countries is approximately 10%–30% in children [2]."
+  },
+  {
+    q: "Which physician recognized the association of AD with allergic rhinitis and asthma in 1892?",
+    options: ["Hanifin", "Rajka", "Besnier", "Williams"],
+    answer: 2,
+    explanation: "The association of AD with allergic rhinitis and asthma was recognized by Besnier in 1892 [3]."
+  },
+  {
+    q: "In what percentage of affected individuals does the onset of Atopic Dermatitis occur before 5 years of age?",
+    options: ["45%", "60%", "75%", "85%"],
+    answer: 3,
+    explanation: "Early-onset AD is the most common type, developing before 5 years of age in 85% of affected individuals [4]."
+  },
+  {
+    q: "The age-dependent sequence of atopic disorders (AD, food allergy, asthma, allergic rhinoconjunctivitis) is referred to as what phenomenon?",
+    options: ["The allergic cascade", "The Th2 evolution", "The epidermal barrier defect", "The atopic march"],
+    answer: 3,
+    explanation: "This age-dependent sequence, where AD usually starts first, is referred to as the 'atopic march' [5, 6]."
+  },
+  {
+    q: "Which factor is associated with a greater likelihood of Atopic Dermatitis persistence into adulthood?",
+    options: ["Late-onset AD (after puberty)", "High socioeconomic status", "Concurrent asthma and/or allergic rhinoconjunctivitis", "Resolution of disease by 4–6 years of age"],
+    answer: 2,
+    explanation: "Predictors of persistence into adulthood include concurrent asthma and/or allergic rhinoconjunctivitis, young age at onset, low socioeconomic status, non-White ethnicity, and filaggrin mutations [6]."
+  },
+  {
+    q: "For early-onset AD, the concordance rate is significantly higher in monozygotic twins compared to dizygotic twins, indicating the strong influence of what factor?",
+    options: ["Environmental triggers", "Innate immune dysregulation", "Genetic factors", "Epidermal barrier dysfunction alone"],
+    answer: 2,
+    explanation: "Genetic factors account for a large proportion of susceptibility to early-onset AD, with a significantly higher concordance rate in monozygotic twins (77%) compared to dizygotic twins (15%) [7]."
+  },
+  {
+    q: "Which genetic factor represents the strongest known risk factor for Atopic Dermatitis?",
+    options: ["SPINK5 polymorphisms", "Mutations in CLDN1", "FLG loss-of-function variants", "TLR2, 4, 6, 9 polymorphisms"],
+    answer: 2,
+    explanation: "FLG loss-of-function (LOF) variants represent the strongest known genetic risk factor for AD [8]."
+  },
+  {
+    q: "What is the approximate penetrance of AD for individuals possessing two $\textit{FLG}$ loss-of-function alleles?",
+    options: ["15%", "40%", "70%", "90%"],
+    answer: 3,
+    explanation: "The penetrance of AD is approximately 40% for one and approximately 90% for two $\textit{FLG}$ LOF alleles [8]."
+  },
+  {
+    q: "FLG mutations are linked to an increased risk for which specific infectious complication in AD patients?",
+    options: ["Group A Streptococcus superinfection", "Herpes simplex virus (HSV) infections", "Molluscum contagiosum", "Malassezia overgrowth"],
+    answer: 1,
+    explanation: "FLG mutations are associated with an increased risk of irritant contact dermatitis, hand eczema, herpes simplex virus (HSV) infections, and food allergy [9]."
+  },
+  {
+    q: "Filaggrin breakdown products, such as histidine, contribute to which essential process for healthy skin?",
+    options: ["Activation of Th2 immune response", "Serine protease inhibition", "Epidermal hydration and acid mantle formation", "Cathelicidin LL37 production"],
+    answer: 2,
+    explanation: "Filaggrin breakdown products such as histidine contribute to epidermal hydration, acid mantle formation, lipid processing, and barrier function [10-12]."
+  },
+  {
+    q: "Which manifestation of epidermal barrier dysfunction in non-lesional skin of children with AD correlates with disease severity?",
+    options: ["Increased skin surface pH", "Increased transepidermal water loss (TEWL)", "Altered lipid composition", "Reduced activity of β-glucoscerebrosidase"],
+    answer: 1,
+    explanation: "The level of TEWL in non-lesional skin of children with AD correlates with disease severity [13-15]."
+  },
+  {
+    q: "The lymphoepithelial Kazal-type trypsin inhibitor (LEKTI), which helps regulate endogenous serine proteases, is encoded by which gene?",
+    options: ["KLK5", "CLDN1", "FLG", "SPINK5"],
+    answer: 3,
+    explanation: "The lymphoepithelial Kazal-type trypsin inhibitor (LEKTI) is encoded by $\textit{SPINK5}$ [16]."
+  },
+  {
+    q: "Unrestrained protease activity, such as seen in LEKTI deficiency, leads to the excessive degradation of which stratum corneum component?",
+    options: ["Loricrin", "Filaggrin", "Desmoglein-1 (Dsg1)", "Involucrin"],
+    answer: 2,
+    explanation: "LEKTI deficiency results in excessive degradation of the corneodesmosomal component desmoglein-1 (Dsg1), causing abnormal stratum corneum detachment and thereby disrupting the epidermal barrier [17, 18]."
+  },
+  {
+    q: "The inflammatory profile of AD transitions over time; which cytokine profile predominates in acute lesions?",
+    options: ["Th1 and Th17", "Th2 and Th22", "Th1 and Th22", "Th2 only (IL-4, IL-5, IL-13)"],
+    answer: 3,
+    explanation: "Acute AD lesions have a predominance of Th2 cytokines, but there is subsequent evolution to a chronic phase characterized by Th1 and Th22 cytokine profiles [19]."
+  },
+  {
+    q: "Which keratinocyte-derived cytokine is known as the 'master-switch of allergic inflammation' due to its central role in evoking a Th2 response?",
+    options: ["Interleukin-1 (IL-1)", "Interleukin-33 (IL-33)", "Thymic stromal lymphopoietin (TSLP)", "Interleukin-25 (IL-25)"],
+    answer: 2,
+    explanation: "Thymic stromal lymphopoietin (TSLP) is known as the 'master-switch of allergic inflammation' due to its central role in evoking a Th2 response via dendritic cell activation [24, 61, 68–70]."
+  },
+  {
+    q: "The heterodimeric receptors for both IL-4 and IL-13 share which subunit, making it a target for systemic AD therapies?",
+    options: ["IL-4 receptor $\alpha$ subunit (IL-4R$\alpha$)", "IL-13 receptor $\alpha 2$ subunit (IL-13R$\alpha$2)", "STAT6", "IL-31 receptor A subunit"],
+    answer: 0,
+    explanation: "The heterodimeric receptors for IL-4 and IL-13 both contain the IL-4 receptor $\alpha$ subunit (IL-4R$\alpha$) [14]."
+  },
+  {
+    q: "Nemolizumab, a humanized monoclonal antibody, achieves its therapeutic effect by targeting which specific receptor subunit?",
+    options: ["IL-4 receptor $\alpha$", "TSLP receptor", "IL-31 receptor A subunit", "IL-17 receptor"],
+    answer: 2,
+    explanation: "Randomized, placebo-controlled trials have shown that nemolizumab, a humanized monoclonal antibody against the IL-31 receptor A subunit, can significantly reduce pruritus in patients with moderate to severe AD [20, 21]."
+  },
+  {
+    q: "Which specific T cell subtype is particularly characteristic of new-onset pediatric AD, alongside Th2 polarization?",
+    options: ["Th1 cells", "Th17 cells", "Tregs", "$\gamma\delta$ T cells"],
+    answer: 1,
+    explanation: "Acute AD lesions evolve to a chronic phase characterized by Th1 and Th22 cytokine profiles, as well as variable levels of Th17 cytokines in both acute and chronic AD. Production of IL-17 and IL-19 is especially characteristic of new-onset pediatric AD [15, 19, 22]."
+  },
+  {
+    q: "Which innate immune cells, expanded in AD lesions, are stimulated by TSLP, IL-25, and IL-33 and promote Th2-type inflammation in a T cell independent manner?",
+    options: ["Plasmacytoid dendritic cells", "Natural killer cells", "Group 2 innate lymphoid cells (ILC2)", "Langerhans cells"],
+    answer: 2,
+    explanation: "The group 2 ILC (ILC2) population is expanded in AD lesions and stimulated by TSLP, IL-25 (IL-17E), and IL-33 [27, 90–92]."
+  },
+  {
+    q: "Approximately what percentage of patients with Atopic Dermatitis have skin colonized with $\textit{Staphylococcus aureus}$?",
+    options: ["5%", "25%", "50%", "More than 90%"],
+    answer: 3,
+    explanation: "More than 90% of patients with AD have skin colonized with $\textit{S. aureus}$, compared to about 5% of unaffected individuals [23]."
+  },
+  {
+    q: "What characteristic change occurs in the cutaneous microbiome during AD flares?",
+    options: ["Bacterial diversity increases", "$\textit{Staphylococcus spp.}$ proportion decreases significantly", "Fungal colonization becomes dominant", "Bacterial diversity decreases and the proportion of $\textit{Staphylococcus spp.}$ increases"],
+    answer: 3,
+    explanation: "During AD flares, bacterial diversity decreases and the proportion of the microbiome accounted for by $\textit{Staphylococcus spp.}$ increases from ~35% to ~90% [23, 24]."
+  },
+  {
+    q: "$\textit{S. aureus}$ exotoxins with superantigenic properties promote the development of which type of immune response?",
+    options: ["Th1 immune response", "Th2 immune response", "Th17 immune response", "Regulatory T cell response"],
+    answer: 1,
+    explanation: "Superantigens can promote the development of a Th2 immune response, and exotoxins with superantigenic properties are produced by up to 65% of the $\textit{S. aureus}$ strains that colonize AD patients [25, 26]."
+  },
+  {
+    q: "A patient presenting with numerous monomorphic, punched-out erosions with hemorrhagic crusting over eczematous skin should be primarily investigated for which viral complication?",
+    options: ["Molluscum contagiosum", "Eczema herpeticum", "Varicella zoster infection", "Human papillomavirus infection"],
+    answer: 1,
+    explanation: "Eczema herpeticum represents rapid dissemination of a herpes simplex viral infection over eczematous skin, often presenting with numerous monomorphic, punched-out erosions with hemorrhagic crusting [27, 28]."
+  },
+  {
+    q: "Which histologic feature is characteristic of acute, exudative eczema in AD lesions?",
+    options: ["Epidermal atrophy", "Irregular psoriasiform acanthosis", "Marked spongiosis with intraepidermal fluid collection", "Dermal fibrosis with increased mast cells"],
+    answer: 2,
+    explanation: "Acute, exudative eczema is characterized by marked spongiosis, with intraepidermal fluid collection leading to the formation of vesicles (micro and macro) or even bullae [29]."
+  },
+  {
+    q: "Which symptom is listed as an essential feature of AD that must be present and is sufficient for diagnosis, often triggered by exogenous factors like sweating?",
+    options: ["Xerosis", "Flexural lesions at any age", "Pruritus", "Personal and/or family history of atopy"],
+    answer: 2,
+    explanation: "Pruritus is listed as an essential feature that must be present and is sufficient for diagnosis. Rubbing or scratching initiates or exacerbates flares ('the itch that rashes'), and it is often worse in the evening and triggered by factors like sweating or rough clothing [30]."
+  },
+  {
+    q: "Infantile AD (age <2 years) typically spares which areas?",
+    options: ["The cheeks", "The scalp", "The extensor aspects of the extremities", "The central face and diaper area"],
+    answer: 3,
+    explanation: "Infantile AD often initially appears on the cheeks, scalp, and extensor aspects of the extremities, usually with sparing of the diaper area and the central face [30, 31]."
+  },
+  {
+    q: "What are the classic sites of predilection for lichenification in childhood AD (age 2 to 12 years)?",
+    options: ["Face and scalp", "Antecubital and popliteal fossae", "Dorsal hands and feet", "Groin and axillae"],
+    answer: 1,
+    explanation: "The classic sites of predilection in childhood AD are the antecubital and popliteal fossae (flexural eczema) [32]."
+  },
+  {
+    q: "The regional variant of AD known as 'frictional lichenoid eruption' is characterized by what morphology and location?",
+    options: ["Coin-shaped eczematous plaques on the trunk", "Shiny, red, non-scaling plaques in the body folds", "Multiple small, flat-topped papules on the elbows and knees", "Deep-seated vesicles on the palms and sides of fingers"],
+    answer: 2,
+    explanation: "Frictional lichenoid eruption has a predilection for atopic children and presents as multiple small, flat-topped, pink to skin-colored papules on the elbows and (less often) knees and dorsal hands [33, 34]."
+  },
+  {
+    q: "In adolescents and children with AD, which presentation is characterized by dryness ('chapping') of the vermilion lips, sometimes with peeling and fissuring, often resulting from excessive licking?",
+    options: ["Perioral dermatitis", "Angular cheilitis", "Atopic cheilitis (cheilitis sicca)", "Lip-licker’s eczema"],
+    answer: 2,
+    explanation: "Eczema of the lips, referred to as cheilitis sicca, is common in AD patients... Patients try to moisten their lips by licking, which in turn may irritate the skin around the mouth, resulting in so-called lip-licker’s eczema [35, 36]."
+  },
+  {
+    q: "Which aggravating factor is associated with the 'Head and neck dermatitis' variant of AD that typically occurs after puberty?",
+    options: ["$\textit{Staphylococcus aureus}$ superinfection", "$\textit{Malassezia}$ yeasts overgrowth", "Dust mite allergy", "Irritant contact dermatitis from shaving"],
+    answer: 1,
+    explanation: "$\textit{Malassezia}$ yeasts, which are members of the skin microbiome in the head and neck area, may be an aggravating factor for this presentation [37, 38]."
+  },
+  {
+    q: "Pityriasis alba, common in children and adolescents with AD, is characterized by what primary clinical appearance?",
+    options: ["Ill-defined hypopigmented macules and patches with fine scaling", "Keratotic follicular papules with an erythematous rim", "Symmetric, prominent horizontal folds beneath the lower lid", "Dome-shaped papules and nodules with central scale-crust"],
+    answer: 0,
+    explanation: "Pityriasis alba is characterized by multiple, ill-defined, hypopigmented macules and patches, usually 0.5 to 2 cm in diameter, with fine scaling [39]."
+  },
+  {
+    q: "Which associated feature of AD, sometimes referred to as 'allergic shiners,' involves the skin around the eyes appearing gray to violet–brown?",
+    options: ["Keratosis pilaris", "Dennie–Morgan folds", "Periorbital darkening", "Hertoghe sign"],
+    answer: 2,
+    explanation: "Periorbital darkening ('allergic shiners'): The skin around the eyes appears gray to violet–brown, while the rest of the facial skin is rather pale [40]."
+  },
+  {
+    q: "Infantile AD is often preceded or accompanied by which other common chronic dermatosis that typically presents during the first month of life and favors skin folds?",
+    options: ["Allergic contact dermatitis", "Psoriasis", "Scabies", "Seborrheic dermatitis"],
+    answer: 3,
+    explanation: "In infants, AD is often preceded and/or accompanied by seborrheic dermatitis, which commonly presents during the first month of life... with a predilection for the skin folds [41]."
+  },
+  {
+    q: "Which chronic dermatosis should be considered in adolescents and adults with chronic dermatitis poorly responsive to topical corticosteroid treatment, as its histologic features can mimic AD?",
+    options: ["Lichen simplex chronicus", "Asteatotic eczema", "Mycosis fungoides", "Dermatitis herpetiformis"],
+    answer: 2,
+    explanation: "Mycosis fungoides (MF) should be considered in adolescents and adults with chronic dermatitis poorly responsive to topical corticosteroid treatment. The histologic findings of early MF may be difficult to distinguish from those of AD [22, 42]."
+  },
+  {
+    q: "What is the recommended overall approach to AD management, based on insights into the underlying skin barrier defect?",
+    options: ["Reactive management targeting acute flares", "Proactive management including long-term maintenance therapy", "Exclusive use of systemic immunosuppressants", "High-dose oral antihistamine therapy"],
+    answer: 1,
+    explanation: "Based on insights into the underlying skin barrier defect and its relationship to inflammatory processes... a proactive approach that includes long-term maintenance therapy is now recommended [43]."
+  },
+  {
+    q: "Which specific protocol is generally recommended for topical corticosteroid use in maintenance therapy to reduce the risk of relapse in patients with cleared AD?",
+    options: ["Daily application of a low-potency steroid until clear", "Twice-weekly application of a mid-potency steroid to usual areas of involvement", "Continuous use of a potent steroid ointment once daily", "Alternating TCI therapy with daily high-potency corticosteroids"],
+    answer: 1,
+    explanation: "RCTs in children and adults with AD have demonstrated that the risk of relapse can be significantly reduced by proactive maintenance with twice-weekly application of a mid-potency topical corticosteroid to the usual areas of involvement when clear [44, 45]."
+  },
+  {
+    q: "Topical calcineurin inhibitors (TCIs) are particularly useful for AD affecting the face and intertriginous areas due to concern over what potential side effect of corticosteroids in these areas?",
+    options: ["Systemic absorption", "Hypopigmentation", "Acneiform eruptions", "Corticosteroid-induced skin atrophy"],
+    answer: 3,
+    explanation: "TCIs are particularly useful for AD affecting the face and intertriginous areas, sites where corticosteroid-induced skin atrophy is of increased concern and TCI therapy is especially effective [46]."
+  },
+  {
+    q: "What is the primary mechanism of action of Crisaborole 2% ointment, an FDA-approved topical treatment for mild to moderate AD?",
+    options: ["Immunosuppressive action on T cells", "Phosphodiesterase-4 (PDE-4) inhibitor", "Toll-like receptor modulator", "Vitamin D3 analogue"],
+    answer: 1,
+    explanation: "Crisaborole 2% ointment is a phosphodiesterase-4 (PDE-4) inhibitor that is FDA-approved for the treatment of mild to moderate AD [47]."
+  },
+  {
+    q: "What is the maximum recommended duration for continuous use of wet wrap therapy in AD, due to potential risk of side effects?",
+    options: ["48 hours", "1 week", "2 weeks", "Indefinitely, with close monitoring"],
+    answer: 2,
+    explanation: "Wet wrap therapy should be left in place 8–24 hours per day, and the treatment duration should not exceed 2 weeks [48]."
+  },
+  {
+    q: "What is the mechanism of action of Dupilumab, an Interleukin-4/-13 receptor inhibitor?",
+    options: ["Targets free IL-13 only", "Blocks signaling by TSLP and IL-33", "Targets the IL-4R$\alpha$ subunit of heterodimeric IL-4 and IL-13 receptors", "Inhibits Janus kinase 1 and 2 (JAK1/2)"],
+    answer: 2,
+    explanation: "Dupilumab is a human monoclonal antibody that targets the IL-4R$\alpha$ subunit of heterodimeric IL-4 and IL-13 receptors. It blocks signaling by these cytokines and the resulting Th2-mediated inflammation [49]."
+  },
+  {
+    q: "Oral Janus kinase (JAK) inhibitors approved for AD carry a class-wide black box warning noting potential increased risks of which serious events?",
+    options: ["Increased risk of eczema herpeticum and cellulitis", "Transient hypotension and mild nephrotoxicity", "Serious infection, cancer, cardiovascular events, and thrombosis", "Hyperglycemia and bone density loss"],
+    answer: 2,
+    explanation: "The JAK inhibitor class-wide black box warning notes potential increased risks of serious infection, death, cancer, cardiovascular events, and thrombosis [50]."
+  },
+  {
+    q: "Which conventional immunosuppressive agent is mainly used as a short-term treatment for severe AD, serving as a bridge between other therapies, primarily due to concerns regarding nephrotoxicity and hypertension?",
+    options: ["Methotrexate", "Azathioprine", "Cyclosporine", "Mycophenolate mofetil (MMF)"],
+    answer: 2,
+    explanation: "Cyclosporine typically leads to rapid improvement... However, because of potential side effects such as nephrotoxicity and hypertension, it is mainly used as a short-term treatment for AD, serving as a bridge between other therapies [51]."
+  },
+  {
+    q: "In an initial randomized controlled trial (RCT), bathing in dilute sodium hypochlorite (bleach baths) together with intranasal mupirocin was shown to decrease disease severity in moderate to severe AD by targeting which coexisting factor?",
+    options: ["Irritant contact dermatitis", "Staphylococcal colonization", "Autoimmune antibodies", "Fungal infections (Malassezia)"],
+    answer: 1,
+    explanation: "In an initial RCT, bathing in 0.005% sodium hypochlorite... together with a monthly 5-day course of intranasal topical mupirocin... led to greater improvement of moderate to severe, superinfected AD [52, 53]."
+  },
+  {
+    q: "For AD patients without additional conditions like urticaria or allergic rhinoconjunctivitis, what is the recommendation regarding the routine use of non-sedating oral antihistamines?",
+    options: ["Recommended for daily pruritus control", "Recommended only during acute flares", "Not useful and routine use is not recommended", "Effective for controlling the underlying Th2 response"],
+    answer: 2,
+    explanation: "Routine use of oral antihistamines to treat AD is not recommended... Non-sedating antihistamines are not useful in the absence of additional conditions such as urticaria, dermographism, or allergic rhinoconjunctivitis [54-56]."
+  },
+  {
+    q: "What characteristic of a positive IgE blood test or skin prick test to a food allergen necessitates further clinical history or provocation tests in AD patients?",
+    options: ["The test results have high specificity (70-80%)", "Detection of IgE does not necessarily mean the allergy is triggering the patient’s AD", "Positive predictive values are extremely high (>95%)", "Food allergy is the cause of AD in over 50% of infants"],
+    answer: 1,
+    explanation: "The clinical history and (in selected instances) provocation tests should be used to determine the relevance of positive laboratory and skin prick tests, since these allergens may not necessarily be exacerbating the patient’s AD [57]."
+  },
+  {
+    q: "Which food allergen is most often linked to AD exacerbations in infants and young children, accounting for a majority of IgE-mediated reactions?",
+    options: ["Soy", "Milk", "Egg", "Peanuts"],
+    answer: 2,
+    explanation: "Food hypersensitivity affects up to 30% of infants and young children with AD, and ~90% of reactions in this population are caused by five allergens: eggs (most often linked to AD exacerbations), milk, peanuts, soy, and wheat [58]."
+  },
+  {
+    q: "Which allergen source is listed among the components of topical medications and skin care products that commonly cause Allergic Contact Dermatitis (ACD) in AD patients?",
+    options: ["Dust mites", "Wool/rough fabrics", "Lanolin and preservatives", "Nickel and Cobalt"],
+    answer: 2,
+    explanation: "Common contact allergens in AD patients include components of topical medications and skin care products, such as fragrance, preservatives, lanolin, propylene glycol, cocamidopropyl betaine, bacitracin, neomycin, and sometimes corticosteroids [111, 216–218]."
+  },
+  {
+    q: "Regarding AD prevention, what outcome was found in two large RCTs concerning the daily application of emollients during the first 8 to 12 months of life?",
+    options: ["It significantly reduced the incidence of AD in all high-risk infants", "It did not reduce the incidence of AD, and one study showed a mildly increased rate of skin infections", "It reduced the risk of developing subsequent food allergies", "It altered the skin microbiome composition favorably"],
+    answer: 1,
+    explanation: "Two large RCTs found that daily emollient application $\pm$ adding oil to the bath water during the first 8 to 12 months of life did not reduce the incidence of AD; in one of the studies, emollient use was associated with a mildly increased rate of skin infections [59]."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rook's Atopic Eczema Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    "q": "What is the estimated heritability of atopic eczema based on twin studies?",
+    "options": ["25%", "50%", "75%", "90%"],
+    "answer": 2,
+    "explanation": "Twin studies and a systematic review of 35,155 twin pairs suggest an overall heritability of approximately 75% for atopic eczema."
+  },
+  {
+    "q": "Which gene mutation is most strongly associated with severe atopic eczema?",
+    "options": ["SPINK5", "FLG", "TSLP", "IL4RA"],
+    "answer": 1,
+    "explanation": "Loss-of-function mutations in the filaggrin gene (FLG) are associated with approximately 50% of severe atopic eczema cases."
+  },
+  {
+    "q": "Which of the following is NOT a clinical feature associated with FLG mutations?",
+    "options": ["Ichthyosis vulgaris", "Keratosis pilaris", "Hyperlinear palms", "Generalized hyperpigmentation"],
+    "answer": 3,
+    "explanation": "FLG mutations are associated with ichthyosis vulgaris, keratosis pilaris, and hyperlinear palms, but not generalized hyperpigmentation."
+  },
+  {
+    "q": "What is the most common bacterial pathogen colonizing the skin in atopic eczema?",
+    "options": ["Streptococcus pyogenes", "Staphylococcus aureus", "Escherichia coli", "Pseudomonas aeruginosa"],
+    "answer": 1,
+    "explanation": "Staphylococcus aureus is identifiable on skin swabs in most individuals with atopic eczema, often at high density."
+  },
+  {
+    "q": "Which cytokine is targeted by dupilumab?",
+    "options": ["IL-4 and IL-13", "IL-17", "IL-22", "IL-31"],
+    "answer": 0,
+    "explanation": "Dupilumab is a monoclonal antibody that inhibits the IL-4 receptor alpha subunit, thereby blocking signaling of both IL-4 and IL-13."
+  },
+  {
+    "q": "What is the recommended first-line treatment for moderate atopic eczema on the body?",
+    "options": ["Emollients only", "Mild potency topical corticosteroids", "Moderate potency topical corticosteroids", "Potent topical corticosteroids"],
+    "answer": 2,
+    "explanation": "For moderate atopic eczema on the body, moderate potency topical corticosteroids are recommended as first-line anti-inflammatory treatment."
+  },
+  {
+    "q": "Which of the following is a common ocular complication of dupilumab therapy?",
+    "options": ["Cataract", "Glaucoma", "Conjunctivitis", "Retinal detachment"],
+    "answer": 2,
+    "explanation": "Conjunctivitis is a common adverse event associated with dupilumab therapy, occurring in approximately 26% of patients in real-world studies."
+  },
+  {
+    "q": "What is the 'weekender approach' in atopic eczema management?",
+    "options": ["Using topical corticosteroids only on weekends", "Twice-weekly application of potent topical corticosteroids to healed areas", "Weekend admission for intensive treatment", "Using wet wraps only on weekends"],
+    "answer": 1,
+    "explanation": "The 'weekender approach' involves twice-weekly application of potent topical corticosteroids to healed areas to reduce relapses."
+  },
+  {
+    "q": "Which of the following is NOT a recommended tool for measuring patient-reported symptoms in clinical trials?",
+    "options": ["EASI", "POEM", "NRS-11", "RECAP"],
+    "answer": 0,
+    "explanation": "EASI (Eczema Area and Severity Index) is a clinician-measured tool. POEM, NRS-11, and RECAP are patient-reported measures."
+  },
+  {
+    "q": "What is the typical age of onset for atopic eczema?",
+    "options": ["Before 2 years of age", "Between 2-5 years", "Between 5-10 years", "Adulthood only"],
+    "answer": 0,
+    "explanation": "Atopic eczema often starts in early childhood, usually before 2 years of age, although it can begin at any age."
+  },
+  {
+    "q": "Which climate factor correlates positively with atopic eczema symptoms?",
+    "options": ["Latitude", "Annual outdoor temperature", "Relative humidity", "Altitude"],
+    "answer": 0,
+    "explanation": "Symptoms of atopic eczema correlate positively with latitude and negatively with annual outdoor temperature."
+  },
+  {
+    "q": "What is the association between antibiotic use in early life and atopic eczema risk?",
+    "options": ["No association", "Protective effect", "41% increased risk", "Doubled risk"],
+    "answer": 2,
+    "explanation": "Postnatal antibiotic exposure is associated with a 41% increased risk of developing atopic eczema, with a dose-response relationship."
+  },
+  {
+    "q": "Which dietary factor shows a consistent protective effect against atopic eczema?",
+    "options": ["Fast food", "Fresh fruits", "Red meat", "Dairy products"],
+    "answer": 1,
+    "explanation": "Frequent consumption of fresh fruits (1-2 times/week) shows a consistent protective effect against atopic eczema risk."
+  },
+  {
+    "q": "What is the proposed mechanism for the protective effect of unpasteurized farm milk?",
+    "options": ["High calcium content", "Microbial contamination or other constituents", "Lactose intolerance prevention", "High fat content"],
+    "answer": 1,
+    "explanation": "The protective effect of unpasteurized farm milk may be related to microbial contamination or other constituents of unprocessed cow's milk."
+  },
+  {
+    "q": "Which immune cells are predominantly found in early lesional atopic eczema skin?",
+    "options": ["B lymphocytes", "Neutrophils", "T lymphocytes", "Mast cells"],
+    "answer": 2,
+    "explanation": "The cellular infiltrate in early lesional atopic eczema is comprised predominantly of T lymphocytes with a CD4+:CD8+ ratio of 7:1."
+  },
+  {
+    "q": "What is the 'atopic march'?",
+    "options": ["Progression from atopic eczema to other atopic diseases", "Seasonal variation of atopic eczema", "Genetic progression of FLG mutations", "Therapeutic stepping approach"],
+    "answer": 0,
+    "explanation": "The 'atopic march' describes the progression within an individual from atopic eczema to other atopic diseases including allergic rhinitis, food allergy and asthma."
+  },
+  {
+    "q": "Which cytokine is particularly associated with itch in atopic eczema?",
+    "options": ["IL-4", "IL-13", "IL-31", "IL-22"],
+    "answer": 2,
+    "explanation": "IL-31 is strongly associated with itch in atopic eczema, and levels correlate with disease severity."
+  },
+  {
+    "q": "What is the prevalence of food allergy in infants with atopic eczema?",
+    "options": ["5-10%", "15-20%", "30-40%", "50-60%"],
+    "answer": 2,
+    "explanation": "The prevalence of food allergy associated with atopic eczema is estimated to be approximately 30-40% in unselected infants with the disease."
+  },
+  {
+    "q": "Which diagnostic test is considered the gold standard for food-induced atopic eczema?",
+    "options": ["Skin prick test", "Specific IgE measurement", "Atopy patch test", "Challenge exposure"],
+    "answer": 3,
+    "explanation": "Challenge exposure is the gold standard for diagnosing food-induced atopic eczema, as correlation between other tests and clinical benefit is poor."
+  },
+  {
+    "q": "What is the recommended initial dose of ciclosporin for atopic eczema?",
+    "options": ["1-2 mg/kg/day", "2.5-3.5 mg/kg/day", "5-7 mg/kg/day", "10 mg/kg/day"],
+    "answer": 1,
+    "explanation": "An initial dose of 2.5-3.5 mg/kg/day is recommended for ciclosporin in atopic eczema, with a maximal daily dose of 5 mg/kg/day."
+  },
+  {
+    "q": "Which enzyme activity should be measured before initiating azathioprine therapy?",
+    "options": ["CYP2C19", "TPMT", "DPYD", "UGT1A1"],
+    "answer": 1,
+    "explanation": "Thiopurine methyltransferase (TPMT) activity should be measured before initiating azathioprine therapy to guide dosing and avoid toxicity."
+  },
+  {
+    "q": "What is the most common cutaneous complication of atopic eczema?",
+    "options": ["Viral infections", "Bacterial infections", "Fungal infections", "Parasitic infections"],
+    "answer": 1,
+    "explanation": "Secondary bacterial infection with staphylococci or streptococci is common and contributes to disease exacerbations."
+  },
+  {
+    "q": "Which viral infection poses a particular risk for individuals with atopic eczema?",
+    "options": ["Herpes simplex virus", "Human papillomavirus", "Coxsackievirus", "Adenovirus"],
+    "answer": 0,
+    "explanation": "Herpes simplex virus poses an increased risk for individuals with atopic eczema, potentially causing eczema herpeticum."
+  },
+  {
+    "q": "What is the recommended approach for suspected allergic contact dermatitis in atopic eczema?",
+    "options": ["Skin prick testing", "Patch testing", "Specific IgE measurement", "Challenge testing"],
+    "answer": 1,
+    "explanation": "Patch testing should be performed when allergic contact dermatitis is suspected in atopic eczema patients failing to respond to standard therapy."
+  },
+  {
+    "q": "Which ocular condition is associated with atopic eczema and eye rubbing?",
+    "options": ["Cataract", "Glaucoma", "Keratoconus", "Retinal detachment"],
+    "answer": 2,
+    "explanation": "Keratoconus, or conical cornea, is associated with atopic eczema and eye rubbing, most frequently diagnosed in adolescence."
+  },
+  {
+    "q": "What is the recommended bathing approach for atopic eczema patients?",
+    "options": ["Avoid bathing altogether", "Use antibacterial soaps daily", "Bathe with soap substitutes and moisturize immediately after", "Use hot water to reduce itching"],
+    "answer": 2,
+    "explanation": "Bathing is soothing when followed by immediate moisturizing. Soaps should be avoided and soap substitute emollients used for cleansing."
+  },
+  {
+    "q": "Which of the following is a common psychological comorbidity in children with atopic eczema?",
+    "options": ["Schizophrenia", "Attention deficit hyperactivity disorder", "Bipolar disorder", "Obsessive-compulsive disorder"],
+    "answer": 1,
+    "explanation": "Attention deficit hyperactivity disorder (ADHD) is more common in children with atopic eczema."
+  },
+  {
+    "q": "What is the estimated proportion of atopic eczema cases that carry FLG mutations?",
+    "options": ["5%", "20%", "50%", "80%"],
+    "answer": 1,
+    "explanation": "A meta-analysis pooling data from high-risk and low-risk cohorts suggested that 20% of individuals with atopic eczema carry FLG mutations."
+  },
+  {
+    "q": "Which cytokine pattern predominates in chronic atopic eczema lesions?",
+    "options": ["Pure Th2", "Pure Th1", "Mixed Th1/Th2/Th17", "Pure Th17"],
+    "answer": 2,
+    "explanation": "Chronic atopic eczema lesions show a mixed cytokine pattern with IL-5, GM-CSF, IL-12, IFN-γ, and Th17 cytokines predominating."
+  },
+  {
+    "q": "What is the recommended treatment for pityriasis alba in atopic eczema?",
+    "options": ["Potent topical corticosteroids", "Systemic immunosuppressants", "Prevention of inflammation with mild topical corticosteroids or calcineurin inhibitors", "Phototherapy"],
+    "answer": 2,
+    "explanation": "Pityriasis alba is treated by preventing inflammation with strategies such as twice-weekly mild potency topical corticosteroids or calcineurin inhibitors."
+  },
+  {
+    "q": "Which JAK inhibitor is approved for atopic eczema and targets JAK1 and JAK2?",
+    "options": ["Abrocitinib", "Baricitinib", "Upadacitinib", "Tofacitinib"],
+    "answer": 1,
+    "explanation": "Baricitinib is an oral selective JAK1-2 inhibitor that was approved for atopic eczema by the EMA and authorities in Japan in 2020."
+  },
+  {
+    "q": "What is the primary mediator of itch in atopic eczema?",
+    "options": ["Histamine", "IL-31", "Substance P", "Prostaglandins"],
+    "answer": 1,
+    "explanation": "Non-histaminergic signalling is more relevant for chronic itch in atopic eczema, with IL-31 being a key cytokine mediator."
+  },
+  {
+    "q": "Which of the following is a characteristic feature of infantile atopic eczema?",
+    "options": ["Exclusive flexural distribution", "Facial involvement", "Only extensor surface involvement", "No pruritus"],
+    "answer": 1,
+    "explanation": "During infancy, atopic eczema is commonly present on the face but also occurs elsewhere in flexural and non-flexural/extensor distributions."
+  },
+  {
+    "q": "What is the recommended approach for topical corticosteroid application?",
+    "options": ["Apply sparingly once monthly", "Use the fingertip unit for measurement", "Apply only to weeping areas", "Use exclusively on the face"],
+    "answer": 1,
+    "explanation": "The fingertip unit is recommended for measuring topical corticosteroid quantities - a strip from the distal phalangeal crease to the fingertip treats two palm-sized areas."
+  },
+  {
+    "q": "Which of the following is NOT a recommended strategy for primary prevention of atopic eczema?",
+    "options": ["Maternal probiotic supplementation", "Early emollient use", "Strict dietary allergen avoidance during pregnancy", "Breastfeeding promotion"],
+    "answer": 2,
+    "explanation": "There is no evidence that routine dietary allergen avoidance during pregnancy prevents atopic eczema, even in high-risk infants."
+  },
+  {
+    "q": "What is the association between obesity and atopic eczema?",
+    "options": ["No association", "Protective effect", "Increased risk for all atopic eczema", "Increased risk only for severe atopic eczema"],
+    "answer": 3,
+    "explanation": "Obesity is associated with increased risk for severe atopic eczema (OR=1.94), with a dose-response relationship with TV viewing time."
+  },
+  {
+    "q": "Which antimicrobial peptide is reduced in atopic eczema skin?",
+    "options": ["Cathelicidin LL-37", "Defensin-1", "Histatin", "Lactoferrin"],
+    "answer": 0,
+    "explanation": "Reductions in keratinocyte-derived antimicrobial peptides including cathelicidin LL-37, β-defensin 2 and β-defensin 3 contribute to innate immunity compromise in atopic eczema."
+  },
+  {
+    "q": "What is the typical response rate to ciclosporin in atopic eczema?",
+    "options": ["20-30% improvement", "40-50% improvement", "55% improvement at 6-8 weeks", "80-90% improvement"],
+    "answer": 2,
+    "explanation": "Virtually all patients respond rapidly to ciclosporin with a reduction in disease severity by approximately 55% at 6-8 weeks."
+  },
+  {
+    "q": "Which of the following is a characteristic feature of atopic eczema in skin of color?",
+    "options": ["More prominent erythema", "Reduced redness in inflamed skin", "Absence of pigmentary changes", "No flexural involvement"],
+    "answer": 1,
+    "explanation": "A key difference in skin of color is reduced redness evident in inflamed dark skin, requiring clinicians to rely more on symptoms of itch to grade inflammatory activity."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

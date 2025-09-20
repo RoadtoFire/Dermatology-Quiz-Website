@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bolognia Human Papillomaviruses Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+        [
+  {
+    "q": "What is the prevalence of cutaneous warts in primary schoolchildren?",
+    "options": ["Up to 10%", "Up to 20%", "Up to 30%", "Up to 50%"],
+    "answer": 2,
+    "explanation": "The document states that cutaneous warts are caused by specific HPV types, with a prevalence of up to 30% in primary schoolchildren and a decline thereafter with increasing age."
+  },
+  {
+    "q": "Which HPV types are most commonly associated with high-grade cervical intraepithelial neoplasia (CIN)?",
+    "options": ["HPV-6 and -11", "HPV-16 and -18", "HPV-3 and -10", "HPV-1 and -2"],
+    "answer": 1,
+    "explanation": "HPV-16 is detected in ~50% of cervical cancers and high-grade CIN. HPV-16 and -18 are the most common high-risk types causing cervical neoplasia."
+  },
+  {
+    "q": "What percentage of cervical cancers worldwide are caused by HPV types 16, 18, 31, 33, 45, 52, and 58 combined?",
+    "options": ["~70%", "~80%", "~90%", "~95%"],
+    "answer": 2,
+    "explanation": "The document states that HPV-16, -18, -31, -33, -45, -52, and -58 have been identified in ~90% of cervical cancers, and all are targeted in the nine-valent HPV vaccine."
+  },
+  {
+    "q": "Which cells serve as the primary targets for HPV infection?",
+    "options": ["Superficial keratinocytes", "Basal keratinocytes", "Langerhans cells", "Melanocytes"],
+    "answer": 1,
+    "explanation": "Basal keratinocytes serve as the primary targets for HPV infection, which are exposed to the virus through minor abrasions, and infection is promoted by maceration."
+  },
+  {
+    "q": "What is the median duration of high-risk HPV infections in women?",
+    "options": ["4 months", "8 months", "12 months", "18 months"],
+    "answer": 1,
+    "explanation": "The document states that the median duration of high-risk HPV infections in women is 8 months, with persistence found in 30% after 1 year and in 9% after 2 years."
+  },
+  {
+    "q": "Which HPV types are most commonly associated with flat warts?",
+    "options": ["HPV-1 and -2", "HPV-3 and -10", "HPV-6 and -11", "HPV-16 and -18"],
+    "answer": 1,
+    "explanation": "Flat warts are usually caused by HPV-3 or -10, and less often by HPV-28 and -29, according to the document."
+  },
+  {
+    "q": "What is the characteristic histologic feature that distinguishes verrucae from other types of papillomas?",
+    "options": ["Hyperkeratosis", "Acanthosis", "Koilocytosis", "Parakeratosis"],
+    "answer": 2,
+    "explanation": "The document states that koilocytosis (cells with distinctive cytoplasmic vacuoles isolating the nucleus from the cytoplasmic membrane) is a useful feature that distinguishes verrucae from other types of papillomas."
+  },
+  {
+    "q": "Which genes are mutated in epidermodysplasia verruciformis (EV)?",
+    "options": ["p53 and RB", "BRCA1 and BRCA2", "TMC6 (EVER1) and TMC8 (EVER2)", "CXCR4 and DOCK8"],
+    "answer": 2,
+    "explanation": "EV is caused by truncating mutations in two genes, TMC6 (EVER1) and TMC8 (EVER2), that encode transmembrane proteins localized to the endoplasmic reticulum."
+  },
+  {
+    "q": "What is the most common sexually transmitted infection (STI) in the US according to the document?",
+    "options": ["Chlamydia", "Gonorrhea", "HPV infection", "Herpes simplex"],
+    "answer": 2,
+    "explanation": "The document states that in the US, HPV infection of the lower anogenital tract was the most common sexually transmitted infection (STI)."
+  },
+  {
+    "q": "Which HPV types are associated with butcher's warts?",
+    "options": ["HPV-1 and -2", "HPV-3 and -10", "HPV-6 and -11", "HPV-7"],
+    "answer": 3,
+    "explanation": "Butcher's warts, which occur in meat- or fish-processing professionals, are associated with HPV-7, not animal papillomaviruses."
+  },
+  {
+    "q": "What is the recommended age for HPV vaccination according to the CDC?",
+    "options": ["9-10 years", "11-12 years", "13-14 years", "15-16 years"],
+    "answer": 1,
+    "explanation": "The document states that the three HPV vaccines are aimed at achieving universal vaccination of children and adolescents, ideally at 11 or 12 years of age."
+  },
+  {
+    "q": "Which of the following is NOT a characteristic feature of common warts histologically?",
+    "options": ["Church spire papillomatosis", "Marked acanthosis", "Minimal parakeratosis", "Hypergranulosis"],
+    "answer": 2,
+    "explanation": "Common warts characteristically have steeply sloping 'church spire' papillomatosis heaped with ortho- and parakeratosis (not minimal parakeratosis), marked acanthosis, and hypergranulosis."
+  },
+  {
+    "q": "What percentage of women with low-grade or asymptomatic genital HPV-16 infections develop serum antibodies?",
+    "options": ["Less than 25%", "About 40%", "More than 50%", "Nearly 100%"],
+    "answer": 2,
+    "explanation": "The document states that serum antibodies specific to conformational virion epitopes of high-risk HPV-16 can be detected in more than half of women with low-grade or asymptomatic genital HPV-16 infections."
+  },
+  {
+    "q": "Which condition is characterized by multiple circumscribed papules on the oral mucosa in native populations?",
+    "options": ["Oral florid papillomatosis", "Heck disease", "Buschke-Löwenstein tumor", "Bowenoid papulosis"],
+    "answer": 1,
+    "explanation": "Heck disease (focal epithelial hyperplasia) presents as multiple circumscribed papules resembling flat warts on the oral mucosa, rare in White individuals but relatively common in native South Americans, Greenlanders, or South African communities."
+  },
+  {
+    "q": "What is the size of the HPV genome?",
+    "options": ["~6 kilobases", "~8 kilobases", "~10 kilobases", "~12 kilobases"],
+    "answer": 1,
+    "explanation": "The HPV genome is ~8 kilobases (kb) in length, composed of three domains: the upstream regulatory region (URR), the early region, and the late region."
+  },
+  {
+    "q": "Which protein is responsible for the ubiquitin-mediated degradation of p53 in high-risk HPV infections?",
+    "options": ["E1", "E2", "E6", "E7"],
+    "answer": 2,
+    "explanation": "E6 from high-risk mucosal HPV causes the ubiquitin-mediated degradation of the cellular protein p53, removing a brake on suprabasal cell cycling."
+  },
+  {
+    "q": "What is the recurrence rate for genital warts after treatment?",
+    "options": ["5-15%", "15-25%", "25-65%", "65-85%"],
+    "answer": 2,
+    "explanation": "The document states that regardless of the applied therapeutic modality, reported recurrence rates for genital warts are high (25%-65%)."
+  },
+  {
+    "q": "Which HPV types are most commonly associated with recurrent respiratory papillomatosis (RRP)?",
+    "options": ["HPV-16 and -18", "HPV-6 and -11", "HPV-31 and -33", "HPV-1 and -2"],
+    "answer": 1,
+    "explanation": "Recurrent respiratory papillomatosis (RRP) is characterized by exophytic lesions of the airways and is usually caused by HPV-6 and -11."
+  },
+  {
+    "q": "What is WHIM syndrome associated with?",
+    "options": ["Cervical cancer", "Respiratory papillomatosis", "HPV-induced warts and immunodeficiency", "Epidermodysplasia verruciformis"],
+    "answer": 2,
+    "explanation": "WHIM syndrome is characterized by HPV-induced warts (cutaneous and genital), hypogammaglobulinemia, recurrent bacterial infections, and neutropenia due to myelokathexis."
+  },
+  {
+    "q": "Which treatment has the highest efficacy rate for clearing genital warts according to controlled trials?",
+    "options": ["Imiquimod 5% cream", "Podophyllotoxin 0.5% solution", "Cryotherapy", "Trichloroacetic acid"],
+    "answer": 1,
+    "explanation": "According to a network meta-analysis mentioned in the document, podophyllotoxin 0.5% solution was significantly more efficacious than imiquimod 5% cream in clearing genital warts in non-immunocompromised patients."
+  },
+  {
+    "q": "What percentage of children from 1 month to 4 years of age have HPV DNA in skin swab samples?",
+    "options": ["20-30%", "30-40%", "40-50%", "50-70%"],
+    "answer": 3,
+    "explanation": "The document states that children from 1 month to 4 years of age have a high prevalence (from 50% to 70%) of HPV DNA in skin swab samples."
+  },
+  {
+    "q": "Which histologic feature is characteristic of regressing flat warts?",
+    "options": ["Increased koilocytosis", "Parakeratosis and spongiosis", "Hyperkeratosis", "Decreased inflammatory infiltrate"],
+    "answer": 1,
+    "explanation": "Characteristic histologic features of regressing flat warts include parakeratosis, spongiosis, exocytosis of mononuclear cells into the lower epidermis, and occasionally satellite cell necrosis."
+  },
+  {
+    "q": "What is the estimated annual cost burden of genital HPV infection in the US?",
+    "options": ["$2 billion", "$4 billion", "$6 billion", "$8 billion"],
+    "answer": 2,
+    "explanation": "The document states that the estimated annual cost burden of genital HPV infection is $6 billion, making it the second most costly STI after HIV infection."
+  },
+  {
+    "q": "Which HPV types are most commonly associated with giant condylomata (Buschke-Löwenstein tumor)?",
+    "options": ["HPV-16 and -18", "HPV-6 and -11", "HPV-31 and -33", "HPV-5 and -8"],
+    "answer": 1,
+    "explanation": "Buschke-Löwenstein tumor is associated with the low-risk HPV types 6 or 11 that usually cause condylomata acuminata."
+  },
+  {
+    "q": "What is the approximate diameter of papillomavirus virions?",
+    "options": ["25-30 nm", "35-40 nm", "45-50 nm", "55-60 nm"],
+    "answer": 3,
+    "explanation": "Papillomaviruses are non-enveloped, double-stranded DNA viruses ~55-60 nm in diameter."
+  },
+  {
+    "q": "Which immune system component appears to play the primary role in clearing HPV infections?",
+    "options": ["Humoral immunity", "Cell-mediated immunity", "Innate immunity", "Complement system"],
+    "answer": 1,
+    "explanation": "The document states that patients with underlying defects in humoral immunity do not seem to be predisposed to HPV infections, while those with suppressed cell-mediated immunity show increased prevalence of warts, suggesting a primary role of cell-mediated responses."
+  },
+  {
+    "q": "What is the typical timeframe for spontaneous regression of common warts?",
+    "options": ["6 months", "1-2 years", "3-4 years", "5+ years"],
+    "answer": 1,
+    "explanation": "The document states that the majority of warts will regress spontaneously within 1-2 years, and up to two-thirds of cutaneous warts spontaneously regress within 2 years."
+  },
+  {
+    "q": "Which protein is primarily responsible for binding HPV to epithelial cells?",
+    "options": ["L2 minor capsid protein", "L1 major capsid protein", "E6 protein", "E7 protein"],
+    "answer": 1,
+    "explanation": "The document states that binding appears to depend on the L1 major capsid protein, and cell surface and/or basement membrane heparan sulfate is necessary for efficient infection."
+  },
+  {
+    "q": "What percentage of HIV-seropositive MSM were positive for HPV DNA in anal swabs?",
+    "options": ["Up to 60%", "Up to 75%", "Up to 85%", "Up to 93%"],
+    "answer": 3,
+    "explanation": "The document states that in studies analyzing anal swabs, up to 93% of HIV-seropositive MSM were positive for HPV DNA, compared to 60% of HIV-negative MSM."
+  },
+  {
+    "q": "Which generation of HPV vaccine contains the most HPV types?",
+    "options": ["Bivalent (2 types)", "Quadrivalent (4 types)", "9-valent (9 types)", "12-valent (12 types)"],
+    "answer": 2,
+    "explanation": "The 9-valent vaccine (Gardasil® 9) contains VLPs for HPV-6, -11, -16, -18, -31, -33, -45, -52, and -58, making it the most comprehensive currently available."
+  },
+  {
+    "q": "What is the characteristic morphology of plantar warts?",
+    "options": ["Exophytic dome-shaped", "Thick, endophytic with central depression", "Flat-topped smooth surface", "Filiform projections"],
+    "answer": 1,
+    "explanation": "Palmar and plantar warts appear as thick, endophytic papules with gently sloping sides and a central depression resembling an anthill (myrmecia)."
+  },
+  {
+    "q": "Which cells in the epidermis express the highest levels of HPV late genes?",
+    "options": ["Basal cells", "Spinous cells", "Granular layer cells", "Terminally differentiated superficial layers"],
+    "answer": 3,
+    "explanation": "The genes for the virion structural proteins (late genes) are expressed in the terminally differentiated superficial layers of the epithelium."
+  },
+  {
+    "q": "What is the primary mechanism of imiquimod's antiviral effect?",
+    "options": ["Direct viral DNA inhibition", "Activation of Toll-like receptors 7 and 8", "Cell cycle arrest", "Protein synthesis inhibition"],
+    "answer": 1,
+    "explanation": "Imiquimod interacts with Toll-like receptors 7 and 8, resulting in activation of cytokine secretion and stimulation of antigen-presenting dendritic cells."
+  },
+  {
+    "q": "Which HPV genus contains types associated with epidermodysplasia verruciformis?",
+    "options": ["Alpha genus", "Beta genus", "Gamma genus", "Delta genus"],
+    "answer": 1,
+    "explanation": "EV is characterized by particular susceptibility to cutaneous infections with HPV types in the genus β, which do not produce clinical lesions in immunocompetent individuals."
+  },
+  {
+    "q": "What is the recommended treatment approach for bowenoid papulosis in patients younger than 45 years?",
+    "options": ["Radical surgical excision", "Superficial destruction", "Systemic chemotherapy", "Observation only"],
+    "answer": 1,
+    "explanation": "For patients with bowenoid papulosis who are younger than 45 years of age, superficial destruction of lesions (e.g., with cryotherapy or laser vaporization) may be appropriate to avoid mutilation."
+  },
+  {
+    "q": "Which diagnostic test has the highest sensitivity for detecting HPV in genital warts?",
+    "options": ["Immunohistochemistry", "PCR-based techniques", "In situ hybridization", "Viral culture"],
+    "answer": 1,
+    "explanation": "PCR-based techniques can detect a broad range of genital and skin HPV types, while immunohistochemistry has limited sensitivity in genital warts and dysplasias."
+  },
+  {
+    "q": "What is the primary location where Buschke-Löwenstein tumors occur?",
+    "options": ["Hands and feet", "Face and neck", "Anorectal area and external genitalia", "Oral cavity"],
+    "answer": 2,
+    "explanation": "Buschke-Löwenstein tumor is a rare neoplasm of the anorectal area and external genitalia associated with HPV types 6 or 11."
+  },
+  {
+    "q": "Which contact sensitizer has been reported to have an 88% complete clearance rate for recalcitrant warts?",
+    "options": ["Squaric acid dibutyl ester (SADBE)", "Diphenylcyclopropenone (DPCP)", "Dinitrochlorobenzene (DNCB)", "Formaldehyde"],
+    "answer": 1,
+    "explanation": "In a large uncontrolled study, topical sensitization with 2% diphenylcyclopropenone (DPCP) resulted in an 88% complete clearance rate for recalcitrant palmoplantar warts."
+  },
+  {
+    "q": "What is the vaccine efficacy of licensed HPV vaccines in preventing vaccine-type HPV infection?",
+    "options": ["~70%", "~80%", ">90%", "Nearly 100%"],
+    "answer": 2,
+    "explanation": "The prophylactic vaccination trials showed near-complete protection (>90% vaccine efficacy) that was type-restricted against vaccine-type HPV infection."
+  },
+  {
+    "q": "Which cells are NOT normally accessible to HPV due to mechanical barriers?",
+    "options": ["Superficial keratinocytes", "Basal epithelial cells", "Langerhans cells", "Melanocytes"],
+    "answer": 1,
+    "explanation": "Basal epithelial cells are not normally accessible to the virus because of the mechanical barrier provided by the overlying differentiated cell layers, so infection likely requires abrasion or trauma."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

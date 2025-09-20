@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bolognia Psoriasis Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+        [
+  {
+    q: "In the history of dermatology, which physician definitively separated the clinical features of psoriasis from those of leprosy in 1841?",
+    options: ["Robert Willan", "Hebra", "Heinrich Koebner", "Galen"],
+    answer: 1,
+    explanation: "Although Robert Willan (1809) was the first to give an accurate description of psoriasis, Hebra (in 1841) definitively separated the clinical features of psoriasis from those of leprosy [1]."
+  },
+  {
+    q: "What is the reported worldwide prevalence of psoriasis, according to most reviews?",
+    options: ["1.0%", "2.0%", "4.6%", "15.0%"],
+    answer: 1,
+    explanation: "In most reviews, the prevalence of psoriasis is said to be 2% of the world’s population [2]."
+  },
+  {
+    q: "A large group of patients with cutaneous psoriasis reported nail changes in what percentage of cases?",
+    options: ["5%–10%", "39%", "79%", "90%"],
+    answer: 2,
+    explanation: "In one large group of patients with psoriasis (n = 1728), 79% had nail changes [3, 4]."
+  },
+  {
+    q: "Psoriasis onset occurs before the age of 40 years in approximately what percentage of patients?",
+    options: ["25%", "50%", "75%", "90%"],
+    answer: 2,
+    explanation: "In ~75% of patients, the onset is before the age of 40 years [3]."
+  },
+  {
+    q: "What is the estimated contribution of the PSORS1 region on chromosome 6p to the overall genetic risk of developing psoriasis?",
+    options: ["Less than 10%", "Approximately 28%", "Up to 50%", "Over 80%"],
+    answer: 2,
+    explanation: "By far the most important genetic region was PSORS1 (on chromosome 6p), which is estimated to account for up to 50% of psoriasis risk [5]."
+  },
+  {
+    q: "What is the most common form of psoriasis in children?",
+    options: ["Pustular psoriasis", "Erythrodermic psoriasis", "Plaque psoriasis", "Psoriatic arthritis"],
+    answer: 2,
+    explanation: "Plaque psoriasis is the most frequent form of the disease in children, followed by guttate psoriasis [6]."
+  },
+  {
+    q: "Psoriasis is strongly associated with which Histocompatibility Antigen (HLA) in the White population, conferring a relative risk of 13?",
+    options: ["HLA-B27", "HLA-Cw6", "HLA-DRB1*0701", "HLA-B57"],
+    answer: 1,
+    explanation: "Psoriasis is associated with HLA-Cw6, with the presence of HLA-Cw6 conferring a relative risk of 13 for developing psoriasis in the White population [7]."
+  },
+  {
+    q: "What characteristic feature of psoriatic plaques is referred to as 'micaceous scale'?",
+    options: ["Deep redness", "Silver-white appearance", "Yellowish, greasy scale", "Waxy, adherent scale"],
+    answer: 1,
+    explanation: "The characteristic lesion is a sharply demarcated erythematous plaque with micaceous scale [8]. If the superficial silvery white (micaceous) scales are removed, then a wet surface is seen [9]."
+  },
+  {
+    q: "Which finding is the clinical reflection of elongated vessels in the dermal papillae together with thinning of the suprapapillary epidermis in psoriasis?",
+    options: ["Woronoff’s ring", "Koebner phenomenon", "Auspitz sign", "Spongiform pustules of Kogoj"],
+    answer: 2,
+    explanation: "If the superficial silvery white (micaceous) scales are removed, then a wet surface is seen with characteristic pinpoint bleeding. This finding, called Auspitz sign, is the clinical reflection of elongated vessels in the dermal papillae together with thinning of the suprapapillary epidermis [9]."
+  },
+  {
+    q: "What is the most common presentation of psoriatic arthritis?",
+    options: ["Arthritis mutilans", "Asymmetric oligoarthritis of the small joints", "Symmetric polyarthritis of large joints", "Exclusive involvement of DIP joints"],
+    answer: 1,
+    explanation: "The most common presentation is asymmetric oligoarthritis of the small joints of the hands and feet [10]."
+  },
+  {
+    q: "Which of the following sites is NOT typically one of the most common sites of involvement for chronic plaque psoriasis?",
+    options: ["Scalp", "Elbows", "Knees", "Axilla"],
+    answer: 3,
+    explanation: "The most common sites of involvement are the scalp, elbows, and knees, followed by the nails, hands, feet, and trunk (including the intergluteal fold) [11]. The axilla is a common site for flexural or 'inverse' psoriasis, but not generally listed among the most common sites of plaque psoriasis predilection [12, 13]."
+  },
+  {
+    q: "What is the primary function of the enzyme encoded by ERAP1, which interacts synergistically with HLA-Cw6 in psoriasis pathogenesis?",
+    options: ["T cell differentiation", "Inhibitor of TNF-induced NF-κB activation", "Antioxidant enzyme activity", "Enzyme processing MHC class I ligands (antigen presentation)"],
+    answer: 3,
+    explanation: "ERAP1, which encodes an aminopeptidase involved in MHC class I antigen processing, interacts synergistically with the HLA-Cw6 risk allele, providing another argument for the role of an MHC-restricted antigen and its presentation through HLA-C in the pathogenesis of psoriasis [14-16]."
+  },
+  {
+    q: "The transition in the understanding of psoriasis pathophysiology that occurred in the early 1980s recognized psoriasis primarily as what type of disease?",
+    options: ["Keratinocyte proliferation defect", "Cyclic AMP deficiency disorder", "T cell-driven disease", "Eicosanoid dysregulation syndrome"],
+    answer: 2,
+    explanation: "Prior to the early 1980s, psoriasis was long regarded as an epidermal disease... A major paradigm shift occurred when T cell suppressive agents such as cyclosporine were found to result in dramatic improvement... Over the past three decades, psoriasis has been regarded as a T cell-driven disease [17]."
+  },
+  {
+    q: "In lesional psoriatic skin, the majority of T cells found in the epidermis belong to which subset?",
+    options: ["CD4+ T cells", "CD8+ T cells", "Natural killer T cells", "Th22 cells"],
+    answer: 1,
+    explanation: "Most of the epidermal T cells are CD8+, whereas the dermal infiltrate is a mixture of CD4+ and CD8+ cells [18]."
+  },
+  {
+    q: "What is the key initial step in the initiation phase of psoriasis where stressed keratinocytes release components that trigger plasmacytoid dendritic cells (pDCs)?",
+    options: ["Direct T cell activation by superantigens", "Release of IL-17 by $\gamma\delta$ T cells", "Complex formation of self DNA/RNA with cathelicidin LL37", "Increased expression of VEGF promoting neoangiogenesis"],
+    answer: 2,
+    explanation: "Stressed keratinocytes can release self DNA and RNA, which form complexes with the cathelicidin LL37 that then induce interferon-α (IFN-α) production by plasmacytoid dendritic cells (pDCs) [19-21]."
+  },
+  {
+    q: "The accumulation of neutrophils within a spongiotic pustule in the upper stratum spinosum is referred to histologically as what pathognomonic finding for active psoriasis?",
+    options: ["Microabscess of Munro", "Acanthosis with elongated rete ridges", "Spongiform pustule of Kogoj", "Perivascular infiltrate of lymphocytes"],
+    answer: 2,
+    explanation: "The accumulation of neutrophils within a spongiotic pustule is referred to as a 'spongiform pustule of Kogoj' [22, 23]. The accumulation of neutrophils and/or neutrophil remnants in the stratum corneum is called a 'microabscess of Munro' [22]."
+  },
+  {
+    q: "In patients with generalized pustular psoriasis, loss-of-function mutations have been identified in the gene IL36RN, which encodes for which antagonist?",
+    options: ["IL-1 receptor antagonist", "TNF receptor antagonist", "IL-36 receptor antagonist", "IL-17 receptor antagonist"],
+    answer: 2,
+    explanation: "In patients with generalized pustular psoriasis, several groups identified homozygous or compound heterozygous loss-of-function mutations in IL36RN, which encodes the IL-36 receptor antagonist [24, 25]."
+  },
+  {
+    q: "Which keratinocyte-derived chemokine is primarily responsible for recruiting neutrophils into the psoriatic lesion, where they form microabscesses?",
+    options: ["CCL17", "CXCL8", "CCL20", "CXCL9–11"],
+    answer: 1,
+    explanation: "Th17 cells secrete IL-17A and IL-17F (and also IFN-γ and IL-22), which stimulate keratinocyte proliferation and the release of β-defensin 1/2, S100A7/8/9, and the neutrophil-recruiting chemokines CXCL1, CXCL3, CXCL5, and CXCL8 [19, 20, 26]. CXCL8 is thought to mediate the often-prominent infiltration by neutrophils [26]."
+  },
+  {
+    q: "The Koebner phenomenon, the elicitation of psoriatic lesions by skin injury, usually has a lag time between the trauma and the appearance of lesions of what duration?",
+    options: ["24–48 hours", "1 week", "2–6 weeks", "3–6 months"],
+    answer: 2,
+    explanation: "The lag time between the trauma and the appearance of skin lesions is usually 2–6 weeks [27]."
+  },
+  {
+    q: "Guttate psoriasis is frequently preceded by an infection involving which type of organism?",
+    options: ["Staphylococcus aureus", "Group A Streptococci", "Candida species", "Herpes simplex virus"],
+    answer: 1,
+    explanation: "Guttate psoriasis is frequently preceded by an upper respiratory tract infection (often a streptococcal throat infection) [28, 29]."
+  },
+  {
+    q: "Which specific drug, when rapidly tapered, is known to induce pustular psoriasis as well as flares of plaque psoriasis?",
+    options: ["Methotrexate", "Systemic corticosteroids", "Cyclosporine", "Beta-blockers"],
+    answer: 1,
+    explanation: "A rapid taper of systemic corticosteroids can induce pustular psoriasis as well as flares of plaque psoriasis [30]."
+  },
+  {
+    q: "What is the term used to describe generalized pustular psoriasis occurring during pregnancy?",
+    options: ["Pustulosis of the palms and soles", "Acrodermatitis continua of Hallopeau", "Impetigo herpetiformis", "SDRIFE"],
+    answer: 2,
+    explanation: "Generalized pustular psoriasis during pregnancy is also referred to as impetigo herpetiformis [31, 32]."
+  },
+  {
+    q: "In Pustulosis of the palms and soles, in contrast to generalized pustular psoriasis, what is characteristic about the course of the disease?",
+    options: ["It always resolves spontaneously.", "The pustules remain localized to the palmoplantar surfaces and the course is chronic.", "It is almost always accompanied by fever and malaise.", "It is treated exclusively with systemic retinoids."],
+    answer: 1,
+    explanation: "In contrast to the natural history of generalized pustular psoriasis, the pustules remain localized to the palmoplantar surfaces and the course of this disease is chronic [33]."
+  },
+  {
+    q: "Which nail finding is the result of psoriatic changes of the nail bed, reflecting exocytosis of leukocytes beneath the nail plate?",
+    options: ["Nail pitting", "Leukonychia", "Oil drop or salmon patch phenomenon", "Transverse grooves (Beau's lines)"],
+    answer: 2,
+    explanation: "Psoriatic changes of the nail bed result in the 'oil drop' or 'salmon patch' phenomenon, which reflects exocytosis of leukocytes beneath the nail plate [34]."
+  },
+  {
+    q: "In patients with cutaneous psoriasis, involvement of the nail is considered a strong predictor of what concomitant condition?",
+    options: ["Increased alcohol consumption", "Non-alcoholic steatohepatitis", "Psoriatic arthritis", "Systemic lupus erythematosus (SLE)"],
+    answer: 2,
+    explanation: "In patients with psoriasis, nail involvement is a strong predictor of concomitant psoriatic arthritis [35, 36]."
+  },
+  {
+    q: "Which clinical subtype of psoriatic arthritis is characterized by severe, rapidly progressive joint inflammation resulting in destruction, shortening of the digits, and a telescoping phenomenon?",
+    options: ["Mono- and asymmetric oligoarthritis", "Rheumatoid arthritis-like presentation", "Arthritis mutilans", "Spondylitis and sacroiliitis"],
+    answer: 2,
+    explanation: "Arthritis mutilans is characterized by severe, rapidly progressive joint inflammation that results in destruction of the joints and permanent deformity [37]."
+  },
+  {
+    q: "The psoriasiform skin lesions associated with Reactive arthritis (keratoderma blennorrhagicum) have a predilection for which sites?",
+    options: ["Eyelids and cheeks", "Trunk and abdomen", "Soles and extensor surfaces of the legs", "Axilla and groin"],
+    answer: 2,
+    explanation: "Cutaneous lesions occur in ~5% of reactive arthritis patients, with a predilection for the soles, extensor surfaces of the legs, penis, dorsal aspects of the hands, fingers, nails, and scalp [38]."
+  },
+  {
+    q: "Which specific condition is under-represented in patients with psoriasis compared to the general population, due to immunologic differences (Th1/Th17 vs. Th2 response)?",
+    options: ["Obesity", "Metabolic syndrome", "Atopic dermatitis", "Psoriatic arthritis"],
+    answer: 2,
+    explanation: "There is a pronounced under-representation of allergic skin diseases in psoriasis. The frequencies of atopic dermatitis, asthma, urticaria, and allergic contact dermatitis have been found to be lower in psoriatic patients [39]."
+  },
+  {
+    q: "Which histologic finding is considered pathognomonic for stable psoriatic plaque lesions, explaining the Auspitz phenomenon?",
+    options: ["Absence of the granular layer", "Club-shaped dermal papillae with a small suprapapillary plate", "A perivascular infiltrate composed primarily of histiocytes", "Diffuse spongiosis in the stratum spinosum"],
+    answer: 1,
+    explanation: "In the papillary dermis, the capillaries are elongated and tortuous, extending upward into elongated club-shaped dermal papillae; only a small suprapapillary plate of epidermal cells covers the tip of these dermal papillae. This micromorphology explains the “Auspitz” phenomenon [22]."
+  },
+  {
+    q: "In the differential diagnosis of neutrophilic pustules, what finding favors a pustular drug eruption (AGEP) over pustular psoriasis?",
+    options: ["Presence of spongiform pustules of Kogoj", "Accumulation of neutrophils in the stratum corneum (Munro microabscesses)", "Presence of eosinophils", "Diffuse acanthosis of the epidermis"],
+    answer: 2,
+    explanation: "If eosinophils are also present, a pustular drug eruption is favored [40]. AGEP is also noted to have mild spongiform pustulation, which is less prominent than in pustular psoriasis [41]."
+  },
+  {
+    q: "What characteristic feature is often seen in flexural (inverse) psoriasis lesions, in contrast to chronic plaque psoriasis?",
+    options: ["Thick, silvery scale", "Shiny, pink to red, sharply demarcated thin plaques with much less scale", "Numerous sterile pustules", "Deep brown pigmentation"],
+    answer: 1,
+    explanation: "Flexural lesions are characterized by shiny, pink to red, sharply demarcated thin plaques. There is much less scale than in untreated chronic plaque psoriasis [13]."
+  },
+  {
+    q: "What is considered the first-line therapy for mild to moderate psoriasis, including sensitive sites like the flexures and genitalia?",
+    options: ["Topical tazarotene", "Anthralin", "Topical corticosteroids", "Narrowband UVB phototherapy"],
+    answer: 2,
+    explanation: "Topical corticosteroids have become a mainstay in the treatment of psoriasis. They are first-line therapy in mild to moderate psoriasis and in sites such as the flexures and genitalia [42]."
+  },
+  {
+    q: "What is the primary mechanism of action for topical Vitamin D3 analogues in treating psoriasis?",
+    options: ["Inhibiting T-cell activation via calcineurin inhibition", "Reducing inflammation by modulating the AhR receptor", "Inhibiting epidermal proliferation and enhancing differentiation", "Preventing cytokine degradation by inhibiting PDE-4"],
+    answer: 2,
+    explanation: "Calcipotriene inhibits proliferation of keratinocytes and promotes their differentiation... Vitamin D3 analogues have become a first-line therapy for psoriasis [43]."
+  },
+  {
+    q: "What is the recommended maximum weekly dosage of methotrexate (MTX) for adults being treated for psoriasis?",
+    options: ["10 mg", "15 mg", "25 mg", "50 mg"],
+    answer: 2,
+    explanation: "The maximum weekly dosage is 15 mg (children) or 25 mg (adults) [44]."
+  },
+  {
+    q: "For which condition is Methotrexate absolutely contraindicated, requiring significant reduction in dosage if impaired?",
+    options: ["Impaired kidney function (creatinine clearance <60 ml/min)", "Significant liver function abnormalities, hepatitis (active and/or recent)", "Severe anemia", "Pregnancy or lactation"],
+    answer: 3,
+    explanation: "Severe anemia, leukopenia, and/or thrombocytopenia [45] and Significant liver function abnormalities, hepatitis (active and/or recent), severe fibrosis, cirrhosis, excessive alcohol intake [45] are absolute contraindications (*). Impaired kidney function requires significant reduction in dosage (†) [45]."
+  },
+  {
+    q: "Due to its nephrotoxic effects and the requirement for patient monitoring, what is the maximum recommended duration for continuous use of cyclosporine in psoriasis, although this is debated?",
+    options: ["3 months", "6 months", "1 year", "Indefinitely, with monitoring"],
+    answer: 2,
+    explanation: "In view of its nephrotoxic effects... cyclosporine should be given for several-month courses (i.e. maximally 1 year, although this duration is still debated) and alternated with other therapies [46]."
+  },
+  {
+    q: "Contraception is mandatory for women of childbearing age receiving acitretin during treatment and for a specified period after discontinuation, due to the drug's teratogenicity. What is the required period post-discontinuation?",
+    options: ["1 month", "6 months", "1 year", "3 years"],
+    answer: 3,
+    explanation: "A major problem with systemic retinoids is their teratogenicity, making contraception mandatory in women of childbearing age during treatment and (depending on the drug half-life) for a period of 1 month (isotretinoin) to 3 years (acitretin) after discontinuing therapy [47]."
+  },
+  {
+    q: "What is the mechanism of action of Apremilast, an oral systemic therapy for psoriasis?",
+    options: ["Inhibitor of NF-κB activation", "Inhibitor of the IL-23 receptor", "Inhibitor of vascular endothelial growth factor (VEGF)", "Phosphodiesterase 4 inhibitor"],
+    answer: 3,
+    explanation: "Apremilast is an oral phosphodiesterase 4 inhibitor that prevents cyclic AMP degradation within keratinocytes, dendritic cells, monocytes, and neutrophils [48]."
+  },
+  {
+    q: "Which category of targeted immunomodulators (biologics) is associated with a significant enhancement in short-term efficacy, often achieving PASI 90 in 60%–70% of patients?",
+    options: ["First-generation TNF inhibitors", "Second-generation IL-12/23 inhibitors", "Third-generation anti-IL-17 and fourth-generation anti-IL-23 antibodies", "Classic systemic medications (MTX, Cyclosporine)"],
+    answer: 2,
+    explanation: "Third-generation (anti-IL-17 antibodies) and fourth-generation (anti-IL-23 antibodies) biologic agents are associated with a significant enhancement in short-term efficacy [49]."
+  },
+  {
+    q: "According to the criteria proposed by the International Psoriasis Council, which of the following criteria defines a patient as a candidate for systemic therapy (severe disease)?",
+    options: ["Psoriasis Area and Severity Index (PASI) score > 5", "Body Surface Area (BSA) > 5%", "Failure of topical therapy", "Presence of mild pruritus"],
+    answer: 2,
+    explanation: "The latter group [severe disease] should meet at least one of the following criteria: (1) body surface area (BSA) >10%; (2) disease involving special sites; and (3) failure of topical therapy [50]."
+  },
+  {
+    q: "Which biologic agent is specifically approved by the FDA for the treatment of generalized pustular psoriasis (GPP) flares by inhibiting the IL-36 receptor?",
+    options: ["Ustekinumab", "Guselkumab", "Spesolimab-sbzo", "Brodalumab"],
+    answer: 2,
+    explanation: "Spesolimab-sbzo, an interleukin-36 receptor inhibitor, was recently approved for the treatment of generalized pustular psoriasis [51]."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

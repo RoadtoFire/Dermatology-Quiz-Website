@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bolognia Human Papillomaviruses Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    "q": "Which types of Human Herpesviruses (HHVs) are categorized as Alphaherpesvirinae?",
+    "options": [
+      "HSV-1, HSV-2, and HHV-6",
+      "HSV-1, HSV-2, and VZV (HHV-3)",
+      "EBV (HHV-4), CMV (HHV-5), and HHV-8",
+      "HHV-6, HHV-7, and HHV-8"
+    ],
+    "answer": 1,
+    "explanation": "The human herpesviruses categorized as Alphaherpesvirinae are Herpes simplex virus types 1 and 2 (HSV-1, HSV-2) and Varicella–Zoster Virus (VZV; HHV-3) [1-3]."
+  },
+  {
+    "q": "What is the estimated proportion of the world’s population that has experienced a symptomatic Herpes Simplex Virus (HSV) infection?",
+    "options": [
+      "Approximately one-tenth",
+      "Approximately one-third",
+      "Approximately two-thirds",
+      "Approximately one-half"
+    ],
+    "answer": 1,
+    "explanation": "It is estimated that approximately one-third of the world’s population has experienced a symptomatic HSV infection [4]."
+  },
+  {
+    "q": "In children under 10 years of age, what percentage of herpetic infections are caused by HSV-1?",
+    "options": [
+      "Approximately 50%–60%",
+      "Approximately 70%",
+      "Approximately 80%–90%",
+      "Approximately 100%"
+    ],
+    "answer": 2,
+    "explanation": "In children less than 10 years of age, approximately 80%–90% of herpetic infections are caused by HSV-1 [5]."
+  },
+  {
+    "q": "According to the CDC’s 2015–2016 NHANES, what was the overall seroprevalence of HSV-2 among individuals aged 14–49 years in the US?",
+    "options": [
+      "8%",
+      "12%",
+      "16%",
+      "35%"
+    ],
+    "answer": 1,
+    "explanation": "The seroprevalence of HSV-2 among individuals 14–49 years of age in the US was 12% overall in the 2015–2016 National Health and Nutrition Examination Survey (NHANES) [6, 7]."
+  },
+  {
+    "q": "Transmission of HSV-1 is spread primarily through which route?",
+    "options": [
+      "Sexual contact",
+      "Contaminated fomites",
+      "Direct contact with contaminated saliva or other infected secretions",
+      "Airborne droplets"
+    ],
+    "answer": 2,
+    "explanation": "HSV-1 is spread primarily through direct contact with contaminated saliva or other infected secretions [8]. HSV-2 is spread primarily by sexual contact [8]."
+  },
+  {
+    "q": "Where does the Herpes Simplex Virus establish latency following replication at the mucocutaneous site of infection?",
+    "options": [
+      "Regional lymph nodes",
+      "Dorsal root ganglia",
+      "Epithelial cells",
+      "B lymphocytes"
+    ],
+    "answer": 1,
+    "explanation": "Virus replicates at the mucocutaneous site of infection and then travels by retrograde axonal flow to the dorsal root ganglia, where it establishes latency [8]."
+  },
+  {
+    "q": "Which component of the innate immune defense against HSV interacts with double-stranded RNA (which accumulates in HSV-infected cells) and leads to IFN-β and IFN-λ production?",
+    "options": [
+      "TLR2 on the cell surface",
+      "TLR3 on endosomes",
+      "TLR9 on endosomes",
+      "Natural killer (NK) cells"
+    ],
+    "answer": 1,
+    "explanation": "TLR3 on endosomes interacts with double-stranded RNA (which accumulates in HSV-infected cells) and leads to IFN-β and IFN-λ production [9, 10]."
+  },
+  {
+    "q": "How does the HSV ICP47 protein contribute to immune evasion?",
+    "options": [
+      "It blocks complement activation.",
+      "It degrades mRNA.",
+      "It blocks loading of peptides onto MHC class I molecules.",
+      "It causes apoptosis of interacting T cells and NK cells."
+    ],
+    "answer": 2,
+    "explanation": "The HSV ICP47 protein binds to TAP (transporter associated with antigen processing) and blocks loading of peptides onto MHC class I molecules; the 'empty' MHC class I molecules are then degraded by the proteasome [11, 12]."
+  },
+  {
+    "q": "What is a typical feature of mucocutaneous lesions caused by HSV infections?",
+    "options": [
+      "Single, non-tender ulcers",
+      "Painful, grouped vesicles on an erythematous base",
+      "Painless papules and plaques",
+      "Diffuse hyperemia without vesicles"
+    ],
+    "answer": 1,
+    "explanation": "Painful, grouped vesicles appear on an erythematous base and may become umbilicated, followed by progression to pustules, erosions, and/or ulcerations with a characteristic scalloped border [13]."
+  },
+  {
+    "q": "What is the most common presentation of symptomatic primary orolabial HSV infections in children?",
+    "options": [
+      "Recurrent herpes labialis",
+      "Pharyngitis",
+      "Gingivostomatitis",
+      "Herpes gladiatorum"
+    ],
+    "answer": 2,
+    "explanation": "Symptomatic primary orolabial infections often present as gingivostomatitis in children [14]."
+  },
+  {
+    "q": "Among individuals with latent HSV-1 infection, what percentage develops recurrent herpes labialis due to reactivation?",
+    "options": [
+      "Less than 5%",
+      "5%–10%",
+      "20%–40%",
+      "50%–70%"
+    ],
+    "answer": 2,
+    "explanation": "Among individuals with latent HSV-1 infection, 20%–40% develop recurrent herpes labialis due to reactivation [14]."
+  },
+  {
+    "q": "Which of the following is NOT listed as a trigger for HSV reactivation?",
+    "options": [
+      "Ultraviolet light",
+      "Emotional stress",
+      "Immunosuppression",
+      "Prophylactic antiviral treatment"
+    ],
+    "answer": 3,
+    "explanation": "HSV can be reactivated either spontaneously or by a trigger such as emotional stress, ultraviolet light, fever, menstruation, immunosuppression, surgical or dental procedures, and other local tissue damage [15]."
+  },
+  {
+    "q": "Compared to HSV-2, recurrences of genital herpes are generally less common with which HSV type?",
+    "options": [
+      "HSV-1",
+      "HSV-3",
+      "HHV-6",
+      "HHV-7"
+    ],
+    "answer": 0,
+    "explanation": "Recurrences of genital herpes are less common with HSV-1, which lacks HSV-2’s specific tropism for genital epithelium [5]. Recurrences occur more frequently with HSV-2 than HSV-1 [16]."
+  },
+  {
+    "q": "What complication occurs in 20% of affected women during primary genital herpes infections but is a rare complication in men?",
+    "options": [
+      "Extragenital lesions",
+      "Urinary retention",
+      "Aseptic meningitis",
+      "Regional lymphadenopathy"
+    ],
+    "answer": 2,
+    "explanation": "Aseptic meningitis occurs in 10% of affected women with primary genital herpes infection, but it is a rare complication in men [17]."
+  },
+  {
+    "q": "Genital herpes recurrences typically resolve within what duration, compared to primary infections (~20 days)?",
+    "options": [
+      "2–6 weeks",
+      "7–10 days",
+      "3–5 days",
+      "Within 24 hours"
+    ],
+    "answer": 1,
+    "explanation": "For recurrent genital herpes, resolution typically occurs within 7–10 days, compared to approximately 20 days for primary infections [16]."
+  },
+  {
+    "q": "Which entity is characterized by a lesion that is usually single, neither painful nor recurrent, distinguishing it from genital herpes?",
+    "options": [
+      "Chancroid",
+      "Syphilitic chancre",
+      "Granuloma inguinale",
+      "Reactive acute genital ulcers"
+    ],
+    "answer": 1,
+    "explanation": "The syphilitic chancre is usually a single lesion that is neither painful nor recurrent, distinguishing it from herpetic lesions. Chancroid often manifests as several tender ulcers [3, 18]."
+  },
+  {
+    "q": "Which HSV type is the usual cause of Herpetic whitlow in young children?",
+    "options": [
+      "HSV-1",
+      "HSV-2",
+      "HSV-3 (VZV)",
+      "HHV-6"
+    ],
+    "answer": 0,
+    "explanation": "Herpetic whitlow is often in young children, usually due to HSV-1 [19]. Increasing frequency in adolescents/adults is secondary to digital–genital contact, usually due to HSV-2 [19]."
+  },
+  {
+    "q": "What is the mortality rate for Herpes encephalitis without treatment?",
+    "options": [
+      "10% or less",
+      "30%–40%",
+      "50%",
+      "70% or greater"
+    ],
+    "answer": 3,
+    "explanation": "Mortality for Herpes encephalitis is $\\geq$70% without treatment [20]."
+  },
+  {
+    "q": "A Tzanck smear of scrapings from early HSV lesions typically reveals what pathognomonic finding?",
+    "options": [
+      "Eosinophilic intranuclear inclusion bodies (Cowdry type A inclusions)",
+      "Neutrophilic infiltration",
+      "Multinucleated epithelial giant cells",
+      "Slate-gray keratinocyte nuclei with margination of chromatin"
+    ],
+    "answer": 2,
+    "explanation": "A Tzanck smear of scrapings from early lesions reveals multinucleated epithelial giant cells in approximately 60%–75% of HSV outbreaks [21, 22]."
+  },
+  {
+    "q": "Which drug is FDA-approved for the treatment of acyclovir-resistant HSV infections?",
+    "options": [
+      "Valacyclovir",
+      "Famciclovir",
+      "Foscarnet",
+      "Letermovir"
+    ],
+    "answer": 2,
+    "explanation": "Foscarnet is the only antiviral drug approved by the FDA for treatment of acyclovir-resistant HSV [23]. Cidofovir has also shown efficacy but is limited by potential renal toxicity [23]."
+  },
+  {
+    "q": "What is the most common complication of varicella (chickenpox) in healthy children?",
+    "options": [
+      "Encephalitis",
+      "Secondary bacterial infection of the skin",
+      "Pneumonia",
+      "Reye syndrome"
+    ],
+    "answer": 1,
+    "explanation": "Secondary bacterial infection of the skin with subsequent scarring is the most common complication of varicella [24]."
+  },
+  {
+    "q": "The rapid evolution of varicella lesions into 1–3 mm clear vesicles surrounded by narrow red halos is often clinically described by which phrase?",
+    "options": [
+      "Scalloped borders",
+      "Dew drops on a rose petal",
+      "Blueberry muffin lesions",
+      "Hutchinson’s sign"
+    ],
+    "answer": 1,
+    "explanation": "Lesions rapidly evolve over ~12 hours into 1–3 mm clear vesicles surrounded by narrow red halos ('dew drops on a rose petal') [25]."
+  },
+  {
+    "q": "What is the approximate lifetime chance of developing herpes zoster for individuals with a history of varicella?",
+    "options": [
+      "1%",
+      "10%",
+      "20%",
+      "50%"
+    ],
+    "answer": 2,
+    "explanation": "Overall, individuals with a history of varicella have a 20% lifetime chance of developing zoster [26]."
+  },
+  {
+    "q": "What is the estimated rate of transmission of VZV to susceptible household contacts during a herpes zoster outbreak?",
+    "options": [
+      "~5%",
+      "~15%",
+      "~50%",
+      "~80%–90%"
+    ],
+    "answer": 1,
+    "explanation": "The transmission rate to susceptible household contacts is ~15% for zoster, compared to 80%–90% for varicella [27]."
+  },
+  {
+    "q": "In an immunocompromised person with herpes zoster, how is disseminated cutaneous disease defined?",
+    "options": [
+      "Any lesion crossing the midline.",
+      "Visceral involvement.",
+      "More than 20 vesicles outside the area of primary or adjacent dermatomes.",
+      "Involvement of three or more contiguous dermatomes."
+    ],
+    "answer": 2,
+    "explanation": "Disseminated cutaneous disease is defined as more than 20 vesicles outside the area of primary or adjacent dermatomes, and/or visceral involvement occurs in ~10% of immunocompromised persons with zoster [28]."
+  },
+  {
+    "q": "In Herpes Zoster Ophthalmicus, Hutchinson’s sign refers to an increased risk of ocular involvement if skin lesions are in the distribution of which branch of the trigeminal nerve?",
+    "options": [
+      "Ophthalmic division (V1)",
+      "Maxillary division (V2)",
+      "Mandibular division (V3)",
+      "Nasociliary branch"
+    ],
+    "answer": 3,
+    "explanation": "Hutchinson’s sign refers to increased risk of ocular involvement if skin lesions are in the distribution of the nasociliary branch [29]."
+  },
+  {
+    "q": "Ramsay Hunt syndrome is associated with herpes zoster involving the geniculate ganglion of the facial nerve. Which clinical finding is characteristic of this syndrome?",
+    "options": [
+      "Ocular scarring",
+      "Diaphragmatic weakness",
+      "Loss of taste in the anterior two-thirds of the tongue",
+      "Abdominal wall pseudohernia"
+    ],
+    "answer": 2,
+    "explanation": "Clinical findings related to geniculate ganglion involvement (Ramsay Hunt syndrome) include ear pain, facial nerve paralysis (peripheral), loss of taste in the anterior two-thirds of the tongue, and dry mouth and eyes [30]."
+  },
+  {
+    "q": "What is the oral antiviral agent dosage schedule for chronic suppressive therapy for recurrent genital HSV infections in patients with six or more outbreaks per year?",
+    "options": [
+      "Acyclovir 400 mg po TID",
+      "Valacyclovir 500 mg po daily",
+      "Famciclovir 250 mg po BID",
+      "Valacyclovir 1 g po daily"
+    ],
+    "answer": 3,
+    "explanation": "For chronic suppression of HSV, Valacyclovir 1 g po daily is listed for $\\geq$10 outbreaks/year, and clinicians often exercise more lenient criteria for initiation of therapy for individuals with six or more outbreaks per year [31, 32]."
+  },
+  {
+    "q": "For the treatment of herpes zoster in immunocompetent individuals, antiviral treatment should optimally begin within what time frame of the development of skin lesions?",
+    "options": [
+      "Within 12 hours",
+      "Within 72 hours",
+      "Within 7 days",
+      "Within 10 days"
+    ],
+    "answer": 1,
+    "explanation": "For herpes zoster, beginning antiviral treatment within 72 hours of the development of skin lesions is optimal, but initiation up to 7 days after onset also appears to be beneficial [33]."
+  },
+  {
+    "q": "What is the recommended dosing schedule for the recombinant zoster vaccine (Shingrix®) for prevention of herpes zoster in immunocompetent adults ≥50 years of age?",
+    "options": [
+      "One dose only",
+      "Two doses, 2–6 months between doses",
+      "Two doses, 6–12 months between doses",
+      "Three doses over 6 months"
+    ],
+    "answer": 1,
+    "explanation": "The recombinant zoster vaccine (Shingrix®) is recommended as a two-dose regimen, with 2–6 months between doses, for prevention of herpes zoster in immunocompetent adults $\\geq$50 years of age [34]."
+  },
+  {
+    "q": "What clinical triad occurs in more than 80% of patients with EBV-induced infectious mononucleosis?",
+    "options": [
+      "Splenomegaly, rash, and cough",
+      "Pharyngitis, fever, and lymphadenopathy",
+      "Jaundice, thrombocytopenia, and hepatomegaly",
+      "Hydroa vacciniforme, erythema nodosum, and genital ulcers"
+    ],
+    "answer": 1,
+    "explanation": "After an incubation period of 30–50 days, the clinical triad of pharyngitis, fever lasting up to 10 days, and lymphadenopathy (especially cervical) occurs in >80% of patients with EBV-induced infectious mononucleosis [35]."
+  },
+  {
+    "q": "Administration of which class of antibiotics frequently (up to 90%) leads to a 'hypersensitivity' skin reaction in patients with infectious mononucleosis?",
+    "options": [
+      "Macrolides (e.g., Azithromycin)",
+      "Aminopenicillins (e.g., Ampicillin or Amoxicillin)",
+      "Tetracyclines (e.g., Doxycycline)",
+      "Fluoroquinolones (e.g., Ciprofloxacin)"
+    ],
+    "answer": 1,
+    "explanation": "Administration of ampicillin or amoxicillin, and less commonly penicillin or cephalosporins, to patients with infectious mononucleosis, frequently (up to 90% with the former agents) leads to the development of a 'hypersensitivity' skin reaction [36]."
+  },
+  {
+    "q": "Which EBV-specific antibody titer appears 1–6 months after the onset of symptoms and persists for life, indicating the establishment of latency (past/latent infection)?",
+    "options": [
+      "VCA IgM",
+      "VCA IgG",
+      "EA IgG",
+      "EBNA IgG"
+    ],
+    "answer": 3,
+    "explanation": "EBNA IgG appears 1–6 months after onset of symptoms, upon establishment of latency, and persists for life. It is negative during acute primary infection but positive in past/latent and reactivated infection [37]."
+  },
+  {
+    "q": "What is the most common serious complication of EBV-induced infectious mononucleosis in affected adults?",
+    "options": [
+      "Airway compromise",
+      "Splenic rupture",
+      "Glomerulonephritis",
+      "CNS disturbances"
+    ],
+    "answer": 1,
+    "explanation": "Splenic rupture occurs in 0.2% of affected adults, usually after trauma [38]."
+  },
+  {
+    "q": "Cytomegalovirus (CMV) infection in neonates and immunocompromised hosts is frequently associated with enlarged endothelial cells containing large, purplish, crystalline intranuclear inclusion bodies surrounded by a clear halo. This appearance is described as what?",
+    "options": [
+      "Cowdry type A inclusions",
+      "Owl’s eye",
+      "Ballooning degeneration",
+      "Scalloped border"
+    ],
+    "answer": 1,
+    "explanation": "CMV infects endothelial cells, which can have an 'owl’s eye' appearance that is pathognomonic for CMV infection. The cells are enlarged two- to threefold and contain purplish, crystalline intranuclear inclusion bodies surrounded by a clear halo [39]."
+  },
+  {
+    "q": "Cytomegalovirus (CMV) is the leading infectious cause of which two conditions in the US?",
+    "options": [
+      "Orolabial herpes and Kaposi sarcoma",
+      "Deafness and intellectual disability (congenital)",
+      "Aseptic meningitis and pharyngitis",
+      "Pneumonia and hemolytic anemia"
+    ],
+    "answer": 1,
+    "explanation": "CMV is the leading infectious cause of congenital deafness and intellectual disability (TORCH syndrome) in the US [40, 41]."
+  },
+  {
+    "q": "What is the cutaneous manifestation sometimes referred to as 'blueberry muffin' lesions in congenital CMV infection?",
+    "options": [
+      "Purpuric papules and nodules of dermal hematopoiesis",
+      "Vesicles",
+      "Verrucous plaques",
+      "Chronic ulcers"
+    ],
+    "answer": 0,
+    "explanation": "Cutaneous manifestations of congenital CMV infection include purpuric papules and nodules of dermal hematopoiesis which are sometimes referred to as 'blueberry muffin' lesions [41-43]."
+  },
+  {
+    "q": "HHV-6 is the etiologic agent of which common febrile disease of early childhood?",
+    "options": [
+      "Hand-foot-and-mouth disease",
+      "Scarlet fever",
+      "Roseola infantum (exanthem subitum)",
+      "Varicella"
+    ],
+    "answer": 2,
+    "explanation": "HHV-6 is the etiologic agent of exanthem subitum (roseola infantum), one of the most common viral exanthems in infants and young children [44, 45]."
+  },
+  {
+    "q": "HHV-6, HHV-7, EBV, and CMV have been implicated in the pathogenesis of DRESS syndrome. What is the postulated mechanism linking these herpesviruses to DRESS?",
+    "options": [
+      "Direct cytopathic effects of the primary infection on skin cells.",
+      "Reinfection via the oral route causing pharyngitis.",
+      "Drug-related immunosuppression leading to viral reactivation, which stimulates a cellular immune response.",
+      "Persistent viremia causing widespread vasculitis."
+    ],
+    "answer": 2,
+    "explanation": "It has been postulated that drug-related immunosuppression or induction of viral replication leads to viral reactivation (of HHV-6 and others), which stimulates a cellular immune response directed against herpesviruses and likely cross-reacting with the drug [46, 47]."
+  },
+  {
+    "q": "Which demographic group accounts primarily for AIDS-related epidemic Kaposi sarcoma (KS)?",
+    "options": [
+      "Older men of Mediterranean descent",
+      "Solid organ transplant recipients",
+      "Young children in Africa",
+      "Men who have sex with men (MSM)"
+    ],
+    "answer": 3,
+    "explanation": "AIDS-related epidemic KS occurs mainly in men who have sex with men (MSM) [48]."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

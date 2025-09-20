@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rook's Psoriasis and Related Disorders Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    "q": "What is the estimated worldwide point prevalence of psoriasis in the adult population?",
+    "options": ["0.1-0.5%", "1-3%", "5-7%", "10-12%"],
+    "answer": 1,
+    "explanation": "The text states that the point prevalence of psoriasis affects approximately 1–3% of the adult population, with wide geographic variation."
+  },
+  {
+    "q": "Which genetic locus is by far the major psoriasis genetic determinant, located within the MHC?",
+    "options": ["PSORS2 (CARD14)", "PSORS1 (HLA-C:06:02)", "IL36RN", "AP1S3"],
+    "answer": 1,
+    "explanation": "The text identifies PSORS1, located within the MHC on chromosome 6p and associated with HLA-C:06:02, as by far the major psoriasis genetic determinant."
+  },
+  {
+    "q": "Which of the following is NOT a well-recognized environmental trigger for psoriasis?",
+    "options": ["Streptococcal infection", "Lithium therapy", "Beta-blocker therapy", "High-fiber diet"],
+    "answer": 3,
+    "explanation": "Streptococcal infection, lithium, and beta-blockers are all cited as triggers. A high-fiber diet is not mentioned as a trigger in the provided text."
+  },
+  {
+    "q": "The IL-23/IL-17 axis is considered central to the pathogenesis of which form of psoriasis?",
+    "options": ["Guttate psoriasis", "Chronic plaque psoriasis", "Pustular psoriasis", "All of the above"],
+    "answer": 1,
+    "explanation": "The text states that the Th17 cell and the IL-23/IL-17 axis have emerged as central to the pathogenesis of plaque psoriasis."
+  },
+  {
+    "q": "What is the most frequent ocular complication of psoriasis?",
+    "options": ["Uveitis", "Keratitis", "Blepharitis", "Non-specific conjunctivitis"],
+    "answer": 2,
+    "explanation": "The text states that direct involvement of the eyelids or eyelid margins may cause blepharitis and its consequences, which are the most frequent ocular complications."
+  },
+  {
+    "q": "A patient presents with a sudden shower of small, droplike lesions diffusely over the body several weeks after pharyngitis. What is the most likely diagnosis?",
+    "options": ["Follicular psoriasis", "Acute guttate psoriasis", "Pityriasis rosea", "Secondary syphilis"],
+    "answer": 1,
+    "explanation": "Acute guttate psoriasis is described by the sudden onset of small lesions (guttae) and frequently follows streptococcal pharyngitis."
+  },
+  {
+    "q": "Which clinical sign is characterized by small bleeding points revealed after removing scale from a psoriatic plaque?",
+    "options": ["Koebner phenomenon", "Woronoff's ring", "Auspitz sign", "Nikolsky sign"],
+    "answer": 2,
+    "explanation": "The Auspitz sign is the appearance of small bleeding points where the thin suprapapillary epidermis has been torn off after scale removal."
+  },
+  {
+    "q": "Which of the following is a strong and well-documented association with palmoplantar pustulosis (PPP)?",
+    "options": ["HLA-C:06:02 positivity", "Cigarette smoking", "Streptococcal tonsillitis", "Lithium use"],
+    "answer": 1,
+    "explanation": "The text states there is a particularly strong association between cigarette smoking and palmoplantar pustulosis, with about 80% of patients being current or previous smokers."
+  },
+  {
+    "q": "What is the most common subtype of psoriatic arthritis according to the Moll and Wright classification?",
+    "options": ["Arthritis mutilans", "Symmetric polyarthritis", "Asymmetric oligoarthritis", "Predominant axial disease"],
+    "answer": 2,
+    "explanation": "The text states that asymmetric oligo-arthritis is the commonest variety of psoriatic arthritis."
+  },
+  {
+    "q": "Which cytokine's receptor antagonist is commonly mutated in Generalized Pustular Psoriasis (GPP)?",
+    "options": ["IL-1", "IL-17", "IL-23", "IL-36"],
+    "answer": 3,
+    "explanation": "Mutations in IL36RN, which encodes the IL-36 receptor antagonist (IL-36Ra), are a key genetic finding in a significant minority of GPP patients."
+  },
+  {
+    "q": "Which of the following biologic therapies targets the p40 subunit common to both IL-12 and IL-23?",
+    "options": ["Adalimumab", "Ustekinumab", "Secukinumab", "Guselkumab"],
+    "answer": 1,
+    "explanation": "Ustekinumab is a fully human monoclonal antibody against the p40 subunit that is common to both IL-12 and IL-23."
+  },
+  {
+    "q": "A patient with severe, unstable psoriasis develops widespread erythema and scaling covering >90% of their BSA. This is best described as:",
+    "options": ["Generalized pustular psoriasis", "Erythrodermic psoriasis", "Acute guttate psoriasis", "Seborrhoeic psoriasis"],
+    "answer": 1,
+    "explanation": "Erythrodermic psoriasis is defined as a state where most or all of the body surface is affected by psoriasis."
+  },
+  {
+    "q": "Which systemic treatment is generally considered FIRST-line for inducing remission in Generalized Pustular Psoriasis (GPP), unless contraindicated?",
+    "options": ["Methotrexate", "Ciclosporin", "Oral retinoids (Acitretin)", "Systemic corticosteroids"],
+    "answer": 2,
+    "explanation": "Guidelines for GPP recommend an oral retinoid (like acitretin) as the treatment of first choice at present, unless contraindicated."
+  },
+  {
+    "q": "The CASPAR criteria are used to classify and diagnose which condition?",
+    "options": ["Psoriasis Vulgaris", "Psoriatic Arthritis", "Pustular Psoriasis", "Erythrodermic Psoriasis"],
+    "answer": 1,
+    "explanation": "The CASPAR (Classification Criteria for Psoriatic Arthritis) criteria are used by rheumatologists to diagnose psoriatic arthritis with high sensitivity and specificity."
+  },
+  {
+    "q": "Which of the following is a recognized co-morbidity of psoriasis, particularly with more severe disease?",
+    "options": ["Metabolic syndrome", "Asthma", "Alopecia areata", "All of the above"],
+    "answer": 3,
+    "explanation": "The text lists metabolic syndrome, its components, and an increased risk of several immune-mediated diseases including alopecia areata as co-morbidities of psoriasis."
+  },
+  {
+    "q": "What is the name of the phenomenon where psoriasis appears at sites of cutaneous trauma?",
+    "options": ["Auspitz sign", "Koebner phenomenon", "Renbök phenomenon", "Woronoff's ring"],
+    "answer": 1,
+    "explanation": "The Koebner phenomenon describes the development of psoriatic lesions in areas of skin injury or trauma."
+  },
+  {
+    "q": "Which of the following treatments is a topical vitamin D analogue?",
+    "options": ["Dithranol", "Calcipotriol", "Coal tar", "Tacrolimus"],
+    "answer": 1,
+    "explanation": "Calcipotriol is a synthetic vitamin D analogue used as a topical treatment for psoriasis."
+  },
+  {
+    "q": "In the histopathology of a fully developed psoriatic plaque, collections of neutrophils in the stratum corneum are called:",
+    "options": ["Pautrier microabscesses", "Munro microabscesses", "Spongiform pustules of Kogoj", "Satellite cell necrosis"],
+    "answer": 1,
+    "explanation": "Munro microabscesses are defined as collections of neutrophils in the stratum corneum."
+  },
+  {
+    "q": "Which biologic agent is a fully human monoclonal antibody inhibitor of IL-17A?",
+    "options": ["Ustekinumab", "Secukinumab", "Adalimumab", "Guselkumab"],
+    "answer": 1,
+    "explanation": "Secukinumab is a fully human monoclonal antibody that targets and inhibits IL-17A."
+  },
+  {
+    "q": "What is the most common form of psoriasis, accounting for 80-90% of cases?",
+    "options": ["Guttate psoriasis", "Pustular psoriasis", "Chronic plaque psoriasis", "Erythrodermic psoriasis"],
+    "answer": 2,
+    "explanation": "Chronic plaque psoriasis (psoriasis vulgaris) is stated to be the most common type, accounting for about 80–90% of all cases."
+  },
+  {
+    "q": "Nail changes in psoriasis, such as pitting and onycholysis, are associated with an increased risk of also having:",
+    "options": ["Scalp psoriasis", "Psoriatic arthritis", "Pustular psoriasis", "Ocular psoriasis"],
+    "answer": 1,
+    "explanation": "The text states that nail psoriasis is associated with the presence of psoriatic arthritis."
+  },
+  {
+    "q": "Which systemic therapy for psoriasis is associated with a significant risk of nephrotoxicity and hypertension, limiting its long-term use?",
+    "options": ["Methotrexate", "Acitretin", "Ciclosporin", "Apremilast"],
+    "answer": 2,
+    "explanation": "Ciclosporin is associated with significant side effects including renal impairment and hypertension, and thus is not recommended for maintenance treatment."
+  },
+  {
+    "q": "The 'ingram regimen' for psoriasis historically involved the use of a tar bath, UVB, and which topical agent?",
+    "options": ["Calcipotriol", "A potent corticosteroid", "Dithranol", "Coal tar"],
+    "answer": 2,
+    "explanation": "The Ingram regimen involved a tar bath, suberythemogenic UVB, and then dithranol applied to plaques."
+  },
+  {
+    "q": "Which form of phototherapy is generally considered first-line for moderate to severe plaque psoriasis due to its efficacy and safety profile?",
+    "options": ["Broadband UVB", "PUVA", "Narrowband UVB (NB-UVB)", "Grenz rays"],
+    "answer": 2,
+    "explanation": "Phototherapy with narrow-band UVB (NB-UVB) is recommended for patients with moderate to severe psoriasis and has largely replaced broadband UVB and PUVA as a first-line option in many centers."
+  },
+  {
+    "q": "Which of the following is a key difference between pustular psoriasis and chronic plaque psoriasis?",
+    "options": ["Pustular psoriasis is associated with HLA-C:06:02", "Pustular psoriasis is more common", "Pustular psoriasis is not associated with HLA-C:06:02", "Pustular psoriasis responds better to topical steroids"],
+    "answer": 2,
+    "explanation": "The text explicitly states that unlike chronic plaque psoriasis, pustular psoriasis is not associated with HLA-C:06:02."
+  },
+  {
+    "q": "A severe, rare form of deforming arthritis of the hands and feet seen in psoriatic arthritis is called:",
+    "options": ["Osteoarthritis", "Rheumatoid arthritis", "Arthritis mutilans", "Gouty arthritis"],
+    "answer": 2,
+    "explanation": "Arthritis mutilans is a rare, severe deforming arthritis of the hands and feet that is a recognized subtype of psoriatic arthritis."
+  },
+  {
+    "q": "Which small molecule inhibitor of PDE4 is licensed for the treatment of both psoriasis and psoriatic arthritis?",
+    "options": ["Tofacitinib", "Apremilast", "Deucravacitinib", "Methotrexate"],
+    "answer": 1,
+    "explanation": "Apremilast is a phosphodiesterase 4 (PDE4) inhibitor licensed for the treatment of both moderate plaque psoriasis and psoriatic arthritis."
+  },
+  {
+    "q": "What is the most potent inducer of psoriasis among the TNF-α inhibitors?",
+    "options": ["They all have equal risk", "Etanercept", "Infliximab", "Adalimumab"],
+    "answer": 2,
+    "explanation": "While all TNFi can induce or exacerbate psoriasis, the text mentions that infliximab was the first reported and is often implicated in such cases, though it can be used to treat it as well—highlighting the paradox."
+  },
+  {
+    "q": "Which clinical feature is a component of the CASPAR criteria for Psoriatic Arthritis?",
+    "options": ["Scalp psoriasis", "Flexural psoriasis", "Nail psoriasis", "Guttate psoriasis"],
+    "answer": 2,
+    "explanation": "The CASPAR criteria include current psoriasis, a history of psoriasis, a family history of psoriasis, nail dystrophy, dactylitis, and radiographic evidence."
+  },
+  {
+    "q": "Spesolimab, a first-in-class monoclonal antibody, is effective for flares of Generalized Pustular Psoriasis (GPP) because it targets:",
+    "options": ["IL-17 receptor", "IL-23", "IL-36 receptor", "TNF-α"],
+    "answer": 2,
+    "explanation": "Spesolimab is a monoclonal antibody against the IL-36 receptor, targeting the central pathogenic pathway in GPP driven by unopposed IL-36 signalling."
+  },
+  {
+    "q": "Which of the following is a common and challenging differential diagnosis for flexural (inverse) psoriasis?",
+    "options": ["Pityriasis rubra pilaris", "Candidiasis", "Lichen planus", "Cutaneous T-cell lymphoma"],
+    "answer": 1,
+    "explanation": "Candidiasis shows a glistening deep red colour suggestive of psoriasis, particularly in the flexures, and is a common differential diagnosis."
+  },
+  {
+    "q": "What is the standard initial measure for evaluating the severity of skin involvement in psoriasis clinical trials?",
+    "options": ["Physician Global Assessment (PGA)", "Dermatology Life Quality Index (DLQI)", "Psoriasis Area and Severity Index (PASI)", "Body Surface Area (BSA)"],
+    "answer": 2,
+    "explanation": "The Psoriasis Area and Severity Index (PASI) is the most widely used instrument to measure the extent and severity of skin inflammation in psoriasis for clinical trials and practice."
+  },
+  {
+    "q": "Which biologic class is generally contraindicated in patients with active Inflammatory Bowel Disease (IBD)?",
+    "options": ["TNF-α inhibitors", "IL-12/23 inhibitors", "IL-17 inhibitors", "IL-23 inhibitors"],
+    "answer": 2,
+    "explanation": "IL-17 inhibition (e.g., secukinumab, ixekizumab) was found to exacerbate Crohn's disease in trials and is therefore contraindicated in active IBD."
+  },
+  {
+    "q": "Acrodermatitis continua of Hallopeau (ACH) typically has its onset:",
+    "options": ["On the trunk", "On the palms and soles", "On the scalp", "On the distal phalanx of a digit"],
+    "answer": 3,
+    "explanation": "ACH is defined as a chronic sterile pustular eruption initially affecting the nail units of the fingers or toes."
+  },
+  {
+    "q": "What is a recognized, though rare, serious adverse event associated with brodalumab therapy that led to a boxed warning?",
+    "options": ["Hepatotoxicity", "Suicidal ideation and behavior", "Progressive multifocal leukoencephalopathy (PML)", "Veno-thromboembolism"],
+    "answer": 1,
+    "explanation": "In the phase III trial programme for brodalumab, there were six suicides in treated patients, leading to a black box warning in the USA."
+  },
+  {
+    "q": "Which of the following is a characteristic feature of subacute annular generalized pustular psoriasis?",
+    "options": ["High fever and systemic illness", "Lakes of pus", "Pustules appearing on the crest of an advancing erythematous edge", "Rapid evolution over hours"],
+    "answer": 2,
+    "explanation": "Subacute annular GPP is described with lesions that begin as erythema, with pustules appearing peripherally on the crest of the advancing edge."
+  },
+  {
+    "q": "The SAPHO syndrome is an association between synovitis, acne, hyperostosis, osteitis, and which psoriatic disease?",
+    "options": ["Guttate psoriasis", "Palmoplantar pustulosis (PPP)", "Erythrodermic psoriasis", "Acrodermatitis continua of Hallopeau (ACH)"],
+    "answer": 1,
+    "explanation": "PPP is a key component of the rare SAPHO syndrome (Synovitis, Acne, Pustulosis, Hyperostosis, Osteitis)."
+  },
+  {
+    "q": "Which of the following treatments works by inhibiting the Janus kinase (JAK) pathway?",
+    "options": ["Apremilast", "Tofacitinib", "Deucravacitinib", "Both 2 and 3"],
+    "answer": 3,
+    "explanation": "Both Tofacitinib (a JAK1/JAK3 inhibitor) and Deucravacitinib (a TYK2 inhibitor, which is part of the JAK family) work by inhibiting the JAK-STAT signaling pathway."
+  },
+  {
+    "q": "For a patient with psoriasis starting a TNF-α inhibitor, what is a mandatory pre-treatment screening test?",
+    "options": ["Hepatitis C serology", "Latent tuberculosis screening", "HIV test", "Chest X-ray for lung fibrosis"],
+    "answer": 1,
+    "explanation": "Due to the risk of reactivation, screening for latent tuberculosis (e.g., with an IGRA test and chest X-ray) is mandatory prior to starting TNF-α inhibitor therapy."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

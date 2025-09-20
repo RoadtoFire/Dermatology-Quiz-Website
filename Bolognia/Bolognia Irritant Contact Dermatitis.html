@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bolognia Irritant Contact Dermatitis Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    q: "What percentage of occupational skin disorders does irritant contact dermatitis (ICD) constitute?",
+    options: ["50-60%", "60-70%", "70-80%", "80-90%"],
+    answer: 2,
+    explanation: "ICD is the most common form of occupational skin disease, estimated to constitute between 70% and 80% of all occupational skin disorders."
+  },
+  {
+    q: "Which of the following is the primary pathogenic mechanism of irritant contact dermatitis?",
+    options: ["Delayed-type hypersensitivity immune reaction", "Direct cytotoxic effect on skin", "IgE-mediated allergic reaction", "Complement-mediated tissue damage"],
+    answer: 1,
+    explanation: "ICD results from activation of the innate immune system by the direct cytotoxic effect of a chemical or physical agent, unlike allergic contact dermatitis which is a delayed-type hypersensitivity reaction."
+  },
+  {
+    q: "What is the characteristic temporal pattern of acute irritant contact dermatitis?",
+    options: ["Crescendo phenomenon - gradually worsens over days", "Decrescendo phenomenon - peaks quickly then heals", "Plateau phenomenon - remains constant", "Biphasic phenomenon - two peaks"],
+    answer: 1,
+    explanation: "Acute ICD reaches its peak quickly, usually within minutes to hours after exposure, and then starts to heal. This is termed the decrescendo phenomenon."
+  },
+  {
+    q: "Which cytokines are the major mediators in the acute phase of ICD?",
+    options: ["IL-4 and IL-5", "TNF and IL-1α", "IL-17 and IL-22", "IFN-γ and IL-12"],
+    answer: 1,
+    explanation: "Tumor necrosis factor (TNF) and interleukin (IL)-1α are the major mediators in acute ICD, capable of inducing production of other cytokines, chemokines, and adhesion molecules."
+  },
+  {
+    q: "What is the most common cause of cumulative irritant contact dermatitis?",
+    options: ["Strong acids", "Strong alkalis", "Soap and water", "Organic solvents"],
+    answer: 2,
+    explanation: "ICD is most often caused by cumulative exposure to weak irritants such as soap and water, rather than single exposures to strong irritants."
+  },
+  {
+    q: "Which age groups are more susceptible to developing ICD?",
+    options: ["Only infants", "Only elderly", "Both infants and elderly", "Young adults only"],
+    answer: 2,
+    explanation: "Both infants and the elderly are more often affected by ICD because of their less robust epidermal barrier, and they also develop more severe symptoms."
+  },
+  {
+    q: "What is the most commonly affected anatomic site in ICD?",
+    options: ["Face", "Hands", "Feet", "Trunk"],
+    answer: 1,
+    explanation: "Hand involvement is seen in approximately 80% of patients with ICD, with facial involvement in 10%. Hands are the most commonly affected site due to frequent exposure."
+  },
+  {
+    q: "Which type of ICD is characterized by visible inflammation appearing 8 to 24 hours after exposure?",
+    options: ["Acute irritant contact dermatitis", "Acute delayed irritant contact dermatitis", "Cumulative irritant contact dermatitis", "Traumatic irritant contact dermatitis"],
+    answer: 1,
+    explanation: "Acute delayed ICD is characterized by visible inflammation not appearing until 8 to 24 hours or more after exposure, often mimicking allergic contact dermatitis."
+  },
+  {
+    q: "What is asteatotic dermatitis primarily associated with?",
+    options: ["Summer heat", "Dry winter months and frequent bathing", "Spring allergies", "Humid conditions"],
+    answer: 1,
+    explanation: "Asteatotic dermatitis is a variant seen primarily during dry winter months, especially in elderly individuals who frequently bathe without remoisturizing."
+  },
+  {
+    q: "Which substance is commonly used as a reference irritant in research studies?",
+    options: ["Benzalkonium chloride", "Sodium lauryl sulfate", "Hydrochloric acid", "Ethylene oxide"],
+    answer: 1,
+    explanation: "Sodium lauryl sulfate, an anionic detergent, is often used as a reference irritant in studies because of its consistent, non-allergic, rapid toxic response."
+  },
+  {
+    q: "What is the characteristic histologic finding in ICD?",
+    options: ["Spongiosis with eosinophils", "Neutrophil-rich infiltrate with necrotic keratinocytes", "Granulomatous inflammation", "Plasma cell infiltration"],
+    answer: 1,
+    explanation: "The combination of a neutrophil-rich superficial perivascular infiltrate plus widely scattered necrotic keratinocytes is most typical of ICD."
+  },
+  {
+    q: "Which acid causes the most severe burns even at low concentrations?",
+    options: ["Hydrochloric acid", "Sulfuric acid", "Hydrofluoric acid", "Nitric acid"],
+    answer: 2,
+    explanation: "Hydrofluoric acid and sulfuric acid cause the most severe burns, even at low concentrations, and significant absorption may lead to systemic toxicity."
+  },
+  {
+    q: "What is the mechanism by which alkalis cause skin damage?",
+    options: ["Protein denaturation only", "Barrier lipid denaturation and cytotoxicity through cellular swelling", "Oxidation reactions", "Enzyme inhibition"],
+    answer: 1,
+    explanation: "Alkalis disrupt barrier lipids and denature proteins with subsequent fatty acid saponification, subjecting the cell to edema and resultant cytotoxicity."
+  },
+  {
+    q: "Which organic solvent group has the highest irritating capacity?",
+    options: ["Alcohols", "Aromatic solvents", "Esters", "Ketones"],
+    answer: 1,
+    explanation: "The irritating capacity of organic solvents follows the order: aromatic > aliphatic > chlorinated > turpentine > alcohols > esters > ketones."
+  },
+  {
+    q: "What is the primary mechanism by which detergents cause skin irritation?",
+    options: ["Immune system activation", "Damaging influence on the stratum corneum barrier", "Direct cellular toxicity", "Enzyme induction"],
+    answer: 1,
+    explanation: "Detergents' skin toxicity arises from their damaging influence on the stratum corneum, which impairs barrier function."
+  },
+  {
+    q: "Which type of surfactant has the lowest irritation potential?",
+    options: ["Anionic detergents", "Cationic detergents", "Amphoteric surfactants", "Non-ionic surfactants"],
+    answer: 2,
+    explanation: "Amphoteric surfactants such as cocamidopropyl betaine have the lowest irritation potential compared to anionic and non-ionic groups."
+  },
+  {
+    q: "What is the definition of 'wet work' in occupational settings?",
+    options: ["Working outdoors in rain", "Immersion in water >1 hour daily", "Immersion in water >2 hours, occlusive gear, and/or hand washing >20 times/day", "Any exposure to moisture"],
+    answer: 2,
+    explanation: "Wet work is defined as immersion in water for >2 hours, occlusive protective gear, and/or hand washing >20 times/day, representing one of the most important risk factors for irritant dermatitis."
+  },
+  {
+    q: "Which chemical compound in plants causes cutaneous burning through binding to vanilloid receptors?",
+    options: ["Bromelain", "Capsaicin", "Nicotine", "Protoanemonin"],
+    answer: 1,
+    explanation: "Capsaicin binds to vanilloid receptors on sensory neurons, causing cutaneous burning and erythema, and is found in hot peppers."
+  },
+  {
+    q: "What is the most common symptom associated with chronic ICD?",
+    options: ["Burning sensation", "Pruritus and pain due to fissures", "Numbness", "Tingling"],
+    answer: 1,
+    explanation: "Pruritus and pain due to fissures of hyperkeratotic skin are characteristic symptoms of chronic ICD."
+  },
+  {
+    q: "Which factor increases the risk of developing occupational dermatitis by 13.5 times?",
+    options: ["Age over 65", "Female gender", "History of atopic dermatitis", "Previous skin injury"],
+    answer: 2,
+    explanation: "Patients with a history of atopic dermatitis have a 13.5 times greater risk of developing occupational dermatitis."
+  },
+  {
+    q: "What is contact urticaria divided into?",
+    options: ["Acute and chronic subtypes", "Localized and generalized subtypes", "Non-immunologic and immunologic subtypes", "Primary and secondary subtypes"],
+    answer: 2,
+    explanation: "Contact urticaria is divided into non-immunologic and immunologic subtypes, with the non-immunologic form occurring more frequently and in the absence of previous exposure."
+  },
+  {
+    q: "What is the characteristic appearance of cement dermatitis on the lower limbs?",
+    options: ["Vesicular eruption", "Acute ulcerative damage", "Petechial rash", "Lichenification only"],
+    answer: 1,
+    explanation: "Cement causes acute ulcerative damage as a result of the high alkalinity of wet cement due to liberation of calcium hydroxide, with necrotic skin changes appearing 8-12 hours after exposure."
+  },
+  {
+    q: "Which mercury compound exposure can cause bluish linear pigmentation of the tongue and gums?",
+    options: ["Organic mercury", "Inorganic mercury", "Both organic and inorganic", "Neither type"],
+    answer: 1,
+    explanation: "Inorganic mercury can cause bluish linear pigmentation of the tongue and gums, which may serve as a marker for systemic mercury poisoning."
+  },
+  {
+    q: "What is 'degreaser's flush' associated with?",
+    options: ["Benzene exposure", "Trichloroethylene inhalation with alcohol", "Methylene chloride contact", "Carbon tetrachloride vapors"],
+    answer: 1,
+    explanation: "'Degreaser's flush' is sudden erythema in extensive areas of the face, neck, and shoulders caused by alcohol ingestion shortly before or during inhalation of trichloroethylene."
+  },
+  {
+    q: "Which disinfectant is described as having more irritating properties than alcohols?",
+    options: ["Quaternary ammonium salts", "Halogens", "Aldehydes", "Phenolic compounds"],
+    answer: 2,
+    explanation: "Aldehydes (formaldehyde, glutaraldehyde) are more irritating than alcohols and have high chemical reactivity with proteins."
+  },
+  {
+    q: "What is the primary factor determining skin irritancy in cleansers?",
+    options: ["pH level", "Detergent component", "Fragrance content", "Preservative type"],
+    answer: 1,
+    explanation: "Although the primary factor that determines skin irritancy is the detergent component, skin tolerance cannot be adequately predicted from product composition alone."
+  },
+  {
+    q: "What is granuloma gluteale infantum?",
+    options: ["A bacterial infection", "A form of chronic irritant dermatitis", "An allergic reaction", "A genetic condition"],
+    answer: 1,
+    explanation: "Granuloma gluteale infantum is a form of chronic irritant dermatitis in the anogenital region that can lead to papules and nodules from long-standing exposure to urine or stool."
+  },
+  {
+    q: "Which laboratory measurement is best for evaluating irritancy from detergents?",
+    options: ["pH measurement", "Bacterial culture", "Transepidermal water loss (TEWL)", "Inflammatory markers"],
+    answer: 2,
+    explanation: "Irritancy from detergents is best evaluated by measuring TEWL since it represents the surrogate measurable change indicative of irritancy damage from detergents."
+  },
+  {
+    q: "What is the 'accommodation' or 'hardening' phenomenon in ICD?",
+    options: ["Worsening over time", "Spontaneous resolution despite continued exposure", "Development of allergic reactions", "Permanent skin changes"],
+    answer: 1,
+    explanation: "In many individuals, ICD resolves spontaneously even with continuous exposure, a process referred to as 'accommodation' or 'hardening.'"
+  },
+  {
+    q: "Which clinical feature is more frequently associated with ICD compared to allergic contact dermatitis?",
+    options: ["Pruritus", "Burning, pain, and stinging", "Vesiculation", "Scaling"],
+    answer: 1,
+    explanation: "The more frequent complaint of burning, pain, and stinging is associated with ICD, in contrast to pruritus which is more common in allergic contact dermatitis."
+  },
+  {
+    q: "What is the most effective workplace measure for reducing ICD incidence?",
+    options: ["Better gloves", "Technical avoidance", "Worker education", "Medical monitoring"],
+    answer: 1,
+    explanation: "By far the most effective measure for reducing the incidence of contact dermatitis in the workplace is technical avoidance through shielding, personal protection, and limiting potent irritants to closed systems."
+  },
+  {
+    q: "What characterizes non-erythematous irritant contact dermatitis?",
+    options: ["Visible inflammation", "Changes in barrier function without clinical correlate", "Vesicle formation", "Ulceration"],
+    answer: 1,
+    explanation: "Non-erythematous ICD is a subclinical form with early stages of skin irritation seen as changes in stratum corneum barrier function without a visible clinical correlate."
+  },
+  {
+    q: "Which type of ICD is associated with repetitive handling of paper and driving?",
+    options: ["Asteatotic dermatitis", "Frictional irritant contact dermatitis", "Airborne irritant contact dermatitis", "Pustular irritant contact dermatitis"],
+    answer: 1,
+    explanation: "Frictional ICD results from repeated low-grade frictional trauma and is associated with repetitive handling of paper, driving (gripping steering wheel), and sports equipment."
+  },
+  {
+    q: "What is subjective or sensory irritant contact dermatitis characterized by?",
+    options: ["Visible erythema", "Stinging or burning without visible signs", "Vesicle formation", "Scaling"],
+    answer: 1,
+    explanation: "Subjective or sensory ICD is characterized by reports of stinging or burning in the absence of visible cutaneous signs of irritation."
+  },
+  {
+    q: "Which plastic components are primarily responsible for skin damage?",
+    options: ["Final hardened plastic products", "Monomer ingredients, hardeners, and additives", "Polymer chains", "Stabilizers only"],
+    answer: 1,
+    explanation: "Skin damage from plastics is almost exclusively attributable to the monomer ingredients, hardeners, and other additives such as stabilizers, rather than the final hardened product."
+  },
+  {
+    q: "What percentage of patients with contact dermatitis have ICD as a primary diagnosis when screened for allergic contact dermatitis?",
+    options: ["5-7%", "9-10%", "15-20%", "25-30%"],
+    answer: 1,
+    explanation: "Data indicate that ICD as a primary diagnosis accounts for 9-10% of patients screened for allergic contact dermatitis via patch testing."
+  },
+  {
+    q: "Which factor is NOT mentioned as predisposing to granuloma gluteale infantum?",
+    options: ["Prolonged exposure to urine", "Occlusion", "Candidal infection", "Bacterial infection"],
+    answer: 3,
+    explanation: "Predisposing factors include prolonged exposure to urine or stool, occlusion, candidal infection, and topical corticosteroid use. Bacterial infection is not specifically mentioned."
+  },
+  {
+    q: "What is the pH range of wet cement?",
+    options: ["6-8", "8-10", "10-12 initially, rising to 12-14", "Above 14"],
+    answer: 2,
+    explanation: "Wet cement has an initial pH of 10-12 that rises to 12-14 as the cement sets, making it highly alkaline and caustic to skin."
+  },
+  {
+    q: "Which treatment approach has shown controversial results in ICD?",
+    options: ["Moisturizers", "Topical corticosteroids", "Systemic antibiotics", "Phototherapy"],
+    answer: 1,
+    explanation: "The efficacy of topical corticosteroids in ICD has been controversial, as experimental studies have provided conflicting results regarding their effectiveness."
+  },
+  {
+    q: "What is the recommended approach for severe chronic hyperkeratotic palmoplantar dermatitis that doesn't respond to standard therapy?",
+    options: ["Stronger topical steroids", "Systemic retinoids or immunomodulators", "Increased moisturizer use", "Physical therapy"],
+    answer: 1,
+    explanation: "Hyperkeratotic palmoplantar dermatitis from chronic ICD may benefit from systemic retinoids such as acitretin and alitretinoin or immunomodulators such as methotrexate and cyclosporine."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

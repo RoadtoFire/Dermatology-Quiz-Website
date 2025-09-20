@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rook's Mycobacterial Infections Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+        [
+  {
+    "q": "Which of the following is the most common form of cutaneous tuberculosis in children in India?",
+    "options": ["Lupus vulgaris", "Scrofuloderma", "Warty tuberculosis", "Lichen scrofulosorum"],
+    "answer": 1,
+    "explanation": "Scrofuloderma is frequently reported as the most common form of cutaneous tuberculosis in children in Indian studies, often resulting from contiguous spread from underlying lymph nodes."
+  },
+  {
+    "q": "What is the gold standard diagnostic test for confirming Mycobacterium ulcerans infection?",
+    "options": ["Culture at 37°C", "Ziehl-Neelsen stain", "IS2404 PCR", "Tuberculin skin test"],
+    "answer": 2,
+    "explanation": "IS2404 PCR is the gold standard for confirming M. ulcerans infection due to its high sensitivity and specificity, with results available within 48 hours."
+  },
+  {
+    "q": "Which interferon-γ release assay (IGRA) uses the antigens ESAT-6, CFP-10, and TB7.7?",
+    "options": ["T-SPOT.TB", "QuantiFERON-TB Gold In-Tube", "Mantoux test", "Xpert MTB/RIF"],
+    "answer": 1,
+    "explanation": "QuantiFERON-TB Gold In-Tube (QFT-GIT) uses early secretory antigenic target 6 (ESAT-6), culture filtrate protein 10 (CFP-10), and TB7.7 to detect M. tuberculosis infection."
+  },
+  {
+    "q": "Which mycobacterial species requires a lower culture temperature (30–32°C) for optimal growth?",
+    "options": ["M. tuberculosis", "M. marinum", "M. avium", "M. kansasii"],
+    "answer": 1,
+    "explanation": "M. marinum grows optimally at 30–33°C, which is lower than the 35–37°C required for M. tuberculosis, reflecting its adaptation to cooler aquatic environments."
+  },
+  {
+    "q": "What is the recommended first-line oral antibiotic regimen for Mycobacterium ulcerans disease?",
+    "options": ["Rifampicin + Isoniazid", "Rifampicin + Clarithromycin", "Streptomycin + Ethambutol", "Azithromycin + Moxifloxacin"],
+    "answer": 1,
+    "explanation": "The current WHO-recommended regimen for M. ulcerans is oral rifampicin (10 mg/kg) and oral clarithromycin (15 mg/kg) daily for 8 weeks."
+  },
+  {
+    "q": "Which form of cutaneous tuberculosis is characterized by 'apple jelly' nodules on diascopy?",
+    "options": ["Scrofuloderma", "Lupus vulgaris", "Tuberculous chancre", "Erythema induratum"],
+    "answer": 1,
+    "explanation": "Lupus vulgaris typically presents with reddish-brown plaques that show an 'apple jelly' color when pressed with a glass slide (diascopy)."
+  },
+  {
+    "q": "What is the most common site for lupus vulgaris lesions in European populations?",
+    "options": ["Buttocks", "Lower limbs", "Head and neck", "Trunk"],
+    "answer": 2,
+    "explanation": "In Europe, over 80% of lupus vulgaris lesions occur on the head and neck, particularly around the nose."
+  },
+  {
+    "q": "Which mycobacterial infection is commonly associated with tropical fish tanks?",
+    "options": ["M. tuberculosis", "M. marinum", "M. ulcerans", "M. avium complex"],
+    "answer": 1,
+    "explanation": "M. marinum infections are frequently associated with exposure to tropical fish tanks, earning it the nickname 'aquarium granuloma'."
+  },
+  {
+    "q": "Which of the following is a characteristic feature of a tuberculous chancre?",
+    "options": ["Heals rapidly without scarring", "Associated with severe pain", "Develops in non-immune hosts", "Always culture-negative"],
+    "answer": 2,
+    "explanation": "Tuberculous chancre is a primary inoculation tuberculosis that develops in individuals without previous immunity to M. tuberculosis."
+  },
+  {
+    "q": "What is the most common complication of longstanding lupus vulgaris?",
+    "options": ["Lymphadenopathy", "Squamous cell carcinoma", "Miliary tuberculosis", "Renal amyloidosis"],
+    "answer": 1,
+    "explanation": "Squamous cell carcinoma can develop in 0.5–10% of longstanding lupus vulgaris cases, typically after 25–30 years."
+  },
+  {
+    "q": "Which tuberculosis is characterized by a lobular panniculitis with vasculitis?",
+    "options": ["Lichen scrofulosorum", "Papulonecrotic tuberculid", "Erythema induratum", "Lupus miliaris disseminatus faciei"],
+    "answer": 2,
+    "explanation": "Erythema induratum of Bazin represents a tuberculosis-associated panniculitis with histology showing lobular panniculitis with vasculitis."
+  },
+  {
+    "q": "Which diagnostic method demonstrates M. tuberculosis DNA in paucibacillary forms of cutaneous tuberculosis?",
+    "options": ["Culture", "Ziehl-Neelsen stain", "PCR", "Tuberculin test"],
+    "answer": 2,
+    "explanation": "PCR can detect M. tuberculosis DNA in paucibacillary lesions like lupus vulgaris where cultures and smears are often negative."
+  },
+  {
+    "q": "What is the recommended duration of standard therapy for drug-susceptible pulmonary tuberculosis?",
+    "options": ["2 months", "4 months", "6 months", "12 months"],
+    "answer": 2,
+    "explanation": "The standard regimen for drug-susceptible tuberculosis is 6 months: 2 months of rifampicin, isoniazid, ethambutol, and pyrazinamide, followed by 4 months of rifampicin and isoniazid."
+  },
+  {
+    "q": "Which mycobacterial species is the principal cause of Buruli ulcer?",
+    "options": ["M. marinum", "M. ulcerans", "M. tuberculosis", "M. avium"],
+    "answer": 1,
+    "explanation": "M. ulcerans is the environmental mycobacterium that causes Buruli ulcer, characterized by painless ulcers with undermined edges."
+  },
+  {
+    "q": "Which of the following is a common side effect of ethambutol therapy?",
+    "options": ["Orange discoloration of body fluids", "Peripheral neuropathy", "Retrobulbar neuritis", "Hepatitis"],
+    "answer": 2,
+    "explanation": "Ethambutol may cause visual disturbances including retrobulbar neuritis, which is reversible if detected early."
+  },
+  {
+    "q": "What percentage of the world's population is estimated to have latent M. tuberculosis infection?",
+    "options": ["One-tenth", "One-quarter", "One-third", "One-half"],
+    "answer": 2,
+    "explanation": "Approximately one-third of the world's population is estimated to have latent M. tuberculosis infection."
+  },
+  {
+    "q": "Which mycobacterial species is most associated with cervical lymphadenitis in children?",
+    "options": ["M. tuberculosis", "M. avium complex", "M. marinum", "M. fortuitum"],
+    "answer": 1,
+    "explanation": "In countries with low tuberculosis rates, M. avium complex is the most common cause of cervical lymphadenitis in children."
+  },
+  {
+    "q": "What is the causative toxin responsible for tissue necrosis in M. ulcerans infection?",
+    "options": ["Tuberculin", "Mycolactone", "Cord factor", "Sulfatide"],
+    "answer": 1,
+    "explanation": "Mycolactone is a diffusible polyketide toxin produced by M. ulcerans that causes tissue necrosis and suppresses immune responses."
+  },
+  {
+    "q": "Which form of cutaneous tuberculosis results from contiguous spread from an underlying focus?",
+    "options": ["Lupus vulgaris", "Scrofuloderma", "Tuberculid", "Warty tuberculosis"],
+    "answer": 1,
+    "explanation": "Scrofuloderma results from direct invasion of the skin from an underlying contiguous tuberculous focus, typically in lymph nodes, bone, or joints."
+  },
+  {
+    "q": "Which of the following is NOT a typical feature of papulonecrotic tuberculid?",
+    "options": ["Symmetrical distribution", "Healing with varioliform scars", "Strongly positive tuberculin test", "Abundant acid-fast bacilli in lesions"],
+    "answer": 3,
+    "explanation": "Papulonecrotic tuberculid is characterized by few bacilli (paucibacillary), with M. tuberculosis DNA detectable by PCR but rarely by smear or culture."
+  },
+  {
+    "q": "What is the most appropriate treatment for localized M. marinum infection?",
+    "options": ["Isoniazid monotherapy", "Surgical excision alone", "Clarithromycin and ethambutol", "Pyrazinamide and rifampicin"],
+    "answer": 2,
+    "explanation": "Clarithromycin and ethambutol combination is recommended for M. marinum infections, with treatment duration of 3-4 months until symptoms resolve."
+  },
+  {
+    "q": "Which demographic group is most commonly affected by erythema induratum of Bazin?",
+    "options": ["Young children", "Elderly men", "Middle-aged women", "Immunocompromised patients"],
+    "answer": 2,
+    "explanation": "Erythema induratum predominantly affects young to middle-aged women, with 80-90% of cases occurring in females."
+  },
+  {
+    "q": "What is the optimal growth temperature for M. haemophilum?",
+    "options": ["25-28°C", "30-32°C", "35-37°C", "39-41°C"],
+    "answer": 1,
+    "explanation": "M. haemophilum grows optimally at 30-32°C, which explains its predilection for cooler areas of the body like extremities."
+  },
+  {
+    "q": "Which of the following is a characteristic histopathological feature of warty tuberculosis?",
+    "options": ["Caseating granulomas", "Pseudoeptitheliomatous hyperplasia", "Lobular panniculitis", "Leukocytoclastic vasculitis"],
+    "answer": 1,
+    "explanation": "Warty tuberculosis shows marked hyperkeratosis, acanthosis, papillomatosis (which may be pseudoeptitheliomatous), and an intense dermal infiltrate."
+  },
+  {
+    "q": "What percentage of MDR tuberculosis cases are estimated to have XDR tuberculosis?",
+    "options": ["1.2%", "9.6%", "15.3%", "22.7%"],
+    "answer": 1,
+    "explanation": "On average, an estimated 9.6% of MDR tuberculosis cases have XDR tuberculosis (resistance to rifampicin, any fluoroquinolone, and one of bedaquiline or linezolid)."
+  },
+  {
+    "q": "Which rapidly growing mycobacterium is most associated with disseminated cutaneous infections in immunocompromised patients?",
+    "options": ["M. fortuitum", "M. chelonae", "M. smegmatis", "M. gordonae"],
+    "answer": 1,
+    "explanation": "M. chelonae and the M. abscessus group are responsible for approximately 95% of disseminated cutaneous infections caused by rapidly growing mycobacteria."
+  },
+  {
+    "q": "What is the most common extrapulmonary site of tuberculosis?",
+    "options": ["Skin", "Lymph nodes", "Bone and joints", "Genitourinary tract"],
+    "answer": 1,
+    "explanation": "Lymph node tuberculosis is the most common form of extrapulmonary tuberculosis, often presenting as scrofuloderma when involving the skin."
+  },
+  {
+    "q": "Which cytokine is essential for immune control of tuberculosis and is targeted by therapeutic inhibitors?",
+    "options": ["IL-4", "IL-10", "TNF-α", "TGF-β"],
+    "answer": 2,
+    "explanation": "TNF-α is essential for granuloma formation and maintenance, and its inhibition by anti-TNF therapies increases the risk of tuberculosis reactivation."
+  },
+  {
+    "q": "What is the recommended cut-off for a positive tuberculin skin test in close contacts of active tuberculosis cases?",
+    "options": ["≥5 mm", "≥10 mm", "≥15 mm", "≥20 mm"],
+    "answer": 0,
+    "explanation": "A cut-off of ≥5 mm induration is used for tuberculin skin testing in high-risk groups including close contacts of active tuberculosis cases."
+  },
+  {
+    "q": "Which mycobacterial species requires iron supplementation in culture media?",
+    "options": ["M. tuberculosis", "M. marinum", "M. haemophilum", "M. kansasii"],
+    "answer": 2,
+    "explanation": "M. haemophilum has unique growth requirements including the need for iron supplementation in culture media."
+  },
+  {
+    "q": "What is the most common clinical presentation of M. kansasii infection?",
+    "options": ["Cutaneous nodules", "Pulmonary disease", "Lymphadenitis", "Disseminated infection"],
+    "answer": 1,
+    "explanation": "M. kansasii most commonly causes pulmonary disease resembling tuberculosis, usually in patients with underlying lung conditions."
+  },
+  {
+    "q": "Which of the following is a characteristic feature of orificial tuberculosis?",
+    "options": ["Painless ulcers", "Heals spontaneously", "Occurs in immunocompetent hosts", "Associated with advanced visceral TB"],
+    "answer": 3,
+    "explanation": "Orificial tuberculosis occurs in severely ill patients with advanced visceral tuberculosis who often have impaired cell-mediated immunity."
+  },
+  {
+    "q": "What is the approximate incubation period for M. ulcerans infection?",
+    "options": ["2-3 weeks", "4-6 weeks", "2-3 months", "4-5 months"],
+    "answer": 3,
+    "explanation": "The estimated mean incubation period of M. ulcerans is approximately 135 days (4.5 months), with a range of 34-264 days."
+  },
+  {
+    "q": "Which tuberculosis typically presents with asymptomatic, follicular, lichenoid papules?",
+    "options": ["Papulonecrotic tuberculid", "Lichen scrofulosorum", "Erythema induratum", "Lupus miliaris disseminatus faciei"],
+    "answer": 1,
+    "explanation": "Lichen scrofulosorum presents as asymptomatic, minute, follicular papules that often resemble lichen nitidus."
+  },
+  {
+    "q": "What is the most common side effect of isoniazid therapy?",
+    "options": ["Optic neuritis", "Hepatitis", "Orange discoloration of secretions", "Arthralgia"],
+    "answer": 1,
+    "explanation": "Isoniazid commonly causes hepatitis in adults over 35 years of age, and peripheral neuropathy which can be prevented with pyridoxine supplementation."
+  },
+  {
+    "q": "Which mycobacterial infection has been associated with contaminated tattoo ink?",
+    "options": ["M. tuberculosis", "M. leprae", "M. chelonae", "M. avium"],
+    "answer": 2,
+    "explanation": "M. chelonae has been reported as a contaminant in tattoo ink, leading to cutaneous infections."
+  },
+  {
+    "q": "What is the primary mechanism of transmission of M. tuberculosis?",
+    "options": ["Fecal-oral", "Vector-borne", "Airborne droplets", "Direct contact"],
+    "answer": 2,
+    "explanation": "M. tuberculosis is primarily transmitted via inhalation of airborne droplet nuclei containing the bacterium."
+  },
+  {
+    "q": "Which of the following is NOT a recommended drug for M. marinum infection?",
+    "options": ["Clarithromycin", "Rifampicin", "Isoniazid", "Ethambutol"],
+    "answer": 2,
+    "explanation": "M. marinum is resistant to isoniazid and pyrazinamide, but susceptible to clarithromycin, rifampicin, ethambutol, and sulfonamides."
+  },
+  {
+    "q": "What percentage of patients with lupus vulgaris have positive cultures for M. tuberculosis?",
+    "options": ["<5%", "12-40%", "50-65%", "70-85%"],
+    "answer": 1,
+    "explanation": "Cultures are positive in approximately 12.5-40% of lupus vulgaris cases due to the paucibacillary nature of this form of cutaneous tuberculosis."
+  },
+  {
+    "q": "Which rapidly growing mycobacterium is most commonly associated with community-acquired localized cutaneous infections?",
+    "options": ["M. abscessus", "M. chelonae", "M. fortuitum", "M. smegmatis"],
+    "answer": 2,
+    "explanation": "The M. fortuitum group accounts for 60% of community-acquired, localized cutaneous infections caused by rapidly growing mycobacteria."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

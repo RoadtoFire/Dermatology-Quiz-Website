@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rook's Autoinﬂammatory Diseases Presenting in the Skin Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    "q": "What is the most typical dermatological presentation of autoinflammatory syndromes with an urticarial or maculopapular rash?",
+    "options": ["Neutrophilic urticarial dermatosis", "Leukocytoclastic vasculitis", "Granulomatous dermatitis", "Pustular psoriasis"],
+    "answer": 0,
+    "explanation": "Neutrophilic urticarial dermatosis is the most typical dermatological presentation of those autoinflammatory syndromes that present with an urticarial or maculopapular rash."
+  },
+  {
+    "q": "Which cytokine is the key mediator in Cryopyrin-Associated Periodic Syndrome (CAPS)?",
+    "options": ["IL-1β", "TNF-α", "IL-6", "IFN-γ"],
+    "answer": 0,
+    "explanation": "IL-1β is a major pro-inflammatory cytokine and the key mediator of the manifestations of CAPS, supported by the dramatic response to IL-1 blockade."
+  },
+  {
+    "q": "What is the inheritance pattern of Familial Mediterranean Fever (FMF)?",
+    "options": ["Autosomal dominant", "Autosomal recessive", "X-linked recessive", "Sporadic"],
+    "answer": 1,
+    "explanation": "FMF is usually an autosomal recessive disorder related to gain of function mutations in the MEFV gene, although rare dominant mutations exist."
+  },
+  {
+    "q": "Which gene is mutated in TNF Receptor-Associated Periodic Syndrome (TRAPS)?",
+    "options": ["MEFV", "TNFRSF1A", "NLRP3", "MVK"],
+    "answer": 1,
+    "explanation": "TRAPS is associated with mutations in the gene for TNF receptor superfamily 1A (TNFRSF1A), encoding a p55 TNF receptor (TNFR1)."
+  },
+  {
+    "q": "What is the feared complication of untreated TRAPS?",
+    "options": ["AA amyloidosis", "Lymphoma", "Renal failure", "Blindness"],
+    "answer": 0,
+    "explanation": "AA amyloidosis is a feared complication of TRAPS."
+  },
+  {
+    "q": "Which of the following is a characteristic skin finding in Familial Mediterranean Fever (FMF)?",
+    "options": ["Erysipelas-like erythema", "Pustular rash", "Telangiectasia", "Livedo reticularis"],
+    "answer": 0,
+    "explanation": "The most typical cutaneous finding in FMF is the so-called 'erysipelas-like erythema' (ELE), consisting of a warm swollen redness usually localized to the distal lower limbs."
+  },
+  {
+    "q": "Which autoinflammatory syndrome is characterized by neonatal-onset pustular dermatitis, multifocal osteomyelitis, and periostitis?",
+    "options": ["DIRA", "CAPS", "TRAPS", "Blau syndrome"],
+    "answer": 0,
+    "explanation": "Deficiency of interleukin 1 receptor antagonist (DIRA) presents in neonates with aseptic pustular dermatitis, multifocal osteomyelitis and periostitis."
+  },
+  {
+    "q": "What is the treatment of choice for DIRA?",
+    "options": ["Colchicine", "IL-1 inhibition", "TNF inhibition", "JAK inhibition"],
+    "answer": 1,
+    "explanation": "DIRA is treated with IL-1 inhibition (e.g., anakinra) due to the deficiency of the naturally occurring antagonist of the IL-1 receptor."
+  },
+  {
+    "q": "Which syndrome is characterized by the triad of chronic granulomatous arthritis, uveitis, and rash?",
+    "options": ["Blau syndrome", "CAPS", "TRAPS", "MKD"],
+    "answer": 0,
+    "explanation": "Blau syndrome is characterized by early-onset chronic granulomatous arthritis, uveitis and rash due to mutations in NOD2 (CARD15)."
+  },
+  {
+    "q": "What is the inheritance pattern of Blau syndrome?",
+    "options": ["Autosomal recessive", "Autosomal dominant", "X-linked", "Sporadic"],
+    "answer": 1,
+    "explanation": "Blau syndrome is an autosomal dominant multisystem disorder due to mutations in the pattern recognition receptor gene NOD2 (CARD15)."
+  },
+  {
+    "q": "Which autoinflammatory syndrome is associated with mutations in the PSTPIP1 gene?",
+    "options": ["PAPA syndrome", "CAPS", "TRAPS", "FMF"],
+    "answer": 0,
+    "explanation": "Pyogenic sterile arthritis, pyoderma gangrenosum and acne (PAPA) syndrome is due to mutations in the PSTPIP1 gene."
+  },
+  {
+    "q": "Which of the following is NOT a component of PAPA syndrome?",
+    "options": ["Pyogenic arthritis", "Pyoderma gangrenosum", "Acne", "Uveitis"],
+    "answer": 3,
+    "explanation": "PAPA syndrome includes pyogenic arthritis, pyoderma gangrenosum and acne. Uveitis is not a typical feature."
+  },
+  {
+    "q": "What is the hallmark histological feature of neutrophilic urticarial dermatosis?",
+    "options": ["Granulomas", "Neutrophilic infiltrate", "Lymphocytic vasculitis", "Eosinophils"],
+    "answer": 1,
+    "explanation": "Neutrophilic urticarial dermatosis is characterized by an urticarial eruption with infiltration by neutrophils."
+  },
+  {
+    "q": "Which autoinflammatory syndrome is characterized by gain-of-function mutations in STING1?",
+    "options": ["SAVI", "CAPS", "TRAPS", "FMF"],
+    "answer": 0,
+    "explanation": "STING-associated vasculopathy with onset in infancy (SAVI) is caused by gain of function mutations in STING1."
+  },
+  {
+    "q": "What is the typical age of onset for SAVI?",
+    "options": ["Neonatal/infancy", "Adolescence", "Adulthood", "Elderly"],
+    "answer": 0,
+    "explanation": "SAVI is characterized by neonatal-onset of recurrent fever with rash, failure to thrive and interstitial lung disease."
+  },
+  {
+    "q": "Which of the following is a type I interferonopathy?",
+    "options": ["Alcardi-Goutières syndrome (AGS)", "FMF", "TRAPS", "CAPS"],
+    "answer": 0,
+    "explanation": "Alcardi-Goutières syndrome (AGS) is a type I interferonopathy characterized by inflammation affecting the brain and skin."
+  },
+  {
+    "q": "What is the treatment of choice for type I interferonopathies?",
+    "options": ["IL-1 inhibitors", "TNF inhibitors", "JAK inhibitors", "Colchicine"],
+    "answer": 2,
+    "explanation": "JAK inhibitors are the treatment of choice for type I interferonopathies as they target the interferon signaling pathway."
+  },
+  {
+    "q": "Which syndrome is characterized by deficiency of adenosine deaminase 2 (DADA2)?",
+    "options": ["Vasculitis and stroke", "Pustular dermatitis", "Granulomatous arthritis", "Cold-induced urticaria"],
+    "answer": 0,
+    "explanation": "DADA2 is characterized by vasculitis, livedo, nodules, and ischemic/hemorrhagic stroke."
+  },
+  {
+    "q": "What is the inheritance pattern of DADA2?",
+    "options": ["Autosomal dominant", "Autosomal recessive", "X-linked", "Sporadic"],
+    "answer": 1,
+    "explanation": "DADA2 is a recessive disorder related to biallelic hypomorphic mutations in ADA2."
+  },
+  {
+    "q": "Which autoinflammatory syndrome is associated with somatic mutations in UBA1?",
+    "options": ["VEXAS syndrome", "CAPS", "TRAPS", "FMF"],
+    "answer": 0,
+    "explanation": "VEXAS syndrome is an acquired autoinflammatory syndrome arising from myeloid lineage restricted somatic mutation in UBA1."
+  },
+  {
+    "q": "What are the typical clinical features of VEXAS syndrome?",
+    "options": ["Fever, polychondritis, Sweet syndrome", "Arthritis, uveitis, rash", "Cold-induced urticaria, deafness", "Abdominal pain, serositis, ELE"],
+    "answer": 0,
+    "explanation": "VEXAS syndrome presents with fever, relapsing polychondritis and Sweet syndrome in adult men."
+  },
+  {
+    "q": "Which of the following is a diagnostic criterion for Schnitzler syndrome?",
+    "options": ["Monoclonal IgM gammopathy", "Positive ANA", "Eosinophilia", "Low complement levels"],
+    "answer": 0,
+    "explanation": "Schnitzler syndrome is characterized by a chronic urticarial rash and a persistently raised monoclonal IgM."
+  },
+  {
+    "q": "What is the treatment of choice for Schnitzler syndrome?",
+    "options": ["Colchicine", "IL-1 inhibition", "TNF inhibition", "JAK inhibition"],
+    "answer": 1,
+    "explanation": "Patients with Schnitzler syndrome show dramatic and immediate responsiveness to IL-1 inhibitors."
+  },
+  {
+    "q": "Which autoinflammatory syndrome is characterized by the triad of fever, rash, and arthritis in children?",
+    "options": ["Systemic-onset juvenile idiopathic arthritis (SoJIA)", "CAPS", "TRAPS", "FMF"],
+    "answer": 0,
+    "explanation": "Systemic-onset juvenile idiopathic arthritis (SoJIA) presents with spiking fevers, maculopapular rash, and arthritis in children."
+  },
+  {
+    "q": "What is a serious complication of SoJIA?",
+    "options": ["Macrophage activation syndrome", "AA amyloidosis", "Sensorineural deafness", "Blindness"],
+    "answer": 0,
+    "explanation": "Macrophage activation syndrome is a potentially fatal complication of Still disease (SoJIA)."
+  },
+  {
+    "q": "Which syndrome is characterized by synovitis, acne, pustulosis, hyperostosis, and osteitis?",
+    "options": ["SAPHO syndrome", "PAPA syndrome", "Blau syndrome", "DIRA"],
+    "answer": 0,
+    "explanation": "SAPHO syndrome is characterized by synovitis, acne, pustulosis, hyperostosis, and osteitis."
+  },
+  {
+    "q": "What is the most common dermatosis in SAPHO syndrome?",
+    "options": ["Neutrophilic palmoplantar pustulosis", "Erysipelas-like erythema", "Urticarial rash", "Pyoderma gangrenosum"],
+    "answer": 0,
+    "explanation": "A neutrophilic palmoplantar pustulosis is the commonest dermatosis in SAPHO syndrome."
+  },
+  {
+    "q": "Which autoinflammatory syndrome is associated with mutations in NLRC4?",
+    "options": ["NLRC4-associated autoinflammatory disease", "CAPS", "TRAPS", "FMF"],
+    "answer": 0,
+    "explanation": "NLRC4-associated autoinflammatory disease is related to gain of function mutations in NLRC4."
+  },
+  {
+    "q": "What is a characteristic feature of NLRC4-associated autoinflammatory disease?",
+    "options": ["Extremely high IL-18 levels", "Low IgG levels", "Eosinophilia", "Granulomas"],
+    "answer": 0,
+    "explanation": "NLRC4-associated autoinflammatory disease is characterized by extremely high IL-18 levels."
+  },
+  {
+    "q": "Which syndrome is characterized by haploinsufficiency of A20?",
+    "options": ["HA20", "CAPS", "TRAPS", "FMF"],
+    "answer": 0,
+    "explanation": "Haploinsufficiency of A20 (HA20) is caused by mutations in the TNFAIP3 gene encoding protein A20."
+  },
+  {
+    "q": "What is the clinical triad of HA20?",
+    "options": ["Oral ulcers, ocular inflammation, polyarthritis", "Fever, rash, arthritis", "Abdominal pain, serositis, ELE", "Cold-induced urticaria, deafness, amyloidosis"],
+    "answer": 0,
+    "explanation": "HA20 is characterized by the clinical triad of orogenital ulcers, ocular inflammation and non-deforming polyarthritis."
+  },
+  {
+    "q": "Which autoinflammatory syndrome is associated with mevalonate kinase deficiency?",
+    "options": ["Hyper-IgD syndrome (HIDS)", "CAPS", "TRAPS", "FMF"],
+    "answer": 0,
+    "explanation": "Mevalonate kinase deficiency (MKD) manifests as hyper-IgD syndrome (HIDS) or mevalonic aciduria."
+  },
+  {
+    "q": "What is a common triggering factor for flares in MKD?",
+    "options": ["Immunizations", "Cold exposure", "Sun exposure", "Stress"],
+    "answer": 0,
+    "explanation": "Immunization, surgery, trauma and stress are classic triggering factors for flares in MKD."
+  },
+  {
+    "q": "Which autoinflammatory syndrome is characterized by chronic atypical neutrophilic dermatosis with lipodystrophy and elevated temperature?",
+    "options": ["CANDLE", "CAPS", "TRAPS", "FMF"],
+    "answer": 0,
+    "explanation": "CANDLE syndrome is characterized by chronic atypical neutrophilic dermatosis with lipodystrophy and elevated temperature."
+  },
+  {
+    "q": "What is the inheritance pattern of CANDLE syndrome?",
+    "options": ["Autosomal recessive", "Autosomal dominant", "X-linked", "Sporadic"],
+    "answer": 0,
+    "explanation": "CANDLE is an autosomal recessive syndrome related to mutations in the PSMB8 gene."
+  },
+  {
+    "q": "Which autoinflammatory syndrome is associated with vibratory urticaria?",
+    "options": ["ADGRE2 mutations", "NLRP3 mutations", "MEFV mutations", "TNFRSF1A mutations"],
+    "answer": 0,
+    "explanation": "Autosomal dominant vibratory urticaria is related to ADGRE2 mutations."
+  },
+  {
+    "q": "What is a serious complication of vibratory urticaria?",
+    "options": ["Recurrent angioedema of the hypopharynx", "Deafness", "Amyloidosis", "Blindness"],
+    "answer": 0,
+    "explanation": "One of the most serious complications of vibratory urticaria is recurrent angioedema of the hypopharynx related to snoring."
+  },
+  {
+    "q": "Which autoinflammatory syndrome is characterized by neonatal onset of pancytopenia, autoinflammation, rash, and haemophagocytic lymphohistiocytosis?",
+    "options": ["NOCARH syndrome", "CAPS", "TRAPS", "FMF"],
+    "answer": 0,
+    "explanation": "NOCARH syndrome is related to a heterozygous mutation in the CDC42 gene and presents with neonatal onset of pancytopenia, autoinflammation, rash, and haemophagocytic lymphohistiocytosis."
+  },
+  {
+    "q": "What is the treatment of choice for NOCARH syndrome?",
+    "options": ["IL-1 inhibition", "TNF inhibition", "JAK inhibition", "Colchicine"],
+    "answer": 0,
+    "explanation": "IL-1 inhibition was very efficient in a few patients with NOCARH syndrome."
+  },
+  {
+    "q": "Which autoinflammatory syndrome is associated with otulin mutations?",
+    "options": ["ORAS", "CAPS", "TRAPS", "FMF"],
+    "answer": 0,
+    "explanation": "Otulin-related autoinflammatory syndrome (ORAS) is related to mutations in the OTULIN/FAM105B gene."
+  },
+  {
+    "q": "What is the treatment of choice for ORAS?",
+    "options": ["TNF inhibitors", "IL-1 inhibitors", "JAK inhibitors", "Colchicine"],
+    "answer": 0,
+    "explanation": "TNF inhibitors are a very efficient treatment for ORAS."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

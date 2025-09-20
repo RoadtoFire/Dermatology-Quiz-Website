@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Rook's Bacterial Infections Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+    [
+  {
+    "q": "According to the chapter, what is the most common pathogenic bacteria isolated from nosocomial infections in the USA?",
+    "options": ["Pseudomonas aeruginosa", "Escherichia coli", "Staphylococcus aureus", "Streptococcus pyogenes"],
+    "answer": 2,
+    "explanation": "The text states that recent studies have shown Staphylococcus aureus is the most commonly isolated pathogenic bacteria from nosocomial infections in the USA."
+  },
+  {
+    "q": "Which of the following is a recognised function of the normal skin flora?",
+    "options": ["Production of body odor", "Maintenance of an alkaline skin pH", "Directly secreting antibodies", "Defence against bacterial infection through bacterial interference"],
+    "answer": 3,
+    "explanation": "The normal flora's most important function is probably defence against bacterial infection through bacterial interference, where resident bacteria like Cutibacterium acnes create an environment that inhibits pathogens."
+  },
+  {
+    "q": "A patient presents with golden crusted lesions on the face. A culture is most likely to grow which organism?",
+    "options": ["Streptococcus pyogenes", "Pseudomonas aeruginosa", "Staphylococcus aureus", "Corynebacterium minutissimum"],
+    "answer": 2,
+    "explanation": "Non-bullous impetigo, characterized by golden, crusted lesions, is most commonly caused by Staphylococcus aureus worldwide."
+  },
+  {
+    "q": "The exfoliative toxins (ETA and ETB) produced by Staphylococcus aureus in Staphylococcal Scalded Skin Syndrome (SSSS) specifically cleave which protein?",
+    "options": ["Keratin", "Collagen", "Desmoglein 1", "Fibrin"],
+    "answer": 2,
+    "explanation": "The exfoliative toxins act as serine proteases that selectively cleave the cellular adhesion molecule desmoglein 1, leading to superficial blistering and skin separation."
+  },
+  {
+    "q": "What is the most common portal of entry for cellulitis and erysipelas?",
+    "options": ["Haematogenous spread", "Inhalation", "A break in the skin", "Ingestion"],
+    "answer": 2,
+    "explanation": "The text states that for leg cellulitis/erysipelas, there is usually a wound, ulcer, or inflammatory lesion (like tinea pedis) identified as a possible portal of entry."
+  },
+  {
+    "q": "Which organism is the most common cause of bullous impetigo?",
+    "options": ["Group A Streptococcus", "Staphylococcus aureus", "Pseudomonas aeruginosa", "Candida albicans"],
+    "answer": 1,
+    "explanation": "Bullous impetigo is explicitly defined as a superficial cutaneous infection with Staphylococcus aureus."
+  },
+  {
+    "q": "The coral-red fluorescence under Wood's lamp is a classic diagnostic feature for which condition?",
+    "options": ["Pitted keratolysis", "Tinea versicolor", "Erythrasma", "Trichomycosis axillaris"],
+    "answer": 2,
+    "explanation": "Coral-red fluorescence under Wood's light, due to coproporphyrin III production, is diagnostic for erythrasma."
+  },
+  {
+    "q": "Which of the following is a major risk factor for developing Panton-Valentine leukocidin (PVL) positive Staphylococcus aureus infections?",
+    "options": ["Close contact/overcrowding", "High dietary sugar intake", "Sun exposure", "Hypertension"],
+    "answer": 0,
+    "explanation": "Risk factors for PVL infections include overcrowding/close contact, poor hygiene, and skin breaks. Outbreaks are common in sports teams, military personnel, and prisons."
+  },
+  {
+    "q": "What is the first-line antibiotic treatment for uncomplicated cellulitis?",
+    "options": ["Penicillin V", "Flucloxacillin", "Vancomycin", "Ciprofloxacin"],
+    "answer": 1,
+    "explanation": "For cellulitis, first-line treatment is an anti-staphylococcal penicillin like flucloxacillin, which is bactericidal against both staphylococci and streptococci."
+  },
+  {
+    "q": "Perianal streptococcal cellulitis (or dermatitis) most commonly affects which age group?",
+    "options": ["Neonates", "Children aged 6 months to 10 years", "Adolescents", "Adults over 50"],
+    "answer": 1,
+    "explanation": "The text states that perianal streptococcal cellulitis is almost exclusive to young children, with most patients aged between 6 months and 10 years."
+  },
+  {
+    "q": "Which toxin is primarily responsible for the clinical features of Toxic Shock Syndrome (TSS)?",
+    "options": ["Alpha-toxin", "Toxic Shock Syndrome Toxin-1 (TSST-1)", "Exfoliative toxin", "Panton-Valentine leukocidin (PVL)"],
+    "answer": 1,
+    "explanation": "TSST-1, previously identified as staphylococcal enterotoxin F or pyrogenic exotoxin C, is produced by 80-90% of S. aureus isolates from TSS cases and is believed to be the main mediator."
+  },
+  {
+    "q": "A gardener presents with a tender, violaceous, expanding plaque on the hand a few days after a minor injury. What is the most likely diagnosis?",
+    "options": ["Erysipeloid", "Anthrax", "Cutaneous diphtheria", "Orf"],
+    "answer": 0,
+    "explanation": "Erysipeloid, caused by Erysipelothrix rhusiopathiae, is an occupational hazard for those handling fish, meat, or soil. It presents as a tender, violaceous-red plaque with a sharp, raised border, often on the hand."
+  },
+  {
+    "q": "What is the definitive treatment for gas gangrene (clostridial myonecrosis)?",
+    "options": ["Intravenous antibiotics alone", "Hyperbaric oxygen alone", "Prompt surgical debridement", "Topical antiseptics"],
+    "answer": 2,
+    "explanation": "The text emphasizes that prompt surgical debridement of all devitalized tissue is essential. Antibiotic therapy is only an adjunct to surgery."
+  },
+  {
+    "q": "A child presents with a 'strawberry tongue', a scarlatiniform rash, and pharyngitis. What is the most likely cause?",
+    "options": ["Kawasaki disease", "Staphylococcal Scarlet fever", "Streptococcal Scarlet fever", "Toxic Shock Syndrome"],
+    "answer": 2,
+    "explanation": "Scarlet fever, caused by toxin-producing Group A Streptococcus (S. pyogenes), is characterized by pharyngitis, fever, and a distinctive scarlatiniform rash with strawberry tongue."
+  },
+  {
+    "q": "Which of the following is a characteristic histological finding in rhinoscleroma?",
+    "options": ["Mikulicz cells and Russell bodies", "Non-caseating granulomas", "Gram-positive cocci in clusters", "Acid-fast bacilli"],
+    "answer": 0,
+    "explanation": "The histopathology of rhinoscleroma is pathognomonic, showing a dense infiltrate with Mikulicz cells (large vacuolated histiocytes containing bacilli) and Russell bodies (eosinophilic structures in plasma cells)."
+  },
+  {
+    "q": "Melioidosis, caused by Burkholderia pseudomallei, is most commonly acquired through what route?",
+    "options": ["Sexual contact", "Respiratory droplets", "Contamination of skin injuries with soil/water", "Ingestion of contaminated meat"],
+    "answer": 2,
+    "explanation": "Melioidosis is acquired through environmental contamination of minor skin injuries, percutaneous inoculation, or inhalation of the organism, which is found in soil and water in endemic areas."
+  },
+  {
+    "q": "What is the drug of choice for the acute phase of treatment for melioidosis?",
+    "options": ["Doxycycline", "Ceftazidime", "Co-trimoxazole", "Penicillin"],
+    "answer": 1,
+    "explanation": "The management section for melioidosis states that ceftazidime is the drug of choice for the acute (parenteral) phase of treatment."
+  },
+  {
+    "q": "The classic presentation of bubonic plague includes a painfully swollen lymph node known as a:",
+    "options": ["Chancre", "Bubo", "Gumma", "Hubo"],
+    "answer": 1,
+    "explanation": "In bubonic plague, the regional lymph node becomes acutely painful and swollen; this lesion is called a bubo."
+  },
+  {
+    "q": "A patient with a cat scratch develops a primary papule and subsequent significant regional lymphadenopathy. What is the most likely causative agent?",
+    "options": ["Pasteurella multocida", "Bartonella henselae", "Francisella tularensis", "Streptococcus pyogenes"],
+    "answer": 1,
+    "explanation": "Cat scratch disease is a classic syndrome caused by Bartonella henselae, characterized by a primary inoculation papule followed by regional lymphadenopathy after a cat scratch or bite."
+  },
+  {
+    "q": "Ecthyma gangrenosum is a cutaneous manifestation most commonly associated with bacteremia from which organism?",
+    "options": ["Staphylococcus aureus", "Pseudomonas aeruginosa", "Escherichia coli", "Streptococcus pyogenes"],
+    "answer": 1,
+    "explanation": "Ecthyma gangrenosum, characterized by gunmetal grey macules evolving into necrotic ulcers, is a classical manifestation of Pseudomonas aeruginosa septicemia, particularly in immunocompromised hosts."
+  },
+  {
+    "q": "Which of the following is NOT a recommended component of decolonization therapy for Staphylococcus aureus carriage?",
+    "options": ["Nasal mupirocin ointment", "Chlorhexidine body wash", "Oral flucloxacillin for 7 days", "Triclosan body wash"],
+    "answer": 2,
+    "explanation": "Decolonization typically involves topical agents like nasal mupirocin and antiseptic washes (e.g., chlorhexidine or triclosan). Oral antibiotics like rifampicin or clindamycin are used in specific cases but are not first-line for simple decolonization and are not prolonged without indication."
+  },
+  {
+    "q": "What is the most common predisposing factor for recurrent erysipelas of the leg?",
+    "options": ["Venous insufficiency", "Arterial disease", "Diabetes mellitus", "Obesity"],
+    "answer": 0,
+    "explanation": "The text specifically states that venous insufficiency often predisposes to recurrent erysipelas of the leg."
+  },
+  {
+    "q": "Cutaneous diphtheria is characterized by an ulcer with what type of covering?",
+    "options": ["A golden crust", "A black eschar", "A tough grey or brownish-grey adherent membrane", "A honey-colored exudate"],
+    "answer": 2,
+    "explanation": "The text describes the lesion of cutaneous diphtheria as having exudate that tends to form a 'tough grey or brownish grey, adherent membrane'."
+  },
+  {
+    "q": "Infection with which organism is a well-documented risk factor for the development of poststreptococcal glomerulonephritis?",
+    "options": ["Staphylococcus aureus (bullous impetigo)", "Streptococcus pyogenes (impetigo)", "Pseudomonas aeruginosa", "Corynebacterium diphtheriae"],
+    "answer": 1,
+    "explanation": "Streptococcal impetigo accounts for the majority of cases of poststreptococcal acute glomerulonephritis, depending on the nephritogenic potential of the infecting strain."
+  },
+  {
+    "q": "Green discoloration of the nail is a classic sign of infection with which organism?",
+    "options": ["Trichophyton rubrum", "Candida albicans", "Pseudomonas aeruginosa", "Staphylococcus aureus"],
+    "answer": 2,
+    "explanation": "Pseudomonas aeruginosa infection of the nail usually results in a green discoloration due to the production of the blue-green pigment pyocyanin."
+  },
+  {
+    "q": "What is the recommended first-line antibiotic for the treatment of anthrax?",
+    "options": ["Penicillin", "Ciprofloxacin or Doxycycline", "Erythromycin", "Vancomycin"],
+    "answer": 1,
+    "explanation": "For cutaneous anthrax without systemic involvement, the text lists ciprofloxacin and doxycycline as first-line treatment options."
+  },
+  {
+    "q": "The ulceroglandular form of tularaemia is most commonly acquired through what mechanism?",
+    "options": ["Ingestion of contaminated water", "Inhalation of aerosols", "The bite of an infected tick", "Person-to-person contact"],
+    "answer": 2,
+    "explanation": "While transmission can occur in multiple ways, the ulceroglandular form, the most common presentation, typically follows inoculation of the organism via a bite from an infected tick or other arthropod, or direct contact with an infected animal."
+  },
+  {
+    "q": "Which of the following is the most appropriate long-term prophylactic antibiotic to prevent recurrent cellulitis?",
+    "options": ["Flucloxacillin", "Penicillin V", "Ciprofloxacin", "Azithromycin"],
+    "answer": 1,
+    "explanation": "The text cites a study (PATCH II) showing that penicillin V given for 6 months following an episode of cellulitis reduced recurrences. It states that long-term phenoxymethyl penicillin (penicillin V) can prevent recurrent attacks."
+  },
+  {
+    "q": "Which specimen is most likely to yield the causative organism in a case of Staphylococcal Scalded Skin Syndrome (SSSS)?",
+    "options": ["Blister fluid", "Blood culture", "Swab from the apparent primary infection site", "Cerebrospinal fluid"],
+    "answer": 2,
+    "explanation": "The text explains that swabs from blister fluids in SSSS do not usually grow S. aureus because the blisters are sterile and mediated by circulating toxins. The staphylococci are isolated from the original, often occult, septic site (e.g., conjunctiva, wound, nasopharynx)."
+  },
+  {
+    "q": "What is the primary virulence factor produced by Clostridium perfringens that is responsible for the tissue damage in gas gangrene?",
+    "options": ["Tetanospasmin", "Botulinum toxin", "Alpha-toxin", "Leukocidin"],
+    "answer": 2,
+    "explanation": "The α-toxin produced by C. perfringens is a phospholipase C and sphingomyelinase that is haemolytic and is thought to be the main virulence factor in gas gangrene."
+  },
+  {
+    "q": "A patient presents with a painful, swollen lymph node (bubo) in the groin. They recently returned from Madagascar. What is the most urgent concern?",
+    "options": ["Lymphogranuloma venereum", "Bubonic plague", "Syphilis", "Tuberculosis"],
+    "answer": 1,
+    "explanation": "Madagascar is an endemic region for plague. The presentation of a painful, swollen lymph node (bubo) in a returning traveler is highly suggestive of bubonic plague, which is a medical emergency."
+  },
+  {
+    "q": "Which of the following is a characteristic feature of Pasteurella multocida infection?",
+    "options": ["Development weeks after a dog bite", "Rapid onset of inflammation after an animal bite", "Minimal pain and tenderness", "Poor response to penicillin"],
+    "answer": 1,
+    "explanation": "Pasteurella multocida infections, typically following cat or dog bites, are characterized by a rapid onset of redness, swelling, and tenderness around the wound, often within hours to a day."
+  },
+  {
+    "q": "The recommended treatment for brucellosis involves a prolonged course of which two antibiotics?",
+    "options": ["Penicillin and Gentamicin", "Doxycycline and Rifampicin (or an Aminoglycoside)", "Vancomycin and Ciprofloxacin", "Metronidazole and Ceftriaxone"],
+    "answer": 1,
+    "explanation": "The text states that the recommended course for brucellosis includes doxycycline and either rifampicin or an aminoglycoside for at least 6 weeks to prevent relapse."
+  },
+  {
+    "q": "What is the most common clinical presentation of melioidosis?",
+    "options": ["Meningitis", "Pneumonia", "Cellulitis", "Osteomyelitis"],
+    "answer": 1,
+    "explanation": "The text states that melioidosis typically presents as either a localised skin infection or pneumonia, with pneumonia being the most common presentation."
+  },
+  {
+    "q": "Trichomycosis axillaris is caused by:",
+    "options": ["A fungus", "A yeast", "Coryneform bacteria", "A dermatophyte"],
+    "answer": 2,
+    "explanation": "Despite its name, trichomycosis axillaris is a bacterial infection caused by several species of Corynebacterium, not a fungus."
+  },
+  {
+    "q": "In which group of patients is Listeria monocytogenes infection most common?",
+    "options": ["Healthy teenagers", "Pregnant women, the immunocompromised, and neonates", "Elderly men with heart disease", "Young children with eczema"],
+    "answer": 1,
+    "explanation": "The text states that most cases of listerial infections occur in individuals with predisposing conditions, which include pregnancy, glucocorticoid therapy, and other immunocompromising states. It can also be transmitted to neonates."
+  },
+  {
+    "q": "A patient with diabetes presents with severe ear pain and purulent discharge. The pinna is tender and oedematous. What is the most serious potential diagnosis?",
+    "options": ["Otitis media", "Malignant (necrotizing) otitis externa", "Perichondritis", "Herpes zoster oticus"],
+    "answer": 1,
+    "explanation": "Necrotizing (malignant) otitis externa caused by Pseudomonas aeruginosa is a serious infection that occurs predominantly in diabetics and immunocompromised patients, presenting with severe ear pain and purulent discharge and risking osteomyelitis of the skull base."
+  },
+  {
+    "q": "What is the mechanism of action of streptococcal pyrogenic exotoxins (SPEs) in Streptococcal Toxic Shock-like Syndrome (STSS)?",
+    "options": ["They inhibit protein synthesis", "They act as superantigens", "They are neurotoxic", "They disrupt cell membranes"],
+    "answer": 1,
+    "explanation": "The SPEs are part of a larger group of pyrogenic toxin superantigens (PTSAgs) that can activate up to 20% of T cells directly, bypassing normal antigen presentation and causing a massive cytokine surge leading to shock and organ failure."
+  },
+  {
+    "q": "Which of the following is a key distinguishing feature between Staphylococcal Toxic Shock Syndrome (TSS) and Streptococcal Toxic Shock-like Syndrome (STSS)?",
+    "options": ["Presence of a rash", "Association with profound shock", "The need for ICU admission", "STSS is associated with severe invasive disease, while staphylococcal TSS may follow trivial infection"],
+    "answer": 3,
+    "explanation": "The text highlights that cases of STSS are associated with severe invasive group A streptococcal disease (e.g., necrotizing fasciitis), whereas staphylococcal TSS may be associated with either severe or trivial infection (e.g., tampon use)."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Professional Quiz</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #f0f4f8, #dfe9f3);
+      margin: 0 auto;
+      padding: 20px;
+      max-width: 900px;
+    }
+    h1 {
+      text-align: center;
+      color: #003366;
+    }
+    #progressBar {
+      height: 25px;
+      background-color: #e0e0e0;
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    #progressFill {
+      height: 100%;
+      width: 0%;
+      background-color: #007bff;
+      text-align: center;
+      line-height: 25px;
+      color: white;
+      transition: width 0.4s;
+    }
+    .question {
+      background: white;
+      border-left: 6px solid #007bff;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .question p {
+      font-weight: bold;
+    }
+    .option-label {
+      display: block;
+      background: #f4f7fa;
+      margin: 10px 0;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .option-label:hover {
+      background: #e8f0fe;
+    }
+    .option-label.correct {
+      background-color: #d4edda !important;
+      color: #155724;
+      border-color: #c3e6cb;
+    }
+    .option-label.incorrect {
+      background-color: #f8d7da !important;
+      color: #721c24;
+      border-color: #f5c6cb;
+    }
+    .explanation {
+      margin-top: 10px;
+      font-style: italic;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+      display: none;
+    }
+    #score {
+      text-align: center;
+      font-size: 1.5em;
+      color: #003366;
+      margin-top: 30px;
+    }
+    .retry-btn {
+      display: block;
+      margin: 30px auto;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .retry-btn:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bolognia Mycobacterial Infections Quiz</h1>
+  <div id="progressBar">
+    <div id="progressFill">0%</div>
+  </div>
+  <div id="quiz"></div>
+  <div id="score"></div>
+  <button class="retry-btn" onclick="restartQuiz()" style="display:none;">Retake Quiz</button>
+
+  <script>
+    const questions = 
+        [
+  {
+    q: "Impetigo represents the most common bacterial skin infection in which demographic group?",
+    options: ["Immunocompromised adults", "Diabetic patients", "Children", "Elderly patients"],
+    answer: 2,
+    explanation: "Impetigo occurs frequently in children, especially those under 6 years of age, and represents the most common bacterial skin infection in this group."
+  },
+  {
+    q: "What is the most common pathogen found in both non-bullous and bullous forms of impetigo?",
+    options: ["Streptococcus pyogenes (Group A β-hemolytic streptococcus)", "Pseudomonas aeruginosa", "Staphylococcus aureus", "Cutibacterium acnes"],
+    answer: 2,
+    explanation: "The most common pathogen in both non-bullous and bullous impetigo is Staphylococcus aureus. Group A β-hemolytic streptococcus is also an important cause of non-bullous impetigo."
+  },
+  {
+    q: "Bullous impetigo results from the local production of which specific virulence factors by phage group II S. aureus?",
+    options: ["Toxic shock syndrome toxin-1 (TSST-1)", "Streptococcal pyrogenic exotoxins (SPEs)", "Exfoliative toxins (ETA, ETB)", "Panton–Valentine leukocidin (PVL)"],
+    answer: 2,
+    explanation: "Bullous impetigo results from the local production of exfoliative toxins (ETA, ETB) by phage group II S. aureus at the site(s) of cutaneous infection."
+  },
+  {
+    q: "The exfoliative toxins (ETA, ETB) responsible for blistering in bullous impetigo and SSSS mediate blister formation by cleaving which desmosomal protein?",
+    options: ["Desmoglein 3", "Desmoglein 1", "E-cadherin", "Integrin $\alpha$6$\beta$4"],
+    answer: 1,
+    explanation: "Exfoliative toxin binding to the desmosomal protein desmoglein 1 and cleaving its extracellular domain leads to acantholysis within the epidermal granular layer."
+  },
+  {
+    q: "Which specific clinical feature characterizes the late stage of non-bullous impetigo?",
+    options: ["Flaccid bullae measuring up to 5 cm", "A superficial erosion with a typical 'honey-colored' yellow crust", "A sharply marginated erythematous plaque with a ridge-like border", "Pinpoint hemorrhagic petechiae"],
+    answer: 1,
+    explanation: "Late stage non-bullous impetigo is characterized by a superficial erosion with a typical 'honey-colored' yellow crust and rapid direct extension of infection to surrounding skin."
+  },
+  {
+    q: "Acute post-streptococcal glomerulonephritis (APSG) is a known complication of non-bullous impetigo caused by specific serotypes of *Streptococcus pyogenes*. How does antibiotic treatment affect the risk of APSG?",
+    options: ["Antibiotic treatment significantly reduces the risk of APSG.", "Antibiotic treatment increases the risk of APSG by altering the microbial flora.", "The risk of APSG is not altered by treatment with antibiotics.", "Only intravenous antibiotics can prevent APSG."],
+    answer: 2,
+    explanation: "The risk of developing post-streptococcal glomerulonephritis following streptococcal impetigo is not affected by treatment, although a link between streptococcal pyoderma and acute rheumatic fever has not been established."
+  },
+  {
+    q: "Histologically, non-bullous impetigo is characterized by small neutrophilic vesiculopustules located where?",
+    options: ["Within the subcutaneous tissue", "Within the dermal–epidermal junction", "Within the epidermis", "Within the hair follicle below the infundibulum"],
+    answer: 2,
+    explanation: "In non-bullous impetigo, small neutrophilic vesiculopustules are present within the epidermis. Spongiosis frequently underlies the pustule."
+  },
+  {
+    q: "Which topical antibiotic is listed as an effective first-line treatment for healthy patients with a few superficial impetigo lesions and no systemic symptoms?",
+    options: ["Gentamicin", "Ciprofloxacin", "Mupirocin", "Metronidazole"],
+    answer: 2,
+    explanation: "For healthy patients with a few superficial lesions and no systemic symptoms, topical mupirocin, retapamulin, ozenoxacin, or fusidic acid (not available in the US) are often equally effective than oral antibiotics."
+  },
+  {
+    q: "Which underlying condition is a predisposing factor for staphylococcal folliculitis?",
+    options: ["Improperly chlorinated hot tubs", "Psoriasis", "Use of oral contraceptives", "Atopic dermatitis"],
+    answer: 3,
+    explanation: "Predisposing factors for staphylococcal folliculitis include occlusion, maceration, and hyperhydration of the skin; shaving, plucking, or waxing hair; use of topical corticosteroids; hot and humid weather; and atopic dermatitis; and diabetes mellitus."
+  },
+  {
+    q: "Superficial folliculitis, known as Impetigo of Bockhart, typically presents with what morphology?",
+    options: ["Large erythematous papules coalescing to form plaques", "Small (1–4 mm) pustules or crusted papules on an erythematous base", "Deep, fluctuant abscesses in the subcutaneous tissue", "Annular plaques with central clearing"],
+    answer: 1,
+    explanation: "Superficial folliculitis (impetigo of Bockhart) presents with small (1–4 mm) pustules or crusted papules on an erythematous base."
+  },
+  {
+    q: "What defines a furuncle, distinguishing it from a general abscess?",
+    options: ["It occurs only on mucous membranes.", "It exclusively involves anaerobic bacteria.", "It involves a hair follicle.", "It is a complication of methicillin-resistant S. aureus (MRSA)."],
+    answer: 2,
+    explanation: "Whereas an abscess can occur anywhere in or on the body, a furuncle, by definition, involves a hair follicle. A contiguous collection of furuncles is termed a carbuncle."
+  },
+  {
+    q: "For a simple furuncle, what is a key component of successful treatment, often preceding systemic antibiotics?",
+    options: ["Parenteral vancomycin administration", "Warm compresses to promote maturation and drainage", "Topical clindamycin twice daily for 5 days", "High-dose oral corticosteroids"],
+    answer: 1,
+    explanation: "For simple furuncles, warm compresses may promote maturation, drainage, and resolution. Larger or deeper fluctuant lesions typically require incision and drainage. Incision and drainage (without packing) is a key component of successful treatment."
+  },
+  {
+    q: "Which systemic antibiotic is generally considered for empiric coverage of suspected furuncles or abscesses, given the high prevalence of MRSA?",
+    options: ["Penicillin V", "Erythromycin", "Dicloxacillin", "Trimethoprim–sulfamethoxazole (TMP-SMZ)"],
+    answer: 3,
+    explanation: "Given the high proportion of furuncles that are caused by MRSA, empiric coverage with antibiotics such as doxycycline, TMP-SMX, or (depending on local resistance patterns) clindamycin should be considered."
+  },
+  {
+    q: "The most frequent manifestation of Community-Associated (CA)-MRSA infection is:",
+    options: ["Tinea capitis", "Toxic shock syndrome", "Furunculosis (abscesses)", "Non-bullous impetigo"],
+    answer: 2,
+    explanation: "Furunculosis is the most frequent manifestation of CA-MRSA infection."
+  },
+  {
+    q: "Methicillin resistance in *S. aureus* is caused by the production of which protein?",
+    options: ["Exfoliative toxin B (ETB)", "Panton–Valentine leukocidin (PVL)", "Altered penicillin-binding protein 2a (PBP2a)", "Toxic shock syndrome toxin-1 (TSST-1)"],
+    answer: 2,
+    explanation: "Methicillin resistance is caused by the production of an altered penicillin-binding protein 2a (PBP2a) that has decreased affinity for $\beta$-lactam antibiotics. PBP2a is the protein product of the *mecA* gene."
+  },
+  {
+    q: "Which genetic element is associated with the emergence of CA-MRSA (compared to HA-MRSA)?",
+    options: ["SCCmec types I–III", "PBP2a gene variants", "SCCmec types IV and V", "Erythromycin ribosomal methylase (*erm*) genes"],
+    answer: 2,
+    explanation: "Acquisition of different SCCmec elements by *S. aureus* led to the emergence of HA-MRSA (usually SCCmec types I–III) and CA-MRSA (usually SCCmec types IV and V) strains."
+  },
+  {
+    q: "The D-test (double-disk diffusion) is used to detect which specific type of antibiotic resistance in *S. aureus*?",
+    options: ["Resistance to vancomycin", "Inducible resistance to clindamycin", "Intrinsic resistance to methicillin", "Resistance mediated by active drug efflux"],
+    answer: 1,
+    explanation: "If initial sensitivity testing shows resistance to erythromycin and susceptibility to clindamycin, resistance to clindamycin will still develop if *erm* is present ('inducible resistance'), which can be assessed with the D-test (double-disk diffusion)."
+  },
+  {
+    q: "What is the recommended duration for application of mupirocin 2% ointment to the nares to eradicate nasal carriage of *S. aureus*?",
+    options: ["Single application", "Twice daily for 5–10 days", "Once daily indefinitely", "Until two negative nasal cultures are obtained"],
+    answer: 1,
+    explanation: "Application of mupirocin 2% ointment twice daily to the nares for 5–10 days can be used to eradicate nasal carriage of *S. aureus*."
+  },
+  {
+    q: "Staphylococcal Scalded Skin Syndrome (SSSS) is primarily a disease of infants and young children due to two main factors, including decreased renal toxin clearance and which other factor?",
+    options: ["Increased epidermal desmoglein 1", "Lack of toxin-neutralizing antibodies", "Higher incidence of primary staphylococcal bacteremia", "Intrinsic deficiency of T-cell function"],
+    answer: 1,
+    explanation: "SSSS is primarily a disease of infants and young children, who have decreased renal toxin clearance (especially neonates) and/or a lack of toxin-neutralizing antibodies."
+  },
+  {
+    q: "In SSSS, the exfoliative toxins diffuse from the infectious focus and spread via what route to produce widespread effects?",
+    options: ["Through direct contiguous spread in the skin", "Through the lymphatic system", "Through the nervous system", "Hematogenously"],
+    answer: 3,
+    explanation: "In contrast to bullous impetigo, where the effects of the ETs are limited to the site(s) of infection, in SSSS the toxin diffuses from the nidus of infection and spreads hematogenously to produce widespread effects."
+  },
+  {
+    q: "What is a characteristic dermatologic sign observed in SSSS patients, particularly around the mouth and eyes?",
+    options: ["Vermilion lip erosions and crusting", "Perioral and periocular crusting and radial fissuring", "Painful bullae on the trunk and extremities", "Target lesions resembling erythema multiforme"],
+    answer: 1,
+    explanation: "Patients also demonstrate characteristic periorificial (e.g. perioral, periocular) crusting and radial fissuring."
+  },
+  {
+    q: "What is the characteristic histological finding in SSSS?",
+    options: ["Dermal–epidermal separation with epidermal necrosis", "Cleavage of the upper epidermis, typically within the granular layer", "Subepidermal blister formation with a prominent neutrophilic infiltrate", "Thickened, basket-weave stratum corneum"],
+    answer: 1,
+    explanation: "Histologic examination shows a sharply demarcated zone of cleavage at or below the stratum granulosum, typically within the granular layer, with usually no inflammatory cells in the bullae."
+  },
+  {
+    q: "In SSSS, why is Clindamycin administration sometimes used, although monotherapy is not recommended?",
+    options: ["It provides primary coverage against MRSA.", "It reduces bacterial toxin production.", "It stabilizes the epidermal granular layer.", "It reduces fever and malaise."],
+    answer: 1,
+    explanation: "Clindamycin administration may help to reduce bacterial toxin production, but up to 50% of strains implicated in SSSS are clindamycin resistant, so monotherapy with this agent is not recommended."
+  },
+  {
+    q: "Toxic Shock Syndrome (TSS) is caused by colonization with strains of *S. aureus* that produce which superantigen?",
+    options: ["Panton–Valentine leukocidin (PVL)", "Exfoliative toxin A (ETA)", "Toxic shock syndrome toxin-1 (TSST-1)", "Streptococcal mitogenic exotoxin Z"],
+    answer: 2,
+    explanation: "TSS is due to infection or colonization with strains of *S. aureus* that produce toxic shock syndrome toxin-1 (TSST-1)."
+  },
+  {
+    q: "Superantigens like TSST-1 trigger a hyperinflammatory response by binding to which molecules on antigen-presenting cells (APCs)?",
+    options: ["Toll-like receptor 4 (TLR4)", "Major histocompatibility complex (MHC) class II molecules", "Interleukin-1 (IL-1) receptors", "CD4+ T cell receptors"],
+    answer: 1,
+    explanation: "This toxin is thought to act as a 'superantigen' that binds to major histocompatibility complex (MHC) class II molecules of antigen-presenting cells (APCs) and the V$\beta$ region of T cell receptors in a non-antigen-specific manner."
+  },
+  {
+    q: "Which skin finding is a required criterion for the case definition of Toxic Shock Syndrome?",
+    options: ["Hemorrhagic bullae", "Purpura fulminans", "Diffuse macular erythroderma rash", "Ulceration with a pseudomembranous eschar"],
+    answer: 2,
+    explanation: "The case definition of TSS includes a rash defined as diffuse macular erythroderma, followed by desquamation 1–2 weeks after the onset of illness (especially palms and soles)."
+  },
+  {
+    q: "In contrast to SSSS, what is the finding regarding mucous membranes in Toxic Epidermal Necrolysis (TEN)?",
+    options: ["Mucous membranes are generally spared in TEN.", "Mucous membranes are involved, showing erosions, in TEN.", "Mucous membrane involvement is limited to the nasopharynx in TEN.", "Mucous membranes show only erythema in TEN."],
+    answer: 1,
+    explanation: "The comparison of TEN and SSSS shows that mucous membranes are involved, showing erosions, in TEN, while they are uninvolved in SSSS."
+  },
+  {
+    q: "Scarlet fever's erythematous exanthem is caused by toxins produced by which organism?",
+    options: ["Staphylococcus aureus phage group II", "Group A β-hemolytic streptococci", "Clostridium perfringens", "Corynebacterium minutissimum"],
+    answer: 1,
+    explanation: "The erythematous exanthem and enanthem are due to toxins produced by group A $\beta$-hemolytic streptococci. Specifically, streptococcal pyrogenic exotoxins (SPEs) types A, B, and C are implicated."
+  },
+  {
+    q: "The characteristic skin texture of the eruption in scarlet fever is often described as what?",
+    options: ["Waxy, adherent scale", "Shiny, pink plaques", "Sandpaper-like texture", "Criss-cross superficial cracks"],
+    answer: 2,
+    explanation: "The eruption develops tiny superimposed papules with a sandpaper-like texture ('sunburn with goose pimples')."
+  },
+  {
+    q: "In Erysipelas, the abrupt onset of a sharply marginated erythematous plaque with a ridge-like border affects which layers of the skin?",
+    options: ["The epidermis and granular layer only", "The deep dermis and subcutaneous tissue", "The dermis with prominent lymphatic involvement", "The skeletal muscle tissue"],
+    answer: 2,
+    explanation: "Erysipelas is a superficial variant of cellulitis caused primarily by group A streptococci that affects the dermis with prominent lymphatic involvement, but does not extend to the subcutaneous tissues."
+  },
+  {
+    q: "Which Gram-negative bacillus is associated with a localized infection characterized by an erythematous to violaceous area of non-suppurative cellulitis, often following traumatic inoculation in fishermen?",
+    options: ["Neisseria meningitidis", "Pseudomonas aeruginosa", "Erysipelothrix rhusiopathiae", "Burkholderia pseudomallei"],
+    answer: 2,
+    explanation: "Erysipeloid is an acute cutaneous infection caused by *Erysipelothrix rhusiopathiae*... It is caused by traumatic inoculation of the organism into the skin, which most often occurs in fishermen or persons who prepare meat, poultry, or fish. The localized form is characterized by an erythematous to violaceous area of non-suppurative cellulitis."
+  },
+  {
+    q: "Ecthyma is a deep variant of non-bullous impetigo characterized by extension into the dermis, producing a shallow ulcer that heals with which outcome?",
+    options: ["Hyperpigmentation only", "No discernible sequelae", "Scarring", "Atrophy and telangiectasias"],
+    answer: 2,
+    explanation: "Ecthyma is a deep variant of non-bullous impetigo characterized by extension into the dermis to produce a shallow ulcer that heals with scarring."
+  },
+  {
+    q: "In immunocompetent adults, cellulitis is most often caused by which two organisms?",
+    options: ["Corynebacterium spp. and Klebsiella pneumoniae", "Group A streptococci and S. aureus", "Pseudomonas aeruginosa and Haemophilus influenzae", "Clostridium perfringens and Enterococcus faecium"],
+    answer: 1,
+    explanation: "Cellulitis in immunocompetent adults is most often caused by group A streptococci or *S. aureus*, and the latter organism is the most frequent etiology in children."
+  },
+  {
+    q: "Why should NSAIDs be avoided when treating cellulitis?",
+    options: ["They increase the risk of acute glomerulonephritis.", "They inhibit the penetration of oral antibiotics.", "They may mask the signs and symptoms of deeper necrotizing infections.", "They exacerbate lymphedema."],
+    answer: 2,
+    explanation: "NSAIDs may mask the signs and symptoms of deeper necrotizing infections and should be avoided when treating cellulitis."
+  },
+  {
+    q: "What is the pathognomonic finding observed in the draining purulent material of Actinomycosis and Nocardia mycetoma?",
+    options: ["Medlar bodies ('copper pennies')", "Sulfur granules", "Russell bodies", "Endospore-containing spherules"],
+    answer: 1,
+    explanation: "Further progression [of cervicofacial actinomycosis] leads to development of sinus tracts which drain purulent material with characteristic yellow 'sulfur granules' that represent clumps of bacteria. Sulfur granules are observed in *Nocardia* mycetoma."
+  },
+  {
+    q: "What is the characteristic clinical presentation of erythrasma under illumination with a Wood’s lamp?",
+    options: ["No change (non-fluorescent)", "Bright coral-red fluorescence", "Blue-white fluorescence", "Green-yellow fluorescence"],
+    answer: 1,
+    explanation: "When lesions [of erythrasma] are illuminated with a Wood’s lamp, bright coral-red fluorescence appears as a result of porphyrin produced by the bacteria."
+  },
+  {
+    q: "Necrotizing fasciitis (Type 2) is a monomicrobial infection most often caused by which organism?",
+    options: ["Staphylococcus aureus (MRSA)", "Group A streptococci", "Bacteroides spp.", "Clostridium perfringens"],
+    answer: 1,
+    explanation: "Necrotizing fasciitis is classified into two major subtypes: (1) type 1, a polymicrobial infection... and (2) type 2, a monomicrobial infection, most often with group A streptococci."
+  },
+  {
+    q: "The lack of pain in cutaneous anthrax lesions, despite a necrotic eschar, helps differentiate it from which other cutaneous condition?",
+    options: ["Ecthyma gangrenosum", "Brown recluse spider bite", "Orf", "Milker’s nodule"],
+    answer: 1,
+    explanation: "The lack of pain despite a necrotic eschar helps to differentiate cutaneous anthrax from the bite of a brown recluse spider."
+  },
+  {
+    q: "Which skin finding is characteristic of acute meningococcemia?",
+    options: ["Diffuse blanching morbilliform eruption", "Retiform purpura and ischemic necrosis", "Sharply marginated erythematous plaque", "Annular erythema with central clearing"],
+    answer: 1,
+    explanation: "When acute meningococcemia develops, one-third to one-half of patients present with a petechial eruption... Retiform purpura and ischemic necrosis may follow."
+  },
+  {
+    q: "Pseudomonal folliculitis ('hot tub folliculitis') is typically characterized by perifollicular papules and papulopustules arising how long after exposure?",
+    options: ["24–48 hours", "8–48 hours", "1 week", "3–6 months"],
+    answer: 1,
+    explanation: "Erythematous, edematous perifollicular papules and papulopustules arise 8–48 hours after exposure and resolve spontaneously in 7–14 days."
+  },
+  {
+    q: "In which condition is Ecthyma Gangrenosum, an infectious vasculitis causing skin necrosis, most commonly seen?",
+    options: ["Pseudomonas bacteremia in a neutropenic patient", "Meningococcemia in an infant", "Uncomplicated cellulitis in a healthy adult", "Chronic kidney disease with stasis dermatitis"],
+    answer: 0,
+    explanation: "The most common clinical scenario [for Ecthyma Gangrenosum] is Pseudomonas bacteremia in a neutropenic patient."
+  }
+];
+
+  let score = 0;
+    let answered = [];
+
+    function renderQuiz() {
+      score = 0;
+      answered = Array(questions.length).fill(false);
+      document.getElementById("quiz").innerHTML = "";
+      document.getElementById("score").innerText = "";
+      document.querySelector(".retry-btn").style.display = "none";
+      updateProgress();
+
+      questions.forEach((q, i) => {
+        const container = document.createElement("div");
+        container.className = "question";
+        container.innerHTML = `<p>${i + 1}. ${q.q}</p>`;
+
+        q.options.forEach((opt, j) => {
+          const id = `q${i}a${j}`;
+          container.innerHTML += `
+            <input type="radio" name="q${i}" id="${id}" value="${j}" style="display:none;">
+            <label for="${id}" class="option-label" onclick="checkAnswer(${i}, ${j}, ${q.answer}, this)">${opt}</label>
+          `;
+        });
+
+        container.innerHTML += `<div class="explanation" id="explain${i}">${q.explanation}</div>`;
+        document.getElementById("quiz").appendChild(container);
+      });
+    }
+
+    function checkAnswer(qIndex, selected, correct, labelEl) {
+      if (answered[qIndex]) return;
+      answered[qIndex] = true;
+
+      const labels = document.querySelectorAll(`input[name="q${qIndex}"] + label`);
+      labels.forEach((label, idx) => {
+        label.classList.remove("correct", "incorrect");
+        if (idx === correct) label.classList.add("correct");
+        else if (idx === selected) label.classList.add("incorrect");
+      });
+
+      if (selected === correct) score++;
+
+      document.getElementById(`explain${qIndex}`).style.display = "block";
+      updateProgress();
+
+      if (answered.every(a => a)) {
+        document.getElementById("score").innerText = `You got ${score} out of ${questions.length} correct (${Math.round((score / questions.length) * 100)}%)`;
+        document.querySelector(".retry-btn").style.display = "block";
+      }
+    }
+
+    function updateProgress() {
+      const total = questions.length;
+      const completed = answered.filter(Boolean).length;
+      const percent = total ? Math.round((completed / total) * 100) : 0;
+      const fill = document.getElementById("progressFill");
+      fill.style.width = `${percent}%`;
+      fill.innerText = `${percent}%`;
+    }
+
+    function restartQuiz() {
+      renderQuiz();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    renderQuiz();
+  </script>
+</body>
+</html>
+
